@@ -1,0 +1,443 @@
+﻿@model IEnumerable<Restaurent.Models.MenuProduct>
+
+@{
+    ViewData["Title"] = "Our Menu";
+    var isAdmin = Context.Session.GetString("IsAdmin") == "True";
+
+    // تجميع المنتجات حسب الفئة
+    var productsByCategory = Model.GroupBy(p => p.Category?.Name ?? "Uncategorized")
+                                 .OrderBy(g => g.Key);
+    var totalProducts = Model.Count();
+}
+
+<div class="container-fluid px-3 px-md-5 mt-4">
+    <!-- Header Section -->
+    <div class="row align-items-center mb-4">
+        <div class="col-md-8">
+            <h2 class="mb-2"><i class="fas fa-utensils"></i> Our Delicious Menu</h2>
+            <p class="text-muted mb-0">Discover amazing dishes from all categories</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <h4 class="gold-text">
+                <i class="fas fa-box-open"></i>
+                Total Products: <span id="totalProducts">@totalProducts</span>
+            </h4>
+            @if (isAdmin)
+            {
+                <a asp-action="Create" class="btn btn-success mt-2">
+                    <i class="fas fa-plus"></i> Add New Product
+                </a>
+            }
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Advanced Search Section -->
+    <div class="card shadow-lg mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-search"></i> Search & Filter</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-warning text-dark">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" id="searchInput" class="form-control"
+                               placeholder="Search by product name, category, or description...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select id="categoryFilter" class="form-select">
+                        <option value="">All Categories</option>
+                        @foreach (var category in productsByCategory)
+                        {
+                            <option value="@category.Key">@category.Key</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select id="priceFilter" class="form-select">
+                        <option value="">All Prices</option>
+                        <option value="0-25">Under 25 EGP</option>
+                        <option value="25-50">25-50 EGP</option>
+                        <option value="50-100">50-100 EGP</option>
+                        <option value="100-9999">Over 100 EGP</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary w-100" id="clearSearch">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                        <button class="btn btn-info" id="refreshBtn" title="Refresh">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-6 col-md-3 mb-3">
+            <div class="card text-white bg-primary h-100">
+                <div class="card-body text-center">
+                    <h3 class="mb-0" id="visibleProducts">@totalProducts</h3>
+                    <small>Visible Products</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3 mb-3">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body text-center">
+                    <h3 class="mb-0" id="totalCategories">@productsByCategory.Count()</h3>
+                    <small>Categories</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3 mb-3">
+            <div class="card text-white bg-warning h-100">
+                <div class="card-body text-center">
+                    <h3 class="mb-0" id="availableStock">@Model.Sum(p => p.Quantity)</h3>
+                    <small>Total Stock</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3 mb-3">
+            <div class="card text-white bg-info h-100">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@Model.Max(p => p.Price) EGP</h3>
+                    <small>Highest Price</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products by Category -->
+    <div id="productsContainer">
+        @foreach (var categoryGroup in productsByCategory)
+        {
+            <div class="category-section mb-5" data-category="@categoryGroup.Key">
+                <!-- Category Header -->
+                <div class="category-header bg-gradient-primary text-white p-4 rounded-top">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h3 class="mb-2">
+                                <i class="fas @GetCategoryIcon(categoryGroup.Key) me-2"></i>
+                                @categoryGroup.Key
+                            </h3>
+                            <p class="mb-0">
+                                <span class="badge bg-light text-dark me-2">@categoryGroup.Count() products</span>
+                                <span class="badge bg-warning">@categoryGroup.Sum(p => p.Quantity) in stock</span>
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <small>Average Price: <strong>@categoryGroup.Average(p => p.Price).ToString("F2") EGP</strong></small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="row g-4 p-4 bg-light rounded-bottom">
+                    @foreach (var item in categoryGroup)
+                    {
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 product-item"
+                             data-category="@categoryGroup.Key"
+                             data-name="@item.Name"
+                             data-description="@item.Description"
+                             data-price="@item.Price">
+                            <div class="card product-card h-100 shadow-sm">
+                                <div class="position-relative">
+                                    <img src="@Url.Content(item.ImageUrl)" alt="@item.Name"
+                                         class="card-img-top product-image"
+                                         style="height: 200px; width: 100%;"
+                                         onerror="this.src='/images/placeholder.png'">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-success fs-6">@item.Price EGP</span>
+                                    </div>
+                                    @if (item.Quantity < 10)
+                                    {
+                                        <div class="position-absolute top-0 start-0 m-2">
+                                            <span class="badge bg-danger">Low Stock</span>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">@item.Name</h5>
+                                    <p class="card-text text-muted flex-grow-1">
+                                        @(item.Description?.Length > 80 ? item.Description.Substring(0, 80) + "..." : item.Description)
+                                    </p>
+
+                                    <div class="mt-auto">
+                                        <!-- Product Info -->
+                                        <div class="row text-center small text-muted mb-3">
+                                            <div class="col-4">
+                                                <i class="fas fa-clock"></i><br>
+                                                @item.MinTime-@item.MaxTime min
+                                            </div>
+                                            <div class="col-4">
+                                                <i class="fas fa-box"></i><br>
+                                                @item.Quantity left
+                                            </div>
+                                            <div class="col-4">
+                                                <i class="fas fa-fire"></i><br>
+                                                @item.DayStock/day
+                                            </div>
+                                        </div>
+
+                                        <!-- Action Buttons -->
+                                        <div class="d-grid gap-2">
+                                            <a asp-action="Showprd" asp-route-id="@item.Id"
+                                               class="btn btn-info btn-sm">
+                                                <i class="fas fa-eye"></i> Details
+                                            </a>
+
+                                            @if (isAdmin)
+                                            {
+                                                <div class="btn-group w-100" role="group">
+                                                    <a asp-action="Edit" asp-route-id="@item.Id"
+                                                       class="btn btn-warning btn-sm">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a asp-action="Delete" asp-route-id="@item.Id"
+                                                       class="btn btn-danger btn-sm">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- No Results Message -->
+    <div id="noResults" class="text-center d-none mt-5">
+        <div class="alert alert-warning py-5">
+            <i class="fas fa-search fa-3x mb-3 text-warning"></i>
+            <h3>No products found</h3>
+            <p class="mb-0">Try adjusting your search criteria or browse different categories</p>
+        </div>
+    </div>
+
+    <!-- Total Products Footer -->
+    <div class="text-center mt-5 pt-4 border-top">
+        <h5 class="gold-text">
+            <i class="fas fa-chart-bar"></i>
+            Grand Total: <span id="grandTotal">@totalProducts</span> Products Across All Categories
+        </h5>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // دالة البحث المتقدم
+            function performSearch() {
+                var searchText = $('#searchInput').val().toLowerCase();
+                var categoryFilter = $('#categoryFilter').val();
+                var priceFilter = $('#priceFilter').val();
+                var visibleCount = 0;
+                var visibleCategories = new Set();
+
+                $('.product-item').each(function() {
+                    var $item = $(this);
+                    var name = $item.data('name').toLowerCase();
+                    var description = $item.data('description').toLowerCase();
+                    var category = $item.data('category').toLowerCase();
+                    var price = parseFloat($item.data('price'));
+
+                    var matchesSearch = name.includes(searchText) ||
+                                      description.includes(searchText) ||
+                                      category.includes(searchText);
+
+                    var matchesCategory = !categoryFilter || category === categoryFilter.toLowerCase();
+
+                    var matchesPrice = true;
+                    if (priceFilter) {
+                        var [min, max] = priceFilter.split('-').map(Number);
+                        matchesPrice = price >= min && price <= max;
+                    }
+
+                    if (matchesSearch && matchesCategory && matchesPrice) {
+                        $item.show();
+                        visibleCount++;
+                        visibleCategories.add(category);
+                    } else {
+                        $item.hide();
+                    }
+                });
+
+                // إظهار/إخفاء الأقسام
+                $('.category-section').each(function() {
+                    var $section = $(this);
+                    var hasVisibleItems = $section.find('.product-item:visible').length > 0;
+
+                    if (hasVisibleItems) {
+                        $section.show();
+                    } else {
+                        $section.hide();
+                    }
+                });
+
+                // إظهار/إخفاء رسالة عدم وجود نتائج
+                if (visibleCount > 0) {
+                    $('#noResults').addClass('d-none');
+                } else {
+                    $('#noResults').removeClass('d-none');
+                }
+
+                // تحديث الإحصائيات
+                updateStatistics(visibleCount, visibleCategories.size);
+            }
+
+            // دالة تحديث الإحصائيات
+            function updateStatistics(visibleProducts, visibleCategories) {
+                $('#visibleProducts').text(visibleProducts);
+                $('#totalProducts').text(visibleProducts);
+                $('#grandTotal').text(visibleProducts);
+                $('#totalCategories').text(visibleCategories);
+
+                // تحديث إجمالي المخزون للمنتجات المرئية
+                var totalStock = 0;
+                $('.product-item:visible').each(function() {
+                    var stockText = $(this).find('.fa-box').closest('.col-4').text();
+                    var stock = parseInt(stockText) || 0;
+                    totalStock += stock;
+                });
+                $('#availableStock').text(totalStock);
+            }
+
+            // أحداث البحث
+            $('#searchInput').on('input', performSearch);
+            $('#categoryFilter').on('change', performSearch);
+            $('#priceFilter').on('change', performSearch);
+
+            $('#clearSearch').click(function() {
+                $('#searchInput').val('');
+                $('#categoryFilter').val('');
+                $('#priceFilter').val('');
+                performSearch();
+            });
+
+            $('#refreshBtn').click(function() {
+                window.location.reload();
+            });
+
+            // البحث باستخدام زر Enter
+            $('#searchInput').keypress(function(e) {
+                if (e.which === 13) {
+                    performSearch();
+                }
+            });
+
+            // تهيئة الإحصائيات أول مرة
+            updateStatistics(@totalProducts, @productsByCategory.Count());
+        });
+    </script>
+}
+
+<style>
+    /* تحسينات التصميم */
+    .category-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    }
+
+    .product-card {
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+    .category-section {
+        border-radius: 15px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .btn-group .btn {
+        border-radius: 0;
+    }
+
+        .btn-group .btn:first-child {
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+        }
+
+        .btn-group .btn:last-child {
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+
+    /* تحسينات للشاشات الصغيرة */
+    @@media (max-width: 768px) {
+        .container-fluid {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .category-header h3 {
+            font-size: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .col-6 {
+            flex: 0 0 50%;
+            max-width: 50%;
+        }
+
+        .product-image {
+            height: 150px !important;
+        }
+    }
+</style>
+
+@functions {
+    public string GetCategoryIcon(string categoryName)
+    {
+        return categoryName.ToLower() switch
+        {
+            "salads" => "fa-leaf",
+            "soups" => "fa-bowl-food",
+            "burgers" => "fa-burger",
+            "cakes & desserts" => "fa-cake-candles",
+            "beverages" => "fa-mug-hot",
+            "seafood" => "fa-fish",
+            "grilled & bbq" => "fa-fire",
+            "pizza" => "fa-pizza-slice",
+            "pies & pastries" => "fa-pie-chart",
+            _ => "fa-utensils"
+        };
+    }
+}

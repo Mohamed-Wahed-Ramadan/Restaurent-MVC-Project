@@ -1,0 +1,170 @@
+﻿@model Restaurent.ViewModels.MenuCreVw
+
+@{
+    ViewData["Title"] = "Edit Product";
+}
+
+<div class="container mt-4">
+    <h2>Edit Product</h2>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-8">
+            <form asp-action="Edit" method="post">
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Description" class="control-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="Price" class="control-label"></label>
+                            <input asp-for="Price" class="form-control" type="number" />
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="Quantity" class="control-label"></label>
+                            <input asp-for="Quantity" class="form-control" type="number" />
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="CategoryId" class="control-label">Category</label>
+                    <select asp-for="CategoryId" class="form-control" asp-items="Model.Categories">
+                        <option value="">-- Select Category --</option>
+                    </select>
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="ImageUrl" class="control-label">Image URL</label>
+                    <input asp-for="ImageUrl" class="form-control" />
+                    <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                    <small class="form-text text-muted">Example: ./images/product.png</small>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="MinTime" class="control-label">Min Time (minutes)</label>
+                            <input asp-for="MinTime" class="form-control" type="number" />
+                            <span asp-validation-for="MinTime" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label asp-for="MaxTime" class="control-label">Max Time (minutes)</label>
+                            <input asp-for="MaxTime" class="form-control" type="number" />
+                            <span asp-validation-for="MaxTime" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="DayStock" class="control-label">Day Stock</label>
+                    <input asp-for="DayStock" class="form-control" type="number" />
+                    <span asp-validation-for="DayStock" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update Product
+                    </button>
+                    <a asp-action="GetAll" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-info-circle"></i> Product Preview
+                </div>
+                <div class="card-body">
+                    <div id="imagePreview" class="mb-3 text-center">
+                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        {
+                            <img src="@Model.ImageUrl" alt="Product Image" class="img-fluid rounded" style="max-height: 200px;" />
+                        }
+                        else
+                        {
+                            <div class="alert alert-secondary">No image available</div>
+                        }
+                    </div>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-5">Product ID:</dt>
+                        <dd class="col-sm-7">@Model.Id</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // Image preview on URL change
+        $('#ImageUrl').on('input', function() {
+            var imageUrl = $(this).val();
+            if (imageUrl) {
+                $('#imagePreview').html('<img src="' + imageUrl + '" alt="Product Image" class="img-fluid rounded" style="max-height: 200px;" onerror="this.src=\'/images/no-image.png\'">');
+            } else {
+                $('#imagePreview').html('<div class="alert alert-secondary">No image available</div>');
+            }
+        });
+
+        // Validate Min/Max time
+        $('#MaxTime').on('input', function() {
+            var minTime = parseInt($('#MinTime').val());
+            var maxTime = parseInt($(this).val());
+
+            if (maxTime < minTime) {
+                $(this).addClass('is-invalid');
+                if ($(this).next('.invalid-feedback').length === 0) {
+                    $(this).after('<div class="invalid-feedback">Max time must be greater than or equal to Min time</div>');
+                }
+            } else {
+                $(this).removeClass('is-invalid');
+                $(this).next('.invalid-feedback').remove();
+            }
+        });
+    </script>
+}
+
+<style>
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .card {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .btn {
+        padding: 10px 20px;
+    }
+</style>

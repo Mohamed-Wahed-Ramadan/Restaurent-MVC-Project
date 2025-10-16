@@ -1,0 +1,94 @@
+﻿@model Restaurent.Models.User
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-lg">
+                <div class="card-header text-white text-center"
+                     style="background: @(Model.IsAdmin ? "#00ff41" : "#ff9500");">
+                    <h3>
+                        <i class="fas fa-user-circle"></i>
+                        @(Model.IsAdmin ? "Admin Profile" : "User Profile")
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="profile-avatar mx-auto mb-3"
+                             style="width: 120px; height: 120px; background: @(Model.IsAdmin ? "#00ff41" : "#ff9500");
+                                    border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-user fa-4x text-white"></i>
+                        </div>
+                        <h4>@Model.Name</h4>
+                        @if (Model.IsAdmin)
+                        {
+                            <span class="badge" style="background-color: #00ff41; color: #000; font-size: 1rem;">
+                                <i class="fas fa-crown"></i> Administrator
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge" style="background-color: #ff9500; color: #000; font-size: 1rem;">
+                                <i class="fas fa-user"></i> Regular User
+                            </span>
+                        }
+                    </div>
+
+                    <hr />
+
+                    <dl class="row">
+                        <dt class="col-sm-4">
+                            <i class="fas fa-envelope text-primary"></i> Email:
+                        </dt>
+                        <dd class="col-sm-8">@Model.Email</dd>
+
+                        <dt class="col-sm-4">
+                            <i class="fas fa-phone text-success"></i> Phone:
+                        </dt>
+                        <dd class="col-sm-8">@Model.Phone</dd>
+
+                        <dt class="col-sm-4">
+                            <i class="fas fa-birthday-cake text-danger"></i> Birthday:
+                        </dt>
+                        <dd class="col-sm-8">@Model.Birthday.ToString("dd MMMM yyyy")</dd>
+
+                        <dt class="col-sm-4">
+                            <i class="fas fa-calendar-alt text-info"></i> Age:
+                        </dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-primary fs-6">@Model.Age years old</span>
+                        </dd>
+
+                        <dt class="col-sm-4">
+                            <i class="fas fa-clock text-warning"></i> Member Since:
+                        </dt>
+                        <dd class="col-sm-8">@Model.CreatedAt.ToString("dd MMM yyyy")</dd>
+
+                        @if (Model.UpdatedAt.HasValue)
+                        {
+                            <dt class="col-sm-4">
+                                <i class="fas fa-edit text-secondary"></i> Last Updated:
+                            </dt>
+                            <dd class="col-sm-8">@Model.UpdatedAt.Value.ToString("dd MMM yyyy, hh:mm tt")</dd>
+                        }
+                    </dl>
+
+                    <hr />
+
+                    <div class="d-grid gap-2">
+                        <a asp-action="Edit" class="btn btn-warning btn-lg">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </a>
+                        <a asp-action="Logout" class="btn btn-danger btn-lg">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,73 @@
+﻿@model Restaurent.Models.MenuProduct
+
+@{
+    ViewData["Title"] = "Delete Product";
+}
+
+<div class="container mt-4">
+    <h2 class="text-danger">Delete Product</h2>
+    <hr />
+
+    <div class="alert alert-warning" role="alert">
+        <i class="fas fa-exclamation-triangle"></i>
+        Are you sure you want to delete this product?
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid rounded" />
+                </div>
+                <div class="col-md-8">
+                    <dl class="row">
+                        <dt class="col-sm-3">Name</dt>
+                        <dd class="col-sm-9">@Model.Name</dd>
+
+                        <dt class="col-sm-3">Category</dt>
+                        <dd class="col-sm-9">@Model.Category.Name</dd>
+
+                        <dt class="col-sm-3">Price</dt>
+                        <dd class="col-sm-9">@Model.Price EGP</dd>
+
+                        <dt class="col-sm-3">Quantity</dt>
+                        <dd class="col-sm-9">@Model.Quantity</dd>
+
+                        <dt class="col-sm-3">Description</dt>
+                        <dd class="col-sm-9">@Model.Description</dd>
+
+                        <dt class="col-sm-3">Preparation Time</dt>
+                        <dd class="col-sm-9">@Model.MinTime - @Model.MaxTime minutes</dd>
+
+                        <dt class="col-sm-3">Day Stock</dt>
+                        <dd class="col-sm-9">@Model.DayStock</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="Delete" method="post" class="mt-3">
+        <input type="hidden" asp-for="Id" />
+        <div class="form-group">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+            <a asp-action="GetAll" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        // Optional: Add confirmation dialog
+        $('form').on('submit', function(e) {
+            if (!confirm('Are you absolutely sure you want to delete this product?')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
+}
