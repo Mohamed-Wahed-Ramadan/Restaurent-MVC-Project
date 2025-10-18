@@ -215,5 +215,88 @@ namespace Restaurent.Controllers
             TempData["SuccessMessage"] = $"Cleaned up {deletedCount} old orders and their items.";
             return RedirectToAction("Dashboard");
         }
+
+        ///////////////////////////////////
+        ///
+        // حذف التخفيض
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteDiscount(int id)
+        {
+            var userEmail = HttpContext.Session.GetString("UserEmail");
+            if (userEmail != "medo03459@gmail.com" && HttpContext.Session.GetString("IsAdmin") != "True")
+            {
+                TempData["ErrorMessage"] = "Access denied. Admin only.";
+                return RedirectToAction("Discounts");
+            }
+
+            var discount = await _context.Discounts.FindAsync(id);
+            if (discount == null)
+            {
+                TempData["ErrorMessage"] = "Discount not found";
+                return RedirectToAction("Discounts");
+            }
+
+            _context.Discounts.Remove(discount);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Discount deleted successfully!";
+            return RedirectToAction("Discounts");
+        }
+        // الحصول على تفاصيل الطلب (للـ AJAX)
+        [HttpGet]
+        public async Task<JsonResult> GetOrderDetails(int orderId)
+        {
+            var userEmail = HttpContext.Session.GetString("UserEmail");
+            if (userEmail != "medo03459@gmail.com" && HttpContext.Session.GetString("IsAdmin") != "True")
+            {
+                return Json(new { success = false, message = "Access denied" });
+            }
+
+            var order = await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuProduct)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+            {
+                return Json(new { success = false, message = "Order not found" });
+            }
+
+            var orderData = new
+            {
+                id = order.Id,
+                uniqueOrderId = order.UniqueOrderId,
+                createdAt = order.CreatedAt,
+                total = order.Total,
+                status = order.Status,
+                orderType = order.OrderType,
+                location = order.Location,
+                timePreparing = order.TimePreparing,
+                user = new
+                {
+                    name = order.User.Name,
+                    email = order.User.Email,
+                    phone = order.User.Phone,
+                    birthday = order.User.Birthday,
+                    imageURL = order.User.ImageURL
+                },
+                orderItems = order.OrderItems.Select(oi => new
+                {
+                    quantity = oi.Quantity,
+                    unitPrice = oi.UnitPrice,
+                    total = oi.Total,
+                    menuProduct = new
+                    {
+                        name = oi.MenuProduct.Name,
+                        description = oi.MenuProduct.Description,
+                        imageUrl = oi.MenuProduct.ImageUrl
+                    }
+                }).ToList()
+            };
+
+            return Json(orderData);
+        }
     }
 }

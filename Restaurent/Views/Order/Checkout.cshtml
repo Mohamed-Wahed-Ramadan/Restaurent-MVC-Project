@@ -83,6 +83,21 @@
                         <hr class="my-2">
                     }
 
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>@ViewBag.Subtotal.ToString("C2")</span>
+                    </div>
+
+                    @if (ViewBag.Discount > 0)
+                    {
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <span><i class="fas fa-tag"></i> Discount:</span>
+                            <span>-@ViewBag.Discount.ToString("C2")</span>
+                        </div>
+                    }
+
+                    <hr>
+
                     <div class="d-flex justify-content-between mt-3">
                         <h5>Total:</h5>
                         <h5 class="text-success">@Model.Total.ToString("C2")</h5>

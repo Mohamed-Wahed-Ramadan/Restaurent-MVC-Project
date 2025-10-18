@@ -45,11 +45,19 @@ namespace Restaurent.Controllers
                 return RedirectToAction("Index", "Cart");
             }
 
+            var subtotal = cartItems.Sum(c => c.Total);
+            var discount = await CalculateDiscount(userId.Value, await _context.Carts
+                .Where(c => c.UserId == userId)
+                .ToListAsync());
+
             var viewModel = new CheckoutVM
             {
                 CartItems = cartItems,
-                Total = cartItems.Sum(c => c.Total)
+                Total = subtotal - discount
             };
+
+            ViewBag.Subtotal = subtotal;
+            ViewBag.Discount = discount;
 
             return View(viewModel);
         }
@@ -103,10 +111,16 @@ namespace Restaurent.Controllers
             var estimatedTime = model.OrderType == "Delivery" ? maxPreparationTime + 30 : maxPreparationTime;
 
             // إنشاء الطلب - التصحيح هنا
+            // حساب الإجمالي مع الخصم
+            var subtotal = cartItemsToOrder.Sum(c => c.Total);
+            var discount = await CalculateDiscount(userId.Value, cartItemsToOrder);
+            var finalTotal = subtotal - discount;
+
+            // إنشاء الطلب
             var order = new Order
             {
                 UserId = userId.Value,
-                Total = cartItemsToOrder.Sum(c => c.Total),
+                Total = finalTotal,
                 Status = "Pending",
                 TimePreparing = estimatedTime,
                 OrderType = model.OrderType,
@@ -243,6 +257,47 @@ namespace Restaurent.Controllers
                     .SumAsync(c => c.Quantity);
                 HttpContext.Session.SetInt32("CartCount", count);
             }
+        }
+        // دالة حساب الخصم
+        private async Task<decimal> CalculateDiscount(int userId, List<Cart> cartItems)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return 0;
+
+            var now = DateTime.UtcNow;
+            var activeDiscounts = await _context.Discounts
+                .Where(d => d.IsActive && d.StartDate <= now && d.EndDate >= now)
+                .ToListAsync();
+
+            decimal totalDiscount = 0;
+
+            foreach (var cartItem in cartItems)
+            {
+                var product = await _context.MenuProducts
+                    .Include(p => p.Category)
+                    .FirstOrDefaultAsync(p => p.Id == cartItem.MenuProductId);
+
+                if (product == null) continue;
+
+                foreach (var discount in activeDiscounts)
+                {
+                    // تحقق إذا كان الخصم ينطبق على الفئة
+                    bool categoryMatch = discount.CategoryId == null || discount.CategoryId == product.CategoryId;
+
+                    // تحقق إذا كان الخصم معتمد على العمر
+                    bool ageMatch = !discount.IsAgeBased ||
+                                  (user.Age >= (discount.MinAge ?? 0) && user.Age <= (discount.MaxAge ?? 150));
+
+                    if (categoryMatch && ageMatch)
+                    {
+                        var itemDiscount = (cartItem.Total * discount.DiscountPercentage) / 100;
+                        totalDiscount += itemDiscount;
+                        break; // خصم واحد فقط لكل منتج
+                    }
+                }
+            }
+
+            return totalDiscount;
         }
     }
 }

@@ -28,7 +28,7 @@
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card text-white bg-warning">
+            <div class="card text-white" style="background-color: #e67e22;">
                 <div class="card-body text-center">
                     <h4>@Model.Count(o => o.Status == "Pending")</h4>
                     <small>Pending</small>
@@ -36,7 +36,7 @@
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card text-white bg-info">
+            <div class="card text-white" style="background-color: #3498db;">
                 <div class="card-body text-center">
                     <h4>@Model.Count(o => o.Status == "Preparing")</h4>
                     <small>Preparing</small>
@@ -44,7 +44,7 @@
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card text-white bg-success">
+            <div class="card text-white" style="background-color: #27ae60;">
                 <div class="card-body text-center">
                     <h4>@Model.Count(o => o.Status == "Completed")</h4>
                     <small>Completed</small>
@@ -112,7 +112,7 @@
                                         <strong class="text-success">@order.Total.ToString("C2")</strong>
                                     </td>
                                     <td>
-                                        <span class="badge bg-@(order.OrderType == "Delivery" ? "info" : "primary")">
+                                        <span class="badge" style="@(order.OrderType == "Delivery" ? "background-color: #3498db;" : "background-color: #9b59b6;")">
                                             @order.OrderType
                                         </span>
                                     </td>
@@ -120,7 +120,7 @@
                                         <small>@order.Location</small>
                                     </td>
                                     <td>
-                                        <span class="badge bg-@GetStatusBadgeClass(order.Status)" id="status-@order.Id">
+                                        <span class="badge status-badge" style="@GetStatusBadgeStyle(order.Status)" id="status-@order.Id">
                                             @order.Status
                                         </span>
                                     </td>
@@ -159,10 +159,12 @@
 
 <!-- Modal لعرض تفاصيل الطلب -->
 <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Order Details</h5>
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h5 class="modal-title text-white">
+                    <i class="fas fa-receipt me-2"></i>Order Details
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="orderDetailsContent">
@@ -186,8 +188,7 @@
                 if (response.success) {
                     // تحديث واجهة المستخدم
                     const statusBadge = $(`#status-${orderId}`);
-                    statusBadge.removeClass('bg-warning bg-info bg-primary bg-success bg-danger');
-                    statusBadge.addClass(getStatusBadgeClass(newStatus));
+                    statusBadge.attr('style', getStatusBadgeStyle(newStatus));
                     statusBadge.text(newStatus);
 
                     showAlert('success', response.message);
@@ -200,27 +201,193 @@
         }
 
         function viewOrderDetails(orderId) {
-            // هنا يمكنك إضافة AJAX لتحميل تفاصيل الطلب
-            // للمثال، سنعرض رسالة بسيطة
             $('#orderDetailsContent').html(`
-                <div class="text-center py-4">
-                    <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
-                    <p>Loading order details...</p>
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Loading order details...</p>
                 </div>
             `);
             $('#orderDetailsModal').modal('show');
 
-            // محاكاة تحميل البيانات
-            setTimeout(() => {
+            // تحميل تفاصيل الطلب
+            $.get('@Url.Action("GetOrderDetails", "Admin")', { orderId: orderId }, function(order) {
+                const userAge = calculateAge(order.user.birthday);
+
+                const detailsHtml = `
+                    <div class="row">
+                        <!-- معلومات العميل -->
+                        <div class="col-md-4">
+                            <div class="card border-primary mb-3">
+                                <div class="card-header bg-primary text-white">
+                                    <i class="fas fa-user me-2"></i>Customer Information
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="text-muted small">Full Name</label>
+                                        <p class="mb-0 fw-bold">${order.user.name}</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="text-muted small">Email Address</label>
+                                        <p class="mb-0">
+                                            <i class="fas fa-envelope me-2 text-primary"></i>${order.user.email}
+                                        </p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="text-muted small">Phone Number</label>
+                                        <p class="mb-0">
+                                            <i class="fas fa-phone me-2 text-success"></i>${order.user.phone}
+                                        </p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="text-muted small">Age</label>
+                                        <p class="mb-0">
+                                            <i class="fas fa-birthday-cake me-2 text-warning"></i>${userAge} years old
+                                        </p>
+                                    </div>
+                                    ${order.user.imageURL ? `
+                                        <div class="text-center mt-3">
+                                            <img src="${order.user.imageURL}" alt="${order.user.name}"
+                                                 class="rounded-circle border border-3 border-primary"
+                                                 style="width: 100px; height: 100px; object-fit: cover;">
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- معلومات الطلب -->
+                        <div class="col-md-8">
+                            <div class="card border-success mb-3">
+                                <div class="card-header bg-success text-white">
+                                    <i class="fas fa-shopping-cart me-2"></i>Order Information
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <label class="text-muted small">Order ID</label>
+                                            <p class="mb-0 fw-bold text-primary">${order.uniqueOrderId}</p>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="text-muted small">Order Date</label>
+                                            <p class="mb-0">${formatDate(order.createdAt)}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <label class="text-muted small">Order Type</label>
+                                            <p class="mb-0">
+                                                <span class="badge" style="${order.orderType === 'Delivery' ? 'background-color: #3498db;' : 'background-color: #9b59b6;'}">
+                                                    <i class="fas fa-${order.orderType === 'Delivery' ? 'truck' : 'utensils'} me-1"></i>
+                                                    ${order.orderType}
+                                                </span>
+                                            </p>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="text-muted small">Status</label>
+                                            <p class="mb-0">
+                                                <span class="badge status-badge" style="${getStatusBadgeStyle(order.status)}">
+                                                    ${order.status}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="text-muted small">
+                                            <i class="fas fa-map-marker-alt me-2"></i>
+                                            ${order.orderType === 'Delivery' ? 'Delivery Address' : 'Table Number'}
+                                        </label>
+                                        <p class="mb-0 fw-bold">${order.location}</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="text-muted small">Estimated Preparation Time</label>
+                                        <p class="mb-0">
+                                            <i class="fas fa-clock me-2 text-warning"></i>
+                                            <strong>${order.timePreparing} minutes</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- عناصر الطلب -->
+                            <div class="card border-warning">
+                                <div class="card-header bg-warning">
+                                    <i class="fas fa-hamburger me-2"></i>Order Items
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Item</th>
+                                                    <th>Image</th>
+                                                    <th>Quantity</th>
+                                                    <th>Price</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${order.orderItems.map(item => `
+                                                    <tr>
+                                                        <td>
+                                                            <strong>${item.menuProduct.name}</strong><br>
+                                                            <small class="text-muted">${item.menuProduct.description.substring(0, 50)}...</small>
+                                                        </td>
+                                                        <td>
+                                                            <img src="${item.menuProduct.imageUrl}"
+                                                                 alt="${item.menuProduct.name}"
+                                                                 class="rounded"
+                                                                 style="width: 50px; height: 50px; object-fit: cover;"
+                                                                 onerror="this.src='/images/placeholder.png'">
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-secondary">${item.quantity}</span>
+                                                        </td>
+                                                        <td>${formatCurrency(item.unitPrice)}</td>
+                                                        <td><strong>${formatCurrency(item.total)}</strong></td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                            <tfoot>
+                                                <tr class="table-active">
+                                                    <td colspan="4" class="text-end"><strong>Total Amount:</strong></td>
+                                                    <td>
+                                                        <strong class="text-success fs-5">
+                                                            ${formatCurrency(order.total)}
+                                                        </strong>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Note:</strong> This order was placed on ${formatDate(order.createdAt)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                $('#orderDetailsContent').html(detailsHtml);
+            }).fail(function() {
                 $('#orderDetailsContent').html(`
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        Order details feature will be implemented here.
-                        <br><br>
-                        <strong>Order ID:</strong> ${orderId}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Failed to load order details. Please try again.
                     </div>
                 `);
-            }, 1000);
+            });
         }
 
         function cleanupOldOrders() {
@@ -229,22 +396,55 @@
             }
         }
 
-        function getStatusBadgeClass(status) {
+        function getStatusBadgeStyle(status) {
             switch (status.toLowerCase()) {
-                case 'pending': return 'bg-warning';
-                case 'preparing': return 'bg-info';
-                case 'ready': return 'bg-primary';
-                case 'completed': return 'bg-success';
-                case 'cancelled': return 'bg-danger';
-                default: return 'bg-secondary';
+                case 'pending': return 'background-color: #e67e22;'; // برتقالي غامق
+                case 'preparing': return 'background-color: #3498db;'; // أزرق غامق
+                case 'ready': return 'background-color: #9b59b6;'; // بنفسجي
+                case 'completed': return 'background-color: #27ae60;'; // أخضر غامق
+                case 'cancelled': return 'background-color: #c0392b;'; // أحمر غامق
+                default: return 'background-color: #7f8c8d;'; // رمادي غامق
             }
+        }
+
+        function calculateAge(birthday) {
+            const birthDate = new Date(birthday);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+
+            return age;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const options = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return date.toLocaleDateString('en-US', options);
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'EGP'
+            }).format(amount);
         }
 
         function showAlert(type, message) {
             const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
             const alertHtml = `
                 <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
+                    <i class="fas ${icon} me-2"></i>
                     ${message}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -261,7 +461,18 @@
         $(document).ready(function() {
             $('#ordersTable').DataTable({
                 pageLength: 10,
-                order: [[2, 'desc']] // الترتيب حسب التاريخ
+                order: [[2, 'desc']], // الترتيب حسب التاريخ
+                language: {
+                    search: "Search Orders:",
+                    lengthMenu: "Show _MENU_ orders per page",
+                    info: "Showing _START_ to _END_ of _TOTAL_ orders",
+                    paginate: {
+                        first: "First",
+                        last: "Last",
+                        next: "Next",
+                        previous: "Previous"
+                    }
+                }
             });
         });
     </script>
@@ -272,27 +483,59 @@
             font-weight: 600;
         }
 
+        .status-badge {
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.35em 0.65em;
+            color: white;
+        }
+
         .badge {
             font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
         }
 
         .btn-group-sm .btn {
             padding: 0.25rem 0.5rem;
         }
+
+        .modal-xl {
+            max-width: 1200px;
+        }
+
+        .card {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+            .card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            }
+
+        .table-responsive {
+            border-radius: 0.5rem;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
     </style>
 }
 
 @functions {
-    public string GetStatusBadgeClass(string status)
+    public string GetStatusBadgeStyle(string status)
     {
         return status.ToLower() switch
         {
-            "pending" => "bg-warning",
-            "preparing" => "bg-info",
-            "ready" => "bg-primary",
-            "completed" => "bg-success",
-            "cancelled" => "bg-danger",
-            _ => "bg-secondary"
+            "pending" => "background-color: #e67e22;",
+            "preparing" => "background-color: #3498db;",
+            "ready" => "background-color: #9b59b6;",
+            "completed" => "background-color: #27ae60;",
+            "cancelled" => "background-color: #c0392b;",
+            _ => "background-color: #7f8c8d;"
         };
     }
 }
