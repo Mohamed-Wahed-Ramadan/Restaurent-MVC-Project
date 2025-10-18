@@ -1,0 +1,49 @@
+﻿@model string
+
+@{
+    var status = Model;
+    var steps = new[]
+    {
+        new { Key = "Pending", Label = "Order Received", Icon = "fa-clock" },
+        new { Key = "Preparing", Label = "Preparing", Icon = "fa-utensils" },
+        new { Key = "Ready", Label = "Ready", Icon = "fa-check" },
+        new { Key = "Completed", Label = "Completed", Icon = "fa-flag-checkered" }
+    };
+}
+
+@foreach (var step in steps)
+{
+    <div class="timeline-item @(GetStepClass(step.Key, status))">
+        <div class="d-flex align-items-center">
+            <i class="fas @step.Icon me-2"></i>
+            <div>
+                <strong>@step.Label</strong>
+                @if (step.Key == status)
+                {
+                    <br>
+                    <small class="text-muted">Current Status</small>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@functions {
+    public string GetStepClass(string stepKey, string currentStatus)
+    {
+        var stepOrder = new Dictionary<string, int>
+        {
+            ["Pending"] = 1,
+            ["Preparing"] = 2,
+            ["Ready"] = 3,
+            ["Completed"] = 4
+        };
+
+        if (stepOrder[stepKey] < stepOrder[currentStatus])
+            return "completed";
+        else if (stepKey == currentStatus)
+            return "active";
+        else
+            return "";
+    }
+}

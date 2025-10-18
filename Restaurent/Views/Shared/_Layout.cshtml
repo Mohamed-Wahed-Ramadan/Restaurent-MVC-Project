@@ -87,25 +87,26 @@
 
         .navbar {
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            
         }
-        header{
+
+        header {
             position: fixed;
             top: 0;
             width: 100%;
-            z-index: 10;
+            z-index: 1000;
         }
+
         html, body {
             height: 100%;
             margin: 0;
             padding: 0;
-            
         }
 
         body {
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            padding-top: 76px; /* ارتفاع النافبار */
         }
 
         .main-content {
@@ -136,17 +137,102 @@
         .dark-mode .text-muted {
             color: #aaa !important;
         }
+
+        /* أنماط السلة والمفضلة */
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .nav-cart-icon {
+            position: relative;
+            display: inline-block;
+        }
+
+        .favorite-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #ccc;
+        }
+
+            .favorite-btn.active, .favorite-btn:hover {
+                color: #ff4444;
+                transform: scale(1.1);
+            }
+
+        .discount-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        /* تحسينات للشاشات الصغيرة */
+        @@media (max-width: 768px) {
+            body {
+                padding-top: 60px;
+            }
+
+            .navbar-brand {
+                font-size: 1.1rem;
+            }
+
+            .user-badge-admin,
+            .user-badge-user {
+                font-size: 0.8rem;
+                padding: 6px 10px;
+            }
+        }
+
+        /* تحسينات التحميل */
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+        }
+
+        /* أنماط التنبيهات */
+        .alert-fixed {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 1050;
+            min-width: 300px;
+        }
     </style>
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container gap-4">
-                <a class="navbar-brand" href="/MenuProduct/GetAll">
+            <div class="container">
+                <a class="navbar-brand" asp-controller="MenuProduct" asp-action="GetAll">
                     <i class="fas fa-utensils"></i> Restaurant
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#navbarNav">
+                        data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
@@ -156,18 +242,24 @@
                                 <i class="fas fa-home"></i> Home
                             </a>
                         </li>
-                        @* <li class="nav-item">
-                            <a class="nav-link" asp-controller="MenuProduct" asp-action="GetAll">
-                                <i class="fas fa-list"></i> Products
-                            </a>
-                        </li> *@
 
                         @{
                             var userId = Context.Session.GetInt32("UserId");
                             var userName = Context.Session.GetString("UserName");
                             var userEmail = Context.Session.GetString("UserEmail");
+                            var userImage = Context.Session.GetString("UserImage");
                             var isAdmin = Context.Session.GetString("IsAdmin") == "True";
                             var isSuperAdmin = userEmail == "medo03459@gmail.com";
+                            var cartCount = Context.Session.GetInt32("CartCount") ?? 0;
+                        }
+
+                        @if (isAdmin && userId != null)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Admin" asp-action="Dashboard">
+                                    <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                                </a>
+                            </li>
                         }
 
                         @if (isSuperAdmin && userId != null)
@@ -181,35 +273,94 @@
                     </ul>
 
                     <ul class="navbar-nav ms-auto">
+                        <!-- زر البحث -->
+                        <li class="nav-item">
+                            <form class="d-flex me-2" asp-controller="MenuProduct" asp-action="Search" method="get">
+                                <div class="input-group input-group-sm">
+                                    <input type="text" name="searchTerm" class="form-control" placeholder="Search..." style="width: 200px;">
+                                    <button class="btn btn-outline-light" type="submit">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </li>
+
                         @if (userId != null)
                         {
-                            <!-- Logged In User Dropdown -->
+                            <!-- زر السلة -->
+                            <li class="nav-item">
+                                <a class="nav-link nav-cart-icon" asp-controller="Cart" asp-action="Index" title="Shopping Cart">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    @if (cartCount > 0)
+                                    {
+                                        <span class="cart-badge">@cartCount</span>
+                                    }
+                                </a>
+                            </li>
+
+                            <!-- زر المفضلة -->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Favorite" asp-action="Index" title="My Favorites">
+                                    <i class="fas fa-heart"></i>
+                                </a>
+                            </li>
+
+                            <!-- زر الطلبات -->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Order" asp-action="MyOrders" title="My Orders">
+                                    <i class="fas fa-clipboard-list"></i>
+                                </a>
+                            </li>
+
+                            <!-- Dropdown المستخدم -->
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle @(isAdmin ? "user-badge-admin" : "user-badge-user")"
+                                <a class="nav-link dropdown-toggle d-flex align-items-center @(isAdmin ? "user-badge-admin" : "user-badge-user")"
                                    href="#" id="userDropdown" role="button"
                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas @(isAdmin ? "fa-crown" : "fa-user")"></i>
-                                    @userName
+                                    @if (!string.IsNullOrEmpty(userImage))
+                                    {
+                                        <img src="@userImage" alt="@userName" class="user-avatar-small me-2" />
+                                    }
+                                    else
+                                    {
+                                        <i class="fas @(isAdmin ? "fa-crown" : "fa-user") me-2"></i>
+                                    }
+                                    <span>@userName</span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom"
                                     aria-labelledby="userDropdown">
 
                                     <div class="dropdown-header-custom">
                                         <div class="text-center">
-                                            <i class="fas @(isAdmin ? "fa-user-shield" : "fa-user-circle") fa-3x mb-2"></i>
+                                            @if (!string.IsNullOrEmpty(userImage))
+                                            {
+                                                <img src="@userImage" alt="@userName" class="user-avatar-large mb-2" />
+                                            }
+                                            else
+                                            {
+                                                <i class="fas @(isAdmin ? "fa-user-shield" : "fa-user-circle") fa-3x mb-2"></i>
+                                            }
                                             <h6 class="mb-0">@userName</h6>
+                                            <small class="text-muted">@userEmail</small>
+                                            <br />
                                             <small>
                                                 @if (isSuperAdmin)
                                                 {
-                                                    <text>Super Admin</text>
+                                                    <span class="badge bg-danger">
+                                                        <i class="fas fa-crown"></i> Super Admin
+                                                    </span>
                                                 }
                                                 else if (isAdmin)
                                                 {
-                                                    <text>Administrator</text>
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-user-shield"></i> Administrator
+                                                    </span>
                                                 }
                                                 else
                                                 {
-                                                    <text>Regular User</text>
+                                                    <span class="badge bg-info">
+                                                        <i class="fas fa-user"></i> Regular User
+                                                    </span>
                                                 }
                                             </small>
                                         </div>
@@ -217,12 +368,12 @@
 
                                     <li>
                                         <a class="dropdown-item" asp-controller="User" asp-action="Details">
-                                            <i class="fas fa-user-circle text-primary"></i> My Profile
+                                            <i class="fas fa-user-circle text-primary me-2"></i> My Profile
                                         </a>
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-controller="User" asp-action="Edit">
-                                            <i class="fas fa-edit text-warning"></i> Edit Profile
+                                            <i class="fas fa-edit text-warning me-2"></i> Edit Profile
                                         </a>
                                     </li>
 
@@ -231,7 +382,12 @@
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <a class="dropdown-item" asp-controller="MenuProduct" asp-action="Create">
-                                                <i class="fas fa-plus-circle text-success"></i> Add Product
+                                                <i class="fas fa-plus-circle text-success me-2"></i> Add Product
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Discounts">
+                                                <i class="fas fa-tag text-info me-2"></i> Manage Discounts
                                             </a>
                                         </li>
                                     }
@@ -239,7 +395,7 @@
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <a class="dropdown-item text-danger" asp-controller="User" asp-action="Logout">
-                                            <i class="fas fa-sign-out-alt"></i> Logout
+                                            <i class="fas fa-sign-out-alt me-2"></i> Logout
                                         </a>
                                     </li>
                                 </ul>
@@ -263,7 +419,9 @@
 
                         <!-- Dark Mode Button -->
                         <li class="nav-item">
-                            <button id="themeButton" class="btn btn-outline-light ms-2">🌙 Dark Mode</button>
+                            <button id="themeButton" class="btn btn-outline-light ms-2">
+                                <i class="fas fa-moon"></i>
+                            </button>
                         </li>
                     </ul>
                 </div>
@@ -271,17 +429,129 @@
         </nav>
     </header>
 
-    <main role="main" class="main-content mt-5">
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="container mt-3">
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            </div>
+    <style>
+        /* User Avatar Styles */
+        .user-avatar-small {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
+        .user-avatar-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #007bff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .dropdown-header-custom {
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 0.25rem 0.25rem 0 0;
+            margin: -0.5rem -0.5rem 0.5rem -0.5rem;
+        }
+
+            .dropdown-header-custom h6 {
+                color: white;
+                font-weight: 600;
+            }
+
+            .dropdown-header-custom small {
+                color: rgba(255,255,255,0.9);
+            }
+
+        .dropdown-menu-custom {
+            min-width: 280px;
+            padding: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: none;
+            border-radius: 0.5rem;
+        }
+
+        .dropdown-item {
+            border-radius: 0.25rem;
+            padding: 0.5rem 1rem;
+            transition: all 0.2s ease;
+        }
+
+            .dropdown-item:hover {
+                background-color: #f8f9fa;
+                transform: translateX(5px);
+            }
+
+        .user-badge-admin {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+            .user-badge-admin:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+            }
+
+        .user-badge-user {
+            background: linear-gradient(135deg, #48c6ef 0%, #6f86d6 100%);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+            .user-badge-user:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(72, 198, 239, 0.4);
+            }
+
+        .nav-cart-icon {
+            position: relative;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+    </style>
+
+    <!-- منطقة التنبيهات -->
+    <div class="alert-fixed">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+    </div>
+
+    <!-- spinner التحميل -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <main role="main" class="main-content">
         @RenderBody()
     </main>
 
@@ -289,38 +559,230 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5><i class="fas fa-utensils"></i> Restaurant </h5>
-                    <p class="text-muted">Professional restaurant management system</p>
-                    
+                    <!-- اللوجو والوصف -->
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="/images/log0.png" alt="Restaurant Logo"
+                             class="me-3" style="width: 50px; height: 50px; object-fit: contain;">
+                        <div>
+                            <h5 class="mb-1"><i class="fas fa-utensils"></i> Restaurant</h5>
+                            <p class="text-muted mb-0">Professional restaurant management system</p>
+                        </div>
+                    </div>
+                    <p class="text-muted small">
+                        Serving delicious meals since 2024. Experience the best dining with us!
+                    </p>
                 </div>
                 <div class="col-md-3">
                     <h6>Quick Links</h6>
                     <ul class="list-unstyled">
-                        <li><a href="#" class="text-decoration-none text-muted">About Us</a></li>
-                        <li><a href="#" class="text-decoration-none text-muted">Contact</a></li>
+                        <li class="mb-2">
+                            <a asp-controller="MenuProduct" asp-action="GetAll"
+                               class="text-decoration-none text-muted hover-gold">
+                                <i class="fas fa-utensils me-2"></i>Our Menu
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a asp-controller="Cart" asp-action="Index"
+                               class="text-decoration-none text-muted hover-gold">
+                                <i class="fas fa-shopping-cart me-2"></i>Shopping Cart
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a asp-controller="Favorite" asp-action="Index"
+                               class="text-decoration-none text-muted hover-gold">
+                                <i class="fas fa-heart me-2"></i>My Favorites
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 <div class="col-md-3">
                     <h6>Follow Us</h6>
-                    <div>
-                        <a href="#" class="text-muted me-3"><i class="fab fa-facebook fa-lg"></i></a>
-                        <a href="#" class="text-muted me-3"><i class="fab fa-twitter fa-lg"></i></a>
-                        <a href="#" class="text-muted"><i class="fab fa-instagram fa-lg"></i></a>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon facebook" title="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="social-icon twitter" title="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="social-icon instagram" title="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="social-icon youtube" title="YouTube">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-phone me-1"></i> +20 1123002663<br>
+                            <i class="fas fa-envelope me-1"></i> mohamed.wahed.work@gmail.com
+                        </small>
                     </div>
                 </div>
             </div>
-            <hr class="bg-secondary" />
+            <hr class="bg-secondary my-4" />
             <div class="text-center">
-                <p class="mb-0">&copy; @DateTime.Now.Year - Restaurant Manager</p>
+                <p class="mb-0 text-muted">
+                    &copy; @DateTime.Now.Year - Restaurant Manager. All rights reserved. |
+                    Made with <i class="fas fa-heart text-danger"></i> for food lovers
+                </p>
             </div>
         </div>
     </footer>
 
+    <style>
+        /* تأثيرات الروابط */
+        .hover-gold {
+            transition: all 0.3s ease;
+        }
+
+            .hover-gold:hover {
+                color: #ffd700 !important;
+                transform: translateX(5px);
+                text-decoration: none !important;
+            }
+
+        /* تأثيرات أيقونات السوشيال ميديا */
+        .social-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .social-icon:hover {
+                transform: rotate(360deg) scale(1.1);
+            }
+
+            /* ألوان السوشيال ميديا الفعلية */
+            .social-icon.facebook:hover {
+                background: #1877f2;
+                color: white;
+            }
+
+            .social-icon.twitter:hover {
+                background: #1da1f2;
+                color: white;
+            }
+
+            .social-icon.instagram:hover {
+                background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+                color: white;
+            }
+
+            .social-icon.youtube:hover {
+                background: #ff0000;
+                color: white;
+            }
+
+            /* تأثير إضافي للأيقونات */
+            .social-icon::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+                transition: left 0.5s;
+            }
+
+            .social-icon:hover::before {
+                left: 100%;
+            }
+
+        /* تحسينات للشاشات الصغيرة */
+        @@media (max-width: 768px) {
+            .social-icons {
+                justify-content: center;
+                margin-bottom: 1rem;
+            }
+
+            .container {
+                text-align: center;
+            }
+
+            .d-flex.align-items-center {
+                justify-content: center;
+                text-align: center;
+            }
+        }
+
+        /* تأثير للوجو */
+        .logo-container {
+            transition: all 0.3s ease;
+        }
+
+            .logo-container:hover {
+                transform: scale(1.05);
+            }
+
+        /* تحسين النص */
+        .text-muted {
+            opacity: 0.8;
+        }
+
+            .text-muted:hover {
+                opacity: 1;
+            }
+    </style>
+
+    <script>
+        // إضافة تأثيرات تفاعلية إضافية
+        document.addEventListener('DOMContentLoaded', function() {
+            // تأثير للروابط
+            const links = document.querySelectorAll('.hover-gold');
+            links.forEach(link => {
+                link.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateX(8px)';
+                });
+
+                link.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateX(0)';
+                });
+            });
+
+            // تأثير للأيقونات
+            const socialIcons = document.querySelectorAll('.social-icon');
+            socialIcons.forEach(icon => {
+                icon.addEventListener('mouseenter', function() {
+                    this.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+                });
+
+                icon.addEventListener('mouseleave', function() {
+                    this.style.boxShadow = 'none';
+                });
+            });
+
+            // تأثير للوجو
+            const logo = document.querySelector('img[alt="Restaurant Logo"]');
+            if (logo) {
+                logo.addEventListener('mouseenter', function() {
+                    this.style.transform = 'rotate(5deg) scale(1.1)';
+                });
+
+                logo.addEventListener('mouseleave', function() {
+                    this.style.transform = 'rotate(0) scale(1)';
+                });
+            }
+        });
+    </script>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
-    @await RenderSectionAsync("Scripts", required: false)
 
     <script>
         // Auto-hide alerts
@@ -328,21 +790,21 @@
             $('.alert').fadeOut('slow');
         }, 5000);
 
+        // Dark Mode functionality
         document.addEventListener("DOMContentLoaded", function () {
             const themeButton = document.getElementById("themeButton");
-            const da = document.querySelectorAll(".nav-da");
 
             function applyTheme(theme) {
                 if (theme === "dark") {
                     document.body.classList.add("dark-mode");
                     document.querySelector(".navbar").classList.add("dark-mode");
-                    themeButton.textContent = "☀️ Light Mode";
-                    da.forEach(el => el.style.color = "white");
+                    themeButton.innerHTML = '<i class="fas fa-sun"></i>';
+                    themeButton.title = "Light Mode";
                 } else {
                     document.body.classList.remove("dark-mode");
                     document.querySelector(".navbar").classList.remove("dark-mode");
-                    themeButton.textContent = "🌙 Dark Mode";
-                    da.forEach(el => el.style.color = "black");
+                    themeButton.innerHTML = '<i class="fas fa-moon"></i>';
+                    themeButton.title = "Dark Mode";
                 }
             }
 
@@ -358,9 +820,133 @@
             themeButton.addEventListener("click", function () {
                 const newTheme = document.body.classList.contains("dark-mode") ? "light" : "dark";
                 applyTheme(newTheme);
+
+                // حفظ التفضيل في cookie
+                document.cookie = `theme=${newTheme}; path=/; max-age=31536000`; // سنة
+
+                // إرسال طلب للسيرفر لحفظ التفضيل (اختياري)
                 fetch(`/Home/SetTheme?theme=${newTheme}`);
             });
         });
+
+        // تحديث عدد عناصر السلة
+        function updateCartCount() {
+            $.get('@Url.Action("GetCartCount", "Cart")', function(data) {
+                $('.cart-badge').text(data.count);
+                if (data.count > 0) {
+                    $('.cart-badge').show();
+                } else {
+                    $('.cart-badge').hide();
+                }
+            });
+        }
+
+        // إضافة إلى السلة
+        function addToCart(productId, quantity = 1) {
+            showLoading();
+            $.post('@Url.Action("AddToCart", "Cart")', {
+                productId: productId,
+                quantity: quantity
+            }, function(data) {
+                hideLoading();
+                if (data.success) {
+                    updateCartCount();
+                    showAlert('success', data.message);
+                } else {
+                    showAlert('error', data.message);
+                }
+            }).fail(function() {
+                hideLoading();
+                showAlert('error', 'An error occurred while adding to cart');
+            });
+        }
+
+        // التبديل بين المفضلة
+        function toggleFavorite(productId, button) {
+            showLoading();
+            $.post('@Url.Action("ToggleFavorite", "Favorite")', {
+                productId: productId
+            }, function(data) {
+                hideLoading();
+                if (data.success) {
+                    if (data.isFavorite) {
+                        $(button).addClass('active');
+                        showAlert('success', data.message);
+                    } else {
+                        $(button).removeClass('active');
+                        showAlert('info', data.message);
+                    }
+                } else {
+                    showAlert('error', data.message);
+                }
+            }).fail(function() {
+                hideLoading();
+                showAlert('error', 'An error occurred while updating favorites');
+            });
+        }
+
+        // عرض التنبيهات
+        function showAlert(type, message) {
+            var alertClass = type === 'success' ? 'alert-success' :
+                            type === 'error' ? 'alert-danger' :
+                            type === 'warning' ? 'alert-warning' : 'alert-info';
+
+            var icon = type === 'success' ? 'fa-check-circle' :
+                      type === 'error' ? 'fa-exclamation-circle' :
+                      type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+
+            var alertHtml = `<div class="alert ${alertClass} alert-dismissible fade show alert-fixed" role="alert">
+                <i class="fas ${icon} me-2"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>`;
+
+            // إضافة التنبيه في منطقة التنبيهات
+            $('.alert-fixed').append(alertHtml);
+
+            // إخفاء التنبيه تلقائياً بعد 5 ثواني
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        }
+
+        // إظهار spinner التحميل
+        function showLoading() {
+            $('#loadingSpinner').show();
+        }
+
+        // إخفاء spinner التحميل
+        function hideLoading() {
+            $('#loadingSpinner').hide();
+        }
+
+        // البحث في الوقت الحقيقي (اختياري)
+        $('#searchInput').on('input', function() {
+            var searchTerm = $(this).val();
+            if (searchTerm.length >= 3) {
+                // يمكنك إضافة بحث AJAX هنا
+            }
+        });
+
+        // تحديث عدد السلة عند تحميل الصفحة
+        $(document).ready(function() {
+            updateCartCount();
+
+            // إخفاء التنبيهات عند النقر خارجها
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.alert').length) {
+                    $('.alert').alert('close');
+                }
+            });
+        });
+
+        // منع إرسال النموذج إذا كان هناك تحميل
+        $(document).on('submit', 'form', function() {
+            if ($('#loadingSpinner').is(':visible')) {
+                return false;
+            }
+        });
     </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

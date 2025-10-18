@@ -10,8 +10,8 @@
                     <h3><i class="fas fa-sign-in-alt"></i> Login</h3>
                 </div>
                 <div class="card-body p-4">
-                    <form asp-action="Login" method="post">
-                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                    <form asp-action="Login" method="post" id="loginForm">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                         <div class="form-group mb-3">
                             <label class="form-label">
@@ -47,3 +47,20 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#loginForm').on('submit', function(e) {
+                var email = $('input[name="email"]').val();
+                var password = $('input[name="password"]').val();
+
+                if (!email || !password) {
+                    e.preventDefault();
+                    showAlert('error', 'Please fill in all fields');
+                    return false;
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,147 @@
+﻿@model List<Restaurent.Models.MenuProduct>
+
+@{
+    ViewData["Title"] = "My Favorites";
+    var userId = Context.Session.GetInt32("UserId");
+}
+
+<div class="container mt-4">
+    <h2><i class="fas fa-heart"></i> My Favorites</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            <i class="fas fa-heart fa-3x mb-3 text-muted"></i>
+            <h4>No favorites yet</h4>
+            <p>Start adding your favorite products to this list!</p>
+            <a asp-controller="MenuProduct" asp-action="GetAll" class="btn btn-primary">
+                <i class="fas fa-utensils"></i> Browse Menu
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var product in Model)
+            {
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                    <div class="card product-card h-100 shadow-sm">
+                        <div class="position-relative">
+                            <img src="@Url.Content(product.ImageUrl)" alt="@product.Name"
+                                 class="card-img-top product-image"
+                                 style="height: 200px; width: 100%; object-fit: cover;"
+                                 onerror="this.src='/images/default.png'">
+
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <button class="favorite-btn active"
+                                        onclick="toggleFavorite(@product.Id, this)"
+                                        title="Remove from favorites">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+
+                            <div class="position-absolute top-0 start-0 m-2">
+                                <span class="badge bg-success fs-6">@product.Price EGP</span>
+                            </div>
+
+                            @if (product.Quantity < 10)
+                            {
+                                <div class="position-absolute top-0 start-0 m-2" style="margin-top: 40px !important;">
+                                    <span class="badge bg-danger">Low Stock</span>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">@product.Name</h5>
+                            <p class="card-text text-muted flex-grow-1">
+                                @(product.Description?.Length > 80 ? product.Description.Substring(0, 80) + "..." : product.Description)
+                            </p>
+
+                            <div class="mt-auto">
+                                <div class="row text-center small text-muted mb-3">
+                                    <div class="col-4">
+                                        <i class="fas fa-clock"></i><br>
+                                        @product.MinTime-@product.MaxTime min
+                                    </div>
+                                    <div class="col-4">
+                                        <i class="fas fa-box"></i><br>
+                                        @product.Quantity left
+                                    </div>
+                                    <div class="col-4">
+                                        <i class="fas fa-fire"></i><br>
+                                        @product.DayStock/day
+                                    </div>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    @if (product.Quantity > 0)
+                                    {
+                                        <button class="btn btn-success btn-sm"
+                                                onclick="addToCart(@product.Id)">
+                                            <i class="fas fa-cart-plus"></i> Add to Cart
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-secondary btn-sm" disabled>
+                                            <i class="fas fa-times"></i> Out of Stock
+                                        </button>
+                                    }
+
+                                    <a asp-controller="MenuProduct" asp-action="Showprd" asp-route-id="@product.Id"
+                                       class="btn btn-info btn-sm">
+                                        <i class="fas fa-eye"></i> Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // إضافة إلى السلة من صفحة المفضلة
+        function addToCart(productId) {
+            $.post('@Url.Action("AddToCart", "Cart")', {
+                productId: productId,
+                quantity: 1
+            }, function(data) {
+                if (data.success) {
+                    updateCartCount();
+                    showAlert('success', data.message);
+                } else {
+                    showAlert('error', data.message);
+                }
+            });
+        }
+
+        // إزالة من المفضلة
+        function toggleFavorite(productId, button) {
+            $.post('@Url.Action("ToggleFavorite", "Favorite")', {
+                productId: productId
+            }, function(data) {
+                if (data.success) {
+                    if (!data.isFavorite) {
+                        // إزالة العنصر من الصفحة إذا تمت إزالته من المفضلة
+                        $(button).closest('.col-12').fadeOut(300, function() {
+                            $(this).remove();
+
+                            // إذا لم يعد هناك عناصر، عرض رسالة فارغة
+                            if ($('.product-card').length === 0) {
+                                location.reload();
+                            }
+                        });
+                    }
+                    showAlert('success', data.message);
+                } else {
+                    showAlert('error', data.message);
+                }
+            });
+        }
+    </script>
+}

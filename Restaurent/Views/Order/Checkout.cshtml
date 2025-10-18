@@ -1,0 +1,147 @@
+﻿@model Restaurent.ViewModels.CheckoutVM
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="container mt-4">
+    <h2><i class="fas fa-credit-card"></i> Checkout</h2>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Order Information</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="PlaceOrder" method="post">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Order Type *</label>
+                                    <select asp-for="OrderType" class="form-select" id="orderType">
+                                        <option value="">Select Order Type</option>
+                                        <option value="DineIn">Dine In</option>
+                                        <option value="Delivery">Delivery</option>
+                                    </select>
+                                    <span asp-validation-for="OrderType" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dine In Fields -->
+                        <div id="dineInFields" class="row" style="display: none;">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="TableNumber" class="form-label">Table Number *</label>
+                                    <input asp-for="TableNumber" class="form-control" placeholder="Enter table number" />
+                                    <span asp-validation-for="TableNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Fields -->
+                        <div id="deliveryFields" class="row" style="display: none;">
+                            <div class="col-md-12">
+                                <div class="form-group mb-3">
+                                    <label asp-for="DeliveryAddress" class="form-label">Delivery Address *</label>
+                                    <textarea asp-for="DeliveryAddress" class="form-control" rows="3"
+                                              placeholder="Enter your complete delivery address"></textarea>
+                                    <span asp-validation-for="DeliveryAddress" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle"></i> Place Order
+                            </button>
+                            <a asp-controller="Cart" asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Cart
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-receipt"></i> Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var item in Model.CartItems)
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <h6 class="mb-0">@item.ProductName</h6>
+                                <small class="text-muted">@item.Quantity x @item.Price.ToString("C2")</small>
+                            </div>
+                            <span class="fw-bold">@item.Total.ToString("C2")</span>
+                        </div>
+                        <hr class="my-2">
+                    }
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <h5>Total:</h5>
+                        <h5 class="text-success">@Model.Total.ToString("C2")</h5>
+                    </div>
+
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-clock"></i>
+                        <small>
+                            Estimated preparation time:
+                            <strong id="estimatedTime">15-25 minutes</strong>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#orderType').change(function() {
+                var orderType = $(this).val();
+
+                // إخفاء جميع الحقول أولاً
+                $('#dineInFields').hide();
+                $('#deliveryFields').hide();
+
+                // إظهار الحقول المناسبة
+                if (orderType === 'DineIn') {
+                    $('#dineInFields').show();
+                    $('#estimatedTime').text('15-25 minutes');
+                } else if (orderType === 'Delivery') {
+                    $('#deliveryFields').show();
+                    $('#estimatedTime').text('30-45 minutes');
+                }
+            });
+
+            // تفعيل التحقق من الصحة
+            $('form').validate({
+                rules: {
+                    OrderType: "required",
+                    TableNumber: {
+                        required: function() {
+                            return $('#orderType').val() === 'DineIn';
+                        }
+                    },
+                    DeliveryAddress: {
+                        required: function() {
+                            return $('#orderType').val() === 'Delivery';
+                        }
+                    }
+                },
+                messages: {
+                    OrderType: "Please select order type",
+                    TableNumber: "Table number is required for dine-in orders",
+                    DeliveryAddress: "Delivery address is required for delivery orders"
+                }
+            });
+        });
+    </script>
+}

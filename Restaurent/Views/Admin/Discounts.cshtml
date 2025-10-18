@@ -1,0 +1,109 @@
+﻿@model List<Restaurent.Models.Discount>
+
+@{
+    ViewData["Title"] = "Manage Discounts";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-tags"></i> Manage Discounts</h2>
+        <a asp-action="CreateDiscount" class="btn btn-success">
+            <i class="fas fa-plus"></i> Create New Discount
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            <i class="fas fa-tag fa-3x mb-3"></i>
+            <h4>No discounts yet</h4>
+            <p>Create your first discount to attract more customers!</p>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var discount in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 @(discount.IsValid ? "border-success" : "border-secondary")">
+                        <div class="card-header d-flex justify-content-between align-items-center @(discount.IsValid ? "bg-success text-white" : "bg-secondary text-white")">
+                            <h5 class="mb-0">@discount.Name</h5>
+                            <span class="badge @(discount.IsValid ? "bg-light text-dark" : "bg-dark")">
+                                @discount.DiscountPercentage%
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">@discount.Description</p>
+
+                            <div class="mb-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar"></i>
+                                    @discount.StartDate.ToString("MMM dd, yyyy") - @discount.EndDate.ToString("MMM dd, yyyy")
+                                </small>
+                            </div>
+
+                            <div class="mb-2">
+                                <small>
+                                    @if (discount.ApplyToAllCategories)
+                                    {
+                                        <span class="badge bg-info">All Categories</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-primary">@discount.Category?.Name</span>
+                                    }
+                                </small>
+                            </div>
+
+                            @if (discount.IsAgeBased)
+                            {
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-user"></i>
+                                        Age: @discount.MinAge-@discount.MaxAge
+                                    </small>
+                                </div>
+                            }
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge @(discount.IsValid ? "bg-success" : "bg-danger")">
+                                    @(discount.IsValid ? "Active" : "Inactive")
+                                </span>
+                                <div>
+                                    <form asp-action="DeleteDiscount" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@discount.Id" />
+                                        <button type="submit" class="btn btn-sm btn-danger" 
+                                                onclick="return confirm('Are you sure you want to delete this discount?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

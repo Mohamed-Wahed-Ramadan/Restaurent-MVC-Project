@@ -12,8 +12,8 @@ using Restaurent.Context;
 namespace Restaurent.Migrations
 {
     [DbContext(typeof(AppDpContext))]
-    [Migration("20251015201713_initial")]
-    partial class initial
+    [Migration("20251017171144_intial")]
+    partial class intial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,54 @@ namespace Restaurent.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Restaurent.Models.Cart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MenuProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MenuProductId1")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OrderCartId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MenuProductId");
+
+                    b.HasIndex("MenuProductId1")
+                        .IsUnique()
+                        .HasFilter("[MenuProductId1] IS NOT NULL");
+
+                    b.HasIndex("OrderCartId");
+
+                    b.HasIndex("UserId", "MenuProductId")
+                        .IsUnique();
+
+                    b.ToTable("Carts");
+                });
 
             modelBuilder.Entity("Restaurent.Models.Category", b =>
                 {
@@ -122,6 +170,88 @@ namespace Restaurent.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Restaurent.Models.Discount", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("DiscountPercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsAgeBased")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("MaxAge")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MinAge")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("Discounts");
+                });
+
+            modelBuilder.Entity("Restaurent.Models.Favorite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MenuProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MenuProductId");
+
+                    b.HasIndex("UserId", "MenuProductId")
+                        .IsUnique();
+
+                    b.ToTable("Favorites");
+                });
+
             modelBuilder.Entity("Restaurent.Models.MenuProduct", b =>
                 {
                     b.Property<int>("Id")
@@ -168,6 +298,9 @@ namespace Restaurent.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int?>("OrderCartId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
@@ -180,6 +313,8 @@ namespace Restaurent.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("OrderCartId");
 
                     b.ToTable("MenuProducts");
 
@@ -1311,6 +1446,127 @@ namespace Restaurent.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Restaurent.Models.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeliveryAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OrderType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TableNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TimePreparing")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("UniqueOrderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UniqueOrderId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("Restaurent.Models.OrderCart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CartId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MenuProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Mount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("UniqueOrderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("OrderCart");
+                });
+
+            modelBuilder.Entity("Restaurent.Models.OrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MenuProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MenuProductId");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("OrderItems");
+                });
+
             modelBuilder.Entity("Restaurent.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -1329,6 +1585,9 @@ namespace Restaurent.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ImageURL")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("bit");
@@ -1354,6 +1613,75 @@ namespace Restaurent.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Birthday = new DateTime(1999, 11, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "medo03459@gmail.com",
+                            IsAdmin = true,
+                            Name = "Super Admin",
+                            Password = "lJ7iCFYpe8cIOr/VsJ6qi4fISYD36nE1zzwyfws262g=",
+                            Phone = "+201123002663"
+                        });
+                });
+
+            modelBuilder.Entity("Restaurent.Models.Cart", b =>
+                {
+                    b.HasOne("Restaurent.Models.MenuProduct", "MenuProduct")
+                        .WithMany()
+                        .HasForeignKey("MenuProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Restaurent.Models.MenuProduct", null)
+                        .WithOne("Cart")
+                        .HasForeignKey("Restaurent.Models.Cart", "MenuProductId1");
+
+                    b.HasOne("Restaurent.Models.OrderCart", null)
+                        .WithMany("Carts")
+                        .HasForeignKey("OrderCartId");
+
+                    b.HasOne("Restaurent.Models.User", "User")
+                        .WithMany("CartItems")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MenuProduct");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Restaurent.Models.Discount", b =>
+                {
+                    b.HasOne("Restaurent.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("Restaurent.Models.Favorite", b =>
+                {
+                    b.HasOne("Restaurent.Models.MenuProduct", "MenuProduct")
+                        .WithMany()
+                        .HasForeignKey("MenuProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Restaurent.Models.User", "User")
+                        .WithMany("Favorites")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MenuProduct");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Restaurent.Models.MenuProduct", b =>
@@ -1364,12 +1692,85 @@ namespace Restaurent.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Restaurent.Models.OrderCart", "OrderCart")
+                        .WithMany("MenuProducts")
+                        .HasForeignKey("OrderCartId");
+
                     b.Navigation("Category");
+
+                    b.Navigation("OrderCart");
+                });
+
+            modelBuilder.Entity("Restaurent.Models.Order", b =>
+                {
+                    b.HasOne("Restaurent.Models.User", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Restaurent.Models.OrderCart", b =>
+                {
+                    b.HasOne("Restaurent.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Restaurent.Models.OrderItem", b =>
+                {
+                    b.HasOne("Restaurent.Models.MenuProduct", "MenuProduct")
+                        .WithMany()
+                        .HasForeignKey("MenuProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Restaurent.Models.Order", "Order")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MenuProduct");
+
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("Restaurent.Models.Category", b =>
                 {
                     b.Navigation("MenuProduct");
+                });
+
+            modelBuilder.Entity("Restaurent.Models.MenuProduct", b =>
+                {
+                    b.Navigation("Cart");
+                });
+
+            modelBuilder.Entity("Restaurent.Models.Order", b =>
+                {
+                    b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("Restaurent.Models.OrderCart", b =>
+                {
+                    b.Navigation("Carts");
+
+                    b.Navigation("MenuProducts");
+                });
+
+            modelBuilder.Entity("Restaurent.Models.User", b =>
+                {
+                    b.Navigation("CartItems");
+
+                    b.Navigation("Favorites");
+
+                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }

@@ -8,9 +8,19 @@
     <h2>Edit Product</h2>
     <hr />
 
+    @if (TempData["IsDeleted"] != null && (bool)TempData["IsDeleted"])
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Warning!</strong> This product is currently deleted.
+            When you update it, it will be restored and become active again.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="row">
         <div class="col-md-8">
-            <form asp-action="Edit" method="post">
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
                 <input type="hidden" asp-for="Id" />
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -30,7 +40,7 @@
                     <div class="col-md-6">
                         <div class="form-group mb-3">
                             <label asp-for="Price" class="control-label"></label>
-                            <input asp-for="Price" class="form-control" type="number" />
+                            <input asp-for="Price" class="form-control" type="number" step="0.01" />
                             <span asp-validation-for="Price" class="text-danger"></span>
                         </div>
                     </div>
@@ -52,11 +62,19 @@
                     <span asp-validation-for="CategoryId" class="text-danger"></span>
                 </div>
 
+                <!-- Image Upload Section -->
                 <div class="form-group mb-3">
-                    <label asp-for="ImageUrl" class="control-label">Image URL</label>
-                    <input asp-for="ImageUrl" class="form-control" />
-                    <span asp-validation-for="ImageUrl" class="text-danger"></span>
-                    <small class="form-text text-muted">Example: ./images/product.png</small>
+                    <label class="control-label">Product Image</label>
+                    <div class="image-upload-wrapper">
+                        <input type="file" id="imageFile" name="imageFile" accept="image/*" class="d-none" />
+                        <button type="button" class="btn btn-outline-primary w-100" id="uploadBtn">
+                            <i class="fas fa-upload"></i> Choose Image from Device
+                        </button>
+                        <small class="form-text text-muted d-block mt-2">
+                            Supported formats: JPG, PNG, GIF (Max 5MB)
+                        </small>
+                    </div>
+                    <input type="hidden" asp-for="ImageUrl" />
                 </div>
 
                 <div class="row">
@@ -84,9 +102,18 @@
                 </div>
 
                 <div class="form-group mt-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Update Product
-                    </button>
+                    @if (ViewBag.IsDeleted == true)
+                    {
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-undo"></i> Restore & Update Product
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update Product
+                        </button>
+                    }
                     <a asp-action="GetAll" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Back to List
                     </a>
@@ -100,19 +127,49 @@
                     <i class="fas fa-info-circle"></i> Product Preview
                 </div>
                 <div class="card-body">
-                    <div id="imagePreview" class="mb-3 text-center">
+                    <div id="imagePreview" class="mb-3 text-center position-relative">
                         @if (!string.IsNullOrEmpty(Model.ImageUrl))
                         {
-                            <img src="@Model.ImageUrl" alt="Product Image" class="img-fluid rounded" style="max-height: 200px;" />
+                            <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid rounded product-preview-img" id="previewImg" />
                         }
                         else
                         {
-                            <div class="alert alert-secondary">No image available</div>
+                            <div class="alert alert-secondary no-image-placeholder">
+                                <i class="fas fa-image fa-3x mb-2 d-block"></i>
+                                <p class="mb-0">No image available</p>
+                            </div>
                         }
+                        <div id="loadingSpinner" class="spinner-overlay d-none">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
                     </div>
                     <dl class="row mb-0">
                         <dt class="col-sm-5">Product ID:</dt>
                         <dd class="col-sm-7">@Model.Id</dd>
+
+                        @if (ViewBag.IsDeleted == true)
+                        {
+                            <dt class="col-sm-5">Status:</dt>
+                            <dd class="col-sm-7">
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-trash"></i> Deleted
+                                </span>
+                            </dd>
+                        }
+
+                        <dt class="col-sm-5">Current Price:</dt>
+                        <dd class="col-sm-7">
+                            <span class="badge bg-success">@Model.Price.ToString("C")</span>
+                        </dd>
+
+                        <dt class="col-sm-5">Stock:</dt>
+                        <dd class="col-sm-7">
+                            <span class="badge @(Model.Quantity > 10 ? "bg-success" : "bg-warning")">
+                                @Model.Quantity units
+                            </span>
+                        </dd>
                     </dl>
                 </div>
             </div>
@@ -126,30 +183,160 @@
     }
 
     <script>
-        // Image preview on URL change
-        $('#ImageUrl').on('input', function() {
-            var imageUrl = $(this).val();
-            if (imageUrl) {
-                $('#imagePreview').html('<img src="' + imageUrl + '" alt="Product Image" class="img-fluid rounded" style="max-height: 200px;" onerror="this.src=\'/images/no-image.png\'">');
-            } else {
-                $('#imagePreview').html('<div class="alert alert-secondary">No image available</div>');
-            }
-        });
+        $(document).ready(function() {
+            // Upload button click handler
+            $('#uploadBtn').on('click', function() {
+                $('#imageFile').click();
+            });
 
-        // Validate Min/Max time
-        $('#MaxTime').on('input', function() {
-            var minTime = parseInt($('#MinTime').val());
-            var maxTime = parseInt($(this).val());
+            // File input change handler with instant preview
+            $('#imageFile').on('change', function(e) {
+                const file = e.target.files[0];
 
-            if (maxTime < minTime) {
-                $(this).addClass('is-invalid');
-                if ($(this).next('.invalid-feedback').length === 0) {
-                    $(this).after('<div class="invalid-feedback">Max time must be greater than or equal to Min time</div>');
+                if (file) {
+                    // Validate file type
+                    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                    if (!validTypes.includes(file.type)) {
+                        alert('Please select a valid image file (JPG, PNG, or GIF)');
+                        $(this).val('');
+                        return;
+                    }
+
+                    // Validate file size (5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Image size must be less than 5MB');
+                        $(this).val('');
+                        return;
+                    }
+
+                    // Show loading spinner
+                    $('#loadingSpinner').removeClass('d-none');
+
+                    // Show instant preview using FileReader
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        // Update image preview immediately
+                        $('#imagePreview').html(
+                            '<img src="' + e.target.result + '" alt="Product Image" class="img-fluid rounded product-preview-img" id="previewImg" />' +
+                            '<div id="loadingSpinner" class="spinner-overlay d-none">' +
+                            '<div class="spinner-border text-primary" role="status">' +
+                            '<span class="sr-only">Loading...</span></div></div>'
+                        );
+
+                        // Hide loading spinner after image loads
+                        $('#previewImg').on('load', function() {
+                            setTimeout(function() {
+                                $('#loadingSpinner').addClass('d-none');
+                            }, 200);
+                        });
+                    };
+
+                    reader.onerror = function() {
+                        alert('Error reading file');
+                        $('#loadingSpinner').addClass('d-none');
+                    };
+
+                    reader.readAsDataURL(file);
+
+                    // Update button text to show file name
+                    const fileName = file.name.length > 30 ? file.name.substring(0, 30) + '...' : file.name;
+                    $('#uploadBtn').html('<i class="fas fa-check-circle"></i> ' + fileName);
+                    $('#uploadBtn').removeClass('btn-outline-primary').addClass('btn-success');
                 }
-            } else {
-                $(this).removeClass('is-invalid');
-                $(this).next('.invalid-feedback').remove();
+            });
+
+            // Validate Min/Max time
+            $('#MaxTime').on('input', function() {
+                var minTime = parseInt($('#MinTime').val()) || 0;
+                var maxTime = parseInt($(this).val()) || 0;
+
+                if (maxTime > 0 && maxTime < minTime) {
+                    $(this).addClass('is-invalid');
+                    if ($(this).next('.invalid-feedback').length === 0) {
+                        $(this).after('<div class="invalid-feedback">Max time must be greater than or equal to Min time</div>');
+                    }
+                } else {
+                    $(this).removeClass('is-invalid');
+                    $(this).next('.invalid-feedback').remove();
+                }
+            });
+
+            $('#MinTime').on('input', function() {
+                $('#MaxTime').trigger('input');
+            });
+
+            // Check for duplicate product name
+            let typingTimer;
+            const doneTypingInterval = 500;
+
+            $('#Name').on('keyup', function() {
+                clearTimeout(typingTimer);
+                const name = $(this).val();
+                const currentId = $('#Id').val();
+
+                if (name.length > 2) {
+                    typingTimer = setTimeout(function() {
+                        checkProductName(name, currentId);
+                    }, doneTypingInterval);
+                }
+            });
+
+            function checkProductName(name, currentId) {
+                $.ajax({
+                    url: '@Url.Action("CheckExistingProduct", "MenuProduct")',
+                    type: 'GET',
+                    data: { name: name },
+                    success: function(response) {
+                        if (response.exists && response.product.id != currentId) {
+                            if (response.isDeleted) {
+                                showWarning('A deleted product with this name exists. Consider using a different name.');
+                            } else {
+                                showError('A product with this name already exists!');
+                            }
+                        } else {
+                            clearNameValidation();
+                        }
+                    }
+                });
             }
+
+            function showError(message) {
+                $('#Name').addClass('is-invalid');
+                $('#Name').siblings('.text-danger').text(message).show();
+            }
+
+            function showWarning(message) {
+                $('#Name').addClass('is-warning');
+                if ($('#Name').siblings('.text-warning').length === 0) {
+                    $('#Name').after('<small class="text-warning d-block">' + message + '</small>');
+                }
+            }
+
+            function clearNameValidation() {
+                $('#Name').removeClass('is-invalid is-warning');
+                $('#Name').siblings('.text-warning').remove();
+            }
+
+            // Form submit validation
+            $('form').on('submit', function(e) {
+                if ($('#Name').hasClass('is-invalid')) {
+                    e.preventDefault();
+                    alert('Please fix the validation errors before submitting.');
+                    return false;
+                }
+
+                // Confirmation for deleted products
+                @if (ViewBag.IsDeleted == true)
+                {
+                        <text>
+                        if (!confirm('This product is currently deleted. Do you want to restore and update it?')) {
+                            e.preventDefault();
+                            return false;
+                        }
+                        </text>
+                }
+            });
         });
     </script>
 }
@@ -161,10 +348,95 @@
     }
 
     .card {
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border: none;
     }
 
     .btn {
         padding: 10px 20px;
+        transition: all 0.3s ease;
+    }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+    .product-preview-img {
+        max-height: 300px;
+        width: 100%;
+        object-fit: contain;
+        border: 2px solid #e0e0e0;
+        transition: transform 0.3s ease;
+        background: #f8f9fa;
+        padding: 10px;
+    }
+
+        .product-preview-img:hover {
+            transform: scale(1.02);
+            border-color: #007bff;
+        }
+
+    .image-upload-wrapper {
+        margin-bottom: 10px;
+    }
+
+    #imagePreview {
+        min-height: 250px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+    }
+
+    .no-image-placeholder {
+        margin: 0;
+        background: #e9ecef;
+        border: 2px dashed #adb5bd;
+    }
+
+    .spinner-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        z-index: 10;
+    }
+
+    .badge {
+        padding: 6px 12px;
+        font-size: 0.875rem;
+    }
+
+    .card-header {
+        font-weight: 600;
+    }
+
+    dl.row dt {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    dl.row dd {
+        color: #6c757d;
+    }
+
+    .is-warning {
+        border-color: #ffc107 !important;
+    }
+
+    .text-warning {
+        color: #856404 !important;
+    }
+
+    /* Smooth transitions */
+    * {
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     }
 </style>

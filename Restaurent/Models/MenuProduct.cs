@@ -26,6 +26,8 @@ namespace Restaurent.Models
         [Required]
         [ForeignKey("Category")]
         public int CategoryId { get; set; }
-        public Category Category { get; set; }
+        public Category? Category { get; set; }
+        public Cart? Cart { get; set; }
+        public OrderCart? OrderCart { get; set; }
     }
 }

@@ -17,11 +17,21 @@
                 </div>
                 <div class="card-body p-4">
                     <div class="text-center mb-4">
-                        <div class="profile-avatar mx-auto mb-3"
-                             style="width: 120px; height: 120px; background: @(Model.IsAdmin ? "#00ff41" : "#ff9500");
-                                    border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-user fa-4x text-white"></i>
-                        </div>
+                        @if (!string.IsNullOrEmpty(Model.ImageURL))
+                        {
+                            <img src="@Model.ImageURL" alt="Profile Image"
+                                 class="img-thumbnail rounded-circle mb-3"
+                                 style="width: 150px; height: 150px; object-fit: cover;"
+                                 onerror="this.src='/images/default-user.png'">
+                        }
+                        else
+                        {
+                            <div class="profile-avatar mx-auto mb-3"
+                                 style="width: 150px; height: 150px; background: @(Model.IsAdmin ? "#00ff41" : "#ff9500");
+                                            border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user fa-4x text-white"></i>
+                            </div>
+                        }
                         <h4>@Model.Name</h4>
                         @if (Model.IsAdmin)
                         {
@@ -48,7 +58,7 @@
                         <dt class="col-sm-4">
                             <i class="fas fa-phone text-success"></i> Phone:
                         </dt>
-                        <dd class="col-sm-8">@Model.Phone</dd>
+                        <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.Phone) ? "Not provided" : Model.Phone)</dd>
 
                         <dt class="col-sm-4">
                             <i class="fas fa-birthday-cake text-danger"></i> Birthday:
@@ -82,7 +92,11 @@
                         <a asp-action="Edit" class="btn btn-warning btn-lg">
                             <i class="fas fa-edit"></i> Edit Profile
                         </a>
-                        <a asp-action="Logout" class="btn btn-danger btn-lg">
+                        <a asp-action="MyOrders" asp-controller="Order" class="btn btn-info btn-lg">
+                            <i class="fas fa-clipboard-list"></i> My Orders
+                        </a>
+                        <a asp-action="Logout" class="btn btn-danger btn-lg"
+                           onclick="return confirm('Are you sure you want to logout?')">
                             <i class="fas fa-sign-out-alt"></i> Logout
                         </a>
                     </div>
@@ -92,3 +106,22 @@
     </div>
 </div>
 
+@section Scripts {
+    <style>
+        .profile-avatar {
+            transition: transform 0.3s ease;
+        }
+
+            .profile-avatar:hover {
+                transform: scale(1.05);
+            }
+
+        .img-thumbnail {
+            transition: transform 0.3s ease;
+        }
+
+            .img-thumbnail:hover {
+                transform: scale(1.05);
+            }
+    </style>
+}

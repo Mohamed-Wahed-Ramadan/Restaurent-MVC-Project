@@ -1,0 +1,180 @@
+﻿@model Restaurent.ViewModels.DiscountVM
+
+@{
+    ViewData["Title"] = "Create New Discount";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-lg">
+                <div class="card-header bg-success text-white text-center">
+                    <h3><i class="fas fa-tag"></i> Create New Discount</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="CreateDiscount" method="post" id="discountForm">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Name" class="form-label">Discount Name *</label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter discount name" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Description" class="form-label">Description *</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"
+                                      placeholder="Enter discount description"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="DiscountPercentage" class="form-label">Discount Percentage *</label>
+                            <div class="input-group">
+                                <input asp-for="DiscountPercentage" type="number" class="form-control"
+                                       min="1" max="100" placeholder="10" />
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <span asp-validation-for="DiscountPercentage" class="text-danger"></span>
+                            <small class="form-text text-muted">Enter percentage between 1% and 100%</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="StartDate" class="form-label">Start Date *</label>
+                                    <input asp-for="StartDate" type="date" class="form-control" />
+                                    <span asp-validation-for="StartDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="EndDate" class="form-label">End Date *</label>
+                                    <input asp-for="EndDate" type="date" class="form-control" />
+                                    <span asp-validation-for="EndDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="CategoryId" class="form-label">Apply to Category</label>
+                            <select asp-for="CategoryId" class="form-select" asp-items="Model.Categories">
+                                <option value="0">All Categories (Apply to all products)</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                            <small class="form-text text-muted">Select a specific category or leave as "All Categories"</small>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input asp-for="IsAgeBased" class="form-check-input" id="isAgeBased" />
+                            <label asp-for="IsAgeBased" class="form-check-label">
+                                Age-Based Discount
+                            </label>
+                            <small class="form-text text-muted d-block">Apply discount based on customer age</small>
+                        </div>
+
+                        <div id="ageFields" class="row" style="display: none;">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="MinAge" class="form-label">Minimum Age</label>
+                                    <input asp-for="MinAge" type="number" class="form-control" min="1" max="100" />
+                                    <span asp-validation-for="MinAge" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="MaxAge" class="form-label">Maximum Age</label>
+                                    <input asp-for="MaxAge" type="number" class="form-control" min="1" max="100" />
+                                    <span asp-validation-for="MaxAge" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-plus-circle"></i> Create Discount
+                            </button>
+                            <a asp-action="Discounts" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            // إظهار/إخفاء حقول العمر
+            $('#isAgeBased').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#ageFields').slideDown();
+                } else {
+                    $('#ageFields').slideUp();
+                }
+            });
+
+            // التحقق من التاريخ
+            $('#discountForm').on('submit', function(e) {
+                const startDate = new Date($('#StartDate').val());
+                const endDate = new Date($('#EndDate').val());
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (startDate < today) {
+                    e.preventDefault();
+                    alert('Start date cannot be in the past');
+                    return false;
+                }
+
+                if (endDate <= startDate) {
+                    e.preventDefault();
+                    alert('End date must be after start date');
+                    return false;
+                }
+
+                // التحقق من العمر إذا كان الخصم معتمد على العمر
+                if ($('#isAgeBased').is(':checked')) {
+                    const minAge = parseInt($('#MinAge').val()) || 0;
+                    const maxAge = parseInt($('#MaxAge').val()) || 0;
+
+                    if (minAge > maxAge) {
+                        e.preventDefault();
+                        alert('Minimum age cannot be greater than maximum age');
+                        return false;
+                    }
+
+                    if (minAge < 1 || maxAge < 1) {
+                        e.preventDefault();
+                        alert('Age values must be at least 1');
+                        return false;
+                    }
+                }
+            });
+
+            // تعيين الحد الأدنى للتاريخ النهاية
+            $('#StartDate').change(function() {
+                const startDate = $(this).val();
+                $('#EndDate').attr('min', startDate);
+
+                // إذا كان تاريخ النهاية قبل تاريخ البدء، قم بتحديثه
+                const endDate = $('#EndDate').val();
+                if (endDate && endDate < startDate) {
+                    $('#EndDate').val(startDate);
+                }
+            });
+
+            // تعيين الحد الأدنى للتاريخ البدء (اليوم)
+            const today = new Date().toISOString().split('T')[0];
+            $('#StartDate').attr('min', today);
+            $('#EndDate').attr('min', today);
+        });
+    </script>
+}

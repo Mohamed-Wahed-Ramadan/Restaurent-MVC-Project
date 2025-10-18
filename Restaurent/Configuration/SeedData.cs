@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Restaurent.Models;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Restaurent.Configuration
 {
@@ -126,4 +128,35 @@ namespace Restaurent.Configuration
             builder.HasData(products);
         }
     }
+    
+        public class UserConfiguration : IEntityTypeConfiguration<User>
+        {
+            public void Configure(EntityTypeBuilder<User> builder)
+            {
+                // دالة لتشفير كلمة المرور
+                string HashPassword(string password)
+                {
+                    using var sha256 = SHA256.Create();
+                    var bytes = Encoding.UTF8.GetBytes(password);
+                    var hash = sha256.ComputeHash(bytes);
+                    return Convert.ToBase64String(hash);
+                }
+
+
+                builder.HasData(
+                    new User
+                    {
+                        Id = 1,
+                        Name = "Super Admin",
+                        Email = "medo03459@gmail.com",
+                        Password = HashPassword("I*L0ve*ME"),
+                        Phone = "+201123002663",
+                        Birthday = new DateTime(1999, 11, 19),
+                        IsAdmin = true,
+                        CreatedAt = new DateTime(2024, 1, 1)
+                    }
+                );
+            }
+        }
+    
 }

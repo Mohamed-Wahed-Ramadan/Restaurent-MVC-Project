@@ -1,5 +1,4 @@
-﻿
-@model Restaurent.ViewModels.MenuCreVw
+﻿@model Restaurent.ViewModels.MenuCreVw
 
 @{
     ViewData["Title"] = "Create Product";
@@ -11,12 +10,12 @@
 
     <div class="row">
         <div class="col-md-8">
-            <form asp-action="Create" method="post">
+            <form asp-action="Create" method="post" enctype="multipart/form-data" id="createForm">
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                 <div class="form-group mb-3">
                     <label asp-for="Name" class="control-label">Product Name *</label>
-                    <input asp-for="Name" class="form-control" placeholder="Enter product name" />
+                    <input asp-for="Name" class="form-control" placeholder="Enter product name" id="productName" />
                     <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
 
@@ -32,7 +31,7 @@
                         <div class="form-group mb-3">
                             <label asp-for="Price" class="control-label">Price (EGP) *</label>
                             <input asp-for="Price" class="form-control" type="number"
-                                   placeholder="0" min="1" />
+                                   placeholder="0" min="1" step="0.01" />
                             <span asp-validation-for="Price" class="text-danger"></span>
                         </div>
                     </div>
@@ -49,18 +48,25 @@
 
                 <div class="form-group mb-3">
                     <label asp-for="CategoryId" class="control-label">Category *</label>
-                    <select asp-for="CategoryId" class="form-select" asp-items="Model.Categories">
+                    <select asp-for="CategoryId" class="form-select" asp-items="Model.Categories" id="categorySelect">
                         <option value="">-- Select Category --</option>
                     </select>
                     <span asp-validation-for="CategoryId" class="text-danger"></span>
                 </div>
 
+                <!-- Image Upload Section - مثل Edit -->
                 <div class="form-group mb-3">
-                    <label asp-for="ImageUrl" class="control-label">Image URL</label>
-                    <input asp-for="ImageUrl" class="form-control"
-                           placeholder="product.png" id="imageUrlInput" />
-                    <span asp-validation-for="ImageUrl" class="text-danger"></span>
-                    <small class="form-text text-muted">Example: ./images/product.png</small>
+                    <label class="control-label">Product Image *</label>
+                    <div class="image-upload-wrapper">
+                        <input type="file" id="imageFile" name="imageFile" accept="image/*" class="d-none" />
+                        <button type="button" class="btn btn-outline-primary w-100" id="uploadBtn">
+                            <i class="fas fa-upload"></i> Choose Image from Device
+                        </button>
+                        <small class="form-text text-muted d-block mt-2">
+                            Supported formats: JPG, PNG, GIF (Max 5MB)
+                        </small>
+                    </div>
+                    <input type="hidden" asp-for="ImageUrl" />
                 </div>
 
                 <div class="row">
@@ -91,7 +97,7 @@
                 </div>
 
                 <div class="form-group mt-4">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
                         <i class="fas fa-save"></i> Create Product
                     </button>
                     <a asp-action="GetAll" class="btn btn-secondary">
@@ -106,9 +112,19 @@
                 <div class="card-header bg-primary text-white">
                     <i class="fas fa-image"></i> Image Preview
                 </div>
-                <div class="card-body text-center" id="imagePreview">
-                    <img src="/images/mov2.png" alt="Preview"
-                         class="img-fluid rounded" style="max-height: 250px;" />
+                <div class="card-body">
+                    <div id="imagePreview" class="mb-3 text-center position-relative">
+                        <div class="alert alert-secondary no-image-placeholder">
+                            <i class="fas fa-image fa-3x mb-2 d-block"></i>
+                            <p class="mb-0">No image selected</p>
+                        </div>
+                        <div id="loadingSpinner" class="spinner-overlay d-none">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <small class="text-muted d-block text-center">Preview will update automatically</small>
                 </div>
             </div>
 
@@ -121,9 +137,44 @@
                         <li>Fill all required fields (*)</li>
                         <li>Use clear product names</li>
                         <li>Max time should be ≥ Min time</li>
-                        <li>Image should be in /images folder</li>
+                        <li>Upload high quality images</li>
+                        <li>Image size max 5MB</li>
                     </ul>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Existing Product -->
+<div class="modal fade" id="existingProductModal" tabindex="-1" aria-labelledby="existingProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="existingProductModalLabel">
+                    <i class="fas fa-exclamation-triangle"></i> Product Already Exists
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>This product already exists but is currently deleted.</strong>
+                </div>
+
+                <div id="existingProductInfo" class="mb-3">
+                    <!-- Product info will be inserted here -->
+                </div>
+
+                <p class="mb-0">Would you like to edit and restore this existing product instead of creating a new one?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-success" id="editExistingBtn">
+                    <i class="fas fa-edit"></i> Yes, Edit Existing Product
+                </button>
             </div>
         </div>
     </div>
@@ -135,25 +186,297 @@
     }
 
     <script>
-        $('#imageUrlInput').on('input', function() {
-            var imageUrl = $(this).val() || '/images/mov2.png';
-            $('#imagePreview').html('<img src="' + imageUrl + '" alt="Preview" class="img-fluid rounded" style="max-height: 250px;" onerror="this.src=\'/images/default.png\'">');
-        });
+        // متغير لتخزين معلومات المنتج الموجود
+        let existingProductId = null;
+        let existingProductData = null;
 
-        $('#maxTimeInput').on('input', function() {
-            var minTime = parseInt($('#minTimeInput').val()) || 0;
-            var maxTime = parseInt($(this).val()) || 0;
+        $(document).ready(function() {
+            // Upload button click handler
+            $('#uploadBtn').on('click', function() {
+                $('#imageFile').click();
+            });
 
-            if (maxTime > 0 && maxTime < minTime) {
-                $(this).addClass('is-invalid');
-                if ($(this).next('.invalid-feedback').length === 0) {
-                    $(this).after('<div class="invalid-feedback d-block">Max time must be ≥ Min time</div>');
+            // File input change handler with instant preview
+            $('#imageFile').on('change', function(e) {
+                const file = e.target.files[0];
+
+                if (file) {
+                    // Validate file type
+                    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                    if (!validTypes.includes(file.type)) {
+                        alert('Please select a valid image file (JPG, PNG, or GIF)');
+                        $(this).val('');
+                        return;
+                    }
+
+                    // Validate file size (5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Image size must be less than 5MB');
+                        $(this).val('');
+                        return;
+                    }
+
+                    // Show loading spinner
+                    $('#loadingSpinner').removeClass('d-none');
+
+                    // Show instant preview using FileReader
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        // Update image preview immediately
+                        $('#imagePreview').html(
+                            '<img src="' + e.target.result + '" alt="Product Image" class="img-fluid rounded product-preview-img" id="previewImg" />' +
+                            '<div id="loadingSpinner" class="spinner-overlay d-none">' +
+                            '<div class="spinner-border text-primary" role="status">' +
+                            '<span class="sr-only">Loading...</span></div></div>'
+                        );
+
+                        // Hide loading spinner after image loads
+                        $('#previewImg').on('load', function() {
+                            setTimeout(function() {
+                                $('#loadingSpinner').addClass('d-none');
+                            }, 200);
+                        });
+                    };
+
+                    reader.onerror = function() {
+                        alert('Error reading file');
+                        $('#loadingSpinner').addClass('d-none');
+                    };
+
+                    reader.readAsDataURL(file);
+
+                    // Update button text
+                    const fileName = file.name.length > 30 ? file.name.substring(0, 30) + '...' : file.name;
+                    $('#uploadBtn').html('<i class="fas fa-check-circle"></i> ' + fileName);
+                    $('#uploadBtn').removeClass('btn-outline-primary').addClass('btn-success');
                 }
-            } else {
-                $(this).removeClass('is-invalid');
-                $(this).siblings('.invalid-feedback').remove();
-            }
+            });
+
+            // Validate Min/Max time
+            $('#maxTimeInput, #minTimeInput').on('input', function() {
+                var minTime = parseInt($('#minTimeInput').val()) || 0;
+                var maxTime = parseInt($('#maxTimeInput').val()) || 0;
+                var maxInput = $('#maxTimeInput');
+
+                if (maxTime > 0 && maxTime < minTime) {
+                    maxInput.addClass('is-invalid');
+                    if (maxInput.next('.invalid-feedback').length === 0) {
+                        maxInput.after('<div class="invalid-feedback">Max time must be ≥ Min time</div>');
+                    }
+                } else {
+                    maxInput.removeClass('is-invalid');
+                    maxInput.next('.invalid-feedback').remove();
+                }
+            });
+
+            // Check for duplicate product name
+            let typingTimer;
+            const doneTypingInterval = 800;
+
+            $('#productName').on('keyup', function() {
+                clearTimeout(typingTimer);
+                const name = $(this).val().trim();
+
+                if (name.length > 2) {
+                    typingTimer = setTimeout(function() {
+                        checkExistingProduct(name);
+                    }, doneTypingInterval);
+                }
+            });
+
+            // Edit existing product button
+            $('#editExistingBtn').on('click', function() {
+                if (existingProductId) {
+                    window.location.href = '@Url.Action("Edit", "MenuProduct")/' + existingProductId;
+                }
+            });
+
+            // Form submit validation
+            $('#createForm').on('submit', function(e) {
+                // Check if image is selected
+                const imageFile = $('#imageFile').val();
+                if (!imageFile) {
+                    e.preventDefault();
+                    alert('Please select a product image');
+                    $('#uploadBtn').addClass('btn-danger').removeClass('btn-outline-primary');
+                    return false;
+                }
+
+                // Check if product exists
+                if (existingProductId) {
+                    e.preventDefault();
+                    $('#existingProductModal').modal('show');
+                    return false;
+                }
+
+                // Validate times
+                const minTime = parseInt($('#minTimeInput').val()) || 0;
+                const maxTime = parseInt($('#maxTimeInput').val()) || 0;
+                if (maxTime > 0 && maxTime < minTime) {
+                    e.preventDefault();
+                    alert('Max time must be greater than or equal to Min time');
+                    return false;
+                }
+            });
         });
+
+        async function checkExistingProduct(name) {
+            try {
+                const response = await fetch('@Url.Action("CheckExistingProduct", "MenuProduct")?name=' + encodeURIComponent(name));
+                const data = await response.json();
+
+                if (data.exists) {
+                    if (data.isDeleted) {
+                        // المنتج موجود لكن محذوف
+                        existingProductId = data.product.id;
+                        existingProductData = data.product;
+                        showExistingProductWarning(data.product);
+                    } else {
+                        // المنتج موجود وفعال
+                        existingProductId = null;
+                        showActiveProductError(data.product);
+                    }
+                } else {
+                    existingProductId = null;
+                    existingProductData = null;
+                    clearProductWarnings();
+                }
+            } catch (error) {
+                console.error('Error checking existing product:', error);
+            }
+        }
+
+        function showExistingProductWarning(product) {
+            $('#productName').addClass('border-warning');
+
+            // Fill modal with product info
+            $('#existingProductInfo').html(`
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-4">
+                                <img src="${product.imageUrl || '/images/default-product.png'}"
+                                     alt="${product.name}" class="img-fluid rounded">
+                            </div>
+                            <div class="col-8">
+                                <h6 class="mb-1">${product.name}</h6>
+                                <p class="mb-1"><strong>Price:</strong> ${product.price} EGP</p>
+                                <p class="mb-1"><strong>Category:</strong> ${product.category || 'N/A'}</p>
+                                <p class="mb-0">
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-trash"></i> Deleted
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+        }
+
+        function showActiveProductError(product) {
+            $('#productName').addClass('is-invalid');
+            if ($('#productName').siblings('.text-danger.duplicate-error').length === 0) {
+                $('#productName').siblings('.text-danger').after(
+                    '<span class="text-danger duplicate-error d-block mt-1">' +
+                    '<i class="fas fa-exclamation-circle"></i> This product already exists and is active!' +
+                    '</span>'
+                );
+            }
+        }
+
+        function clearProductWarnings() {
+            $('#productName').removeClass('border-warning is-invalid');
+            $('.duplicate-error').remove();
+        }
     </script>
 }
 
+<style>
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .card {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border: none;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+    }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+    .product-preview-img {
+        max-height: 300px;
+        width: 100%;
+        object-fit: contain;
+        border: 2px solid #e0e0e0;
+        transition: transform 0.3s ease;
+        background: #f8f9fa;
+        padding: 10px;
+    }
+
+        .product-preview-img:hover {
+            transform: scale(1.02);
+            border-color: #007bff;
+        }
+
+    .image-upload-wrapper {
+        margin-bottom: 10px;
+    }
+
+    #imagePreview {
+        min-height: 250px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+    }
+
+    .no-image-placeholder {
+        margin: 0;
+        background: #e9ecef;
+        border: 2px dashed #adb5bd;
+    }
+
+    .spinner-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        z-index: 10;
+    }
+
+    .border-warning {
+        border-color: #ffc107 !important;
+        box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25) !important;
+    }
+
+    .modal-content {
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .modal-header.bg-warning {
+        border-bottom: 2px solid #f0ad4e;
+    }
+
+    /* Smooth transitions */
+    * {
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+</style>

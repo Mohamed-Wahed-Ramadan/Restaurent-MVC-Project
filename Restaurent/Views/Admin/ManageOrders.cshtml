@@ -1,0 +1,298 @@
+﻿@model List<Restaurent.Models.Order>
+
+@{
+    ViewData["Title"] = "Manage Orders";
+}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-clipboard-list"></i> Manage Orders</h2>
+        <div>
+            <a asp-action="Dashboard" class="btn btn-secondary">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <button class="btn btn-warning" onclick="cleanupOldOrders()">
+                <i class="fas fa-broom"></i> Cleanup Old Orders
+            </button>
+        </div>
+    </div>
+
+    <!-- إحصائيات سريعة -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body text-center">
+                    <h4>@Model.Count</h4>
+                    <small>Total Orders</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body text-center">
+                    <h4>@Model.Count(o => o.Status == "Pending")</h4>
+                    <small>Pending</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-info">
+                <div class="card-body text-center">
+                    <h4>@Model.Count(o => o.Status == "Preparing")</h4>
+                    <small>Preparing</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-white bg-success">
+                <div class="card-body text-center">
+                    <h4>@Model.Count(o => o.Status == "Completed")</h4>
+                    <small>Completed</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            <i class="fas fa-clipboard-list fa-3x mb-3"></i>
+            <h4>No orders yet</h4>
+            <p class="mb-0">There are no orders to manage at the moment.</p>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-list"></i> All Orders</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover" id="ordersTable">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Type</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                <tr id="order-@order.Id">
+                                    <td>
+                                        <strong>@order.UniqueOrderId</strong>
+                                    </td>
+                                    <td>
+                                        @order.User?.Name<br>
+                                        <small class="text-muted">@order.User?.Email</small>
+                                    </td>
+                                    <td>
+                                        @order.CreatedAt.ToString("MMM dd, yyyy")<br>
+                                        <small class="text-muted">@order.CreatedAt.ToString("hh:mm tt")</small>
+                                    </td>
+                                    <td>
+                                        @order.OrderItems.Count items<br>
+                                        <small class="text-muted">
+                                            @string.Join(", ", order.OrderItems.Take(2).Select(oi => oi.MenuProduct.Name))
+                                            @if (order.OrderItems.Count > 2)
+                                            {
+                                                <text>... and @(order.OrderItems.Count - 2) more</text>
+                                            }
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <strong class="text-success">@order.Total.ToString("C2")</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-@(order.OrderType == "Delivery" ? "info" : "primary")">
+                                            @order.OrderType
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small>@order.Location</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-@GetStatusBadgeClass(order.Status)" id="status-@order.Id">
+                                            @order.Status
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="viewOrderDetails(@order.Id)"
+                                                    title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <div class="dropdown">
+                                                <button class="btn btn-outline-secondary dropdown-toggle"
+                                                        type="button" data-bs-toggle="dropdown"
+                                                        aria-expanded="false" title="Change Status">
+                                                    <i class="fas fa-cog"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Pending')">Pending</a></li>
+                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Preparing')">Preparing</a></li>
+                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Ready')">Ready</a></li>
+                                                    <li><a class="dropdown-item" href="#" onclick="updateOrderStatus(@order.Id, 'Completed')">Completed</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="#" onclick="updateOrderStatus(@order.Id, 'Cancelled')">Cancel</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal لعرض تفاصيل الطلب -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Order Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="orderDetailsContent">
+                <!-- سيتم تحميل المحتوى هنا عبر AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateOrderStatus(orderId, newStatus) {
+            if (!confirm(`Are you sure you want to change order status to "${newStatus}"?`)) {
+                return;
+            }
+
+            $.post('@Url.Action("UpdateOrderStatus", "Admin")', {
+                orderId: orderId,
+                status: newStatus
+            }, function(response) {
+                if (response.success) {
+                    // تحديث واجهة المستخدم
+                    const statusBadge = $(`#status-${orderId}`);
+                    statusBadge.removeClass('bg-warning bg-info bg-primary bg-success bg-danger');
+                    statusBadge.addClass(getStatusBadgeClass(newStatus));
+                    statusBadge.text(newStatus);
+
+                    showAlert('success', response.message);
+                } else {
+                    showAlert('error', response.message);
+                }
+            }).fail(function() {
+                showAlert('error', 'An error occurred while updating order status');
+            });
+        }
+
+        function viewOrderDetails(orderId) {
+            // هنا يمكنك إضافة AJAX لتحميل تفاصيل الطلب
+            // للمثال، سنعرض رسالة بسيطة
+            $('#orderDetailsContent').html(`
+                <div class="text-center py-4">
+                    <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                    <p>Loading order details...</p>
+                </div>
+            `);
+            $('#orderDetailsModal').modal('show');
+
+            // محاكاة تحميل البيانات
+            setTimeout(() => {
+                $('#orderDetailsContent').html(`
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Order details feature will be implemented here.
+                        <br><br>
+                        <strong>Order ID:</strong> ${orderId}
+                    </div>
+                `);
+            }, 1000);
+        }
+
+        function cleanupOldOrders() {
+            if (confirm('Are you sure you want to cleanup old orders? This action cannot be undone.')) {
+                window.location.href = '@Url.Action("CleanupOldOrders", "Admin")';
+            }
+        }
+
+        function getStatusBadgeClass(status) {
+            switch (status.toLowerCase()) {
+                case 'pending': return 'bg-warning';
+                case 'preparing': return 'bg-info';
+                case 'ready': return 'bg-primary';
+                case 'completed': return 'bg-success';
+                case 'cancelled': return 'bg-danger';
+                default: return 'bg-secondary';
+            }
+        }
+
+        function showAlert(type, message) {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+
+            $('.container-fluid').prepend(alertHtml);
+
+            setTimeout(() => {
+                $('.alert').alert('close');
+            }, 5000);
+        }
+
+        // البحث في الجدول
+        $(document).ready(function() {
+            $('#ordersTable').DataTable({
+                pageLength: 10,
+                order: [[2, 'desc']] // الترتيب حسب التاريخ
+            });
+        });
+    </script>
+
+    <style>
+        .table th {
+            border-top: none;
+            font-weight: 600;
+        }
+
+        .badge {
+            font-size: 0.8rem;
+        }
+
+        .btn-group-sm .btn {
+            padding: 0.25rem 0.5rem;
+        }
+    </style>
+}
+
+@functions {
+    public string GetStatusBadgeClass(string status)
+    {
+        return status.ToLower() switch
+        {
+            "pending" => "bg-warning",
+            "preparing" => "bg-info",
+            "ready" => "bg-primary",
+            "completed" => "bg-success",
+            "cancelled" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}
