@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace Restaurent.Migrations
+namespace Context.Migrations
 {
     /// <inheritdoc />
     public partial class intial : Migration
@@ -290,7 +290,7 @@ namespace Restaurent.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "Birthday", "CreatedAt", "Email", "ImageURL", "IsAdmin", "Name", "Password", "Phone", "UpdatedAt" },
-                values: new object[] { 1, new DateTime(1999, 11, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "medo03459@gmail.com", null, true, "Super Admin", "lJ7iCFYpe8cIOr/VsJ6qi4fISYD36nE1zzwyfws262g=", "+201123002663", null });
+                values: new object[] { 1, new DateTime(1999, 11, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "medo03459@gmail.com", null, true, "Super Admin", "VNXLLTMtvbSFApPKrkVZzoi2UWPx6l1OSzrEnXct7RQ=", "+201123002663", null });
 
             migrationBuilder.InsertData(
                 table: "MenuProducts",

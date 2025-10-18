@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Restaurent.Configuration;
-using Restaurent.Models;
+using Models;
+using Context.Configuration;
 
-namespace Restaurent.Context
+//namespace Restaurent.Context
+namespace Context
 {
     public class AppDpContext : DbContext
     {

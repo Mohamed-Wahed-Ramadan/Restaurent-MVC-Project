@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Restaurent.Models
+//namespace Restaurent.Models
+namespace Models
 {
     public class User
     {
@@ -31,7 +32,6 @@ namespace Restaurent.Models
         [DataType(DataType.Date)]
         public DateTime Birthday { get; set; }
 
-        // Computed Property - لا يُخزن في قاعدة البيانات
         [NotMapped]
         public int Age
         {
@@ -39,19 +39,18 @@ namespace Restaurent.Models
             {
                 var today = DateTime.Today;
                 var age = today.Year - Birthday.Year;
-
-                // تحقق إذا لم يصل عيد ميلاده هذا العام
-                if (Birthday.Date > today.AddYears(-age))
-                {
-                    age--;
-                }
-
+                if (Birthday.Date > today.AddYears(-age)) age--;
                 return age;
             }
         }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
         public DateTime? UpdatedAt { get; set; }
+
+        public string? ImageURL { get; set; }
+
+        public List<Order> Orders { get; set; } = new List<Order>();
+        public List<Cart> CartItems { get; set; } = new List<Cart>();
+        public List<Favorite> Favorites { get; set; } = new List<Favorite>();
     }
 }

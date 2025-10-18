@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Restaurent.Models
+//namespace Restaurent.Models
+namespace Models
 {
     public class MenuProduct :BaseModel
     {
@@ -26,6 +27,8 @@ namespace Restaurent.Models
         [Required]
         [ForeignKey("Category")]
         public int CategoryId { get; set; }
-        public Category Category { get; set; }
+        public Category? Category { get; set; }
+        public Cart? Cart { get; set; }
+        public OrderCart? OrderCart { get; set; }
     }
 }

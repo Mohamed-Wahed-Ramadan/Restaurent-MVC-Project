@@ -1,5 +1,5 @@
-﻿@using Restaurent.Context
-@model IEnumerable<Restaurent.Models.MenuProduct>
+﻿@using Context
+@model IEnumerable<Models.MenuProduct>
 
 @{
     ViewData["Title"] = "Our Menu";
@@ -13,16 +13,68 @@
 }
 
 <div class="container-fluid px-3 px-md-5 mt-4">
+    <!-- Photo Gallery Section - Optimized -->
+    @* <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-lg overflow-hidden">
+                <div class="card-body p-0">
+                    <div class="photo-gallery-container">
+                        <div class="photo-gallery-track" id="galleryTrack">
+                            <!-- Images will be loaded by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> *@
+    <div id="carouselExample" class="carousel slide mb-3">
+        <div class="carousel-inner">
+            <div class="carousel-item active" style="width:100% ; height:500px;">
+                <img src="/images/res1.jpg" class="d-block w-100" style="width:100% ; height:100%; alt="Restaurant Image 1">
+            </div>
+            <div class="carousel-item " style="width:100% ; height:500px;">
+                <img src="/images/res7.jpg" class="d-block w-100" style="width:100% ; height:100%; alt="Restaurant Image 1">
+            </div>
+            <div class="carousel-item " style="width:100% ; height:500px;">
+                <img src="/images/res2.jpg" class="d-block w-100" style="width:100% ; height:100%; alt="Restaurant Image 1">
+            </div>
+            <div class="carousel-item " style="width:100% ; height:500px;">
+                <img src="/images/res3.jpg" class="d-block w-100" style="width:100% ; height:100%; alt="Restaurant Image 1">
+            </div>
+            <div class="carousel-item " style="width:100% ; height:500px;">
+                <img src="/images/res4.jpg" class="d-block w-100" style="width:100% ; height:100%; alt="Restaurant Image 1">
+            </div>
+            <div class="carousel-item " style="width:100% ; height:500px;">
+                <img src="/images/res5.jpg" class="d-block w-100" style="width:100% ; height:100%; alt="Restaurant Image 1">
+            </div>
+            <div class="carousel-item " style="width:100% ; height:500px;">
+                <img src="/images/res6.jpg" class="d-block w-100" style="width:100% ; height:100%; alt="Restaurant Image 1">
+            </div>
+
+
+            @* <div class="carousel-item">
+            <img src="..." class="d-block w-100" alt="...">
+        </div> *@
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
     <!-- Active Discounts Banner - Always Visible -->
     <div class="row mb-4">
         <div class="col-12">
-            @if (ViewBag.ActiveDiscounts != null && ((List<Restaurent.Models.Discount>)ViewBag.ActiveDiscounts).Any())
+            @if (ViewBag.ActiveDiscounts != null && ((List<Models.Discount>)ViewBag.ActiveDiscounts).Any())
             {
                 <!-- Discounts Carousel -->
                 <div id="discountsCarousel" class="carousel slide bg-gradient shadow-sm rounded" data-bs-ride="carousel" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                     <div class="carousel-inner py-3">
                         @{
-                            var discounts = (List<Restaurent.Models.Discount>)ViewBag.ActiveDiscounts;
+                            var discounts = (List<Models.Discount>)ViewBag.ActiveDiscounts;
                             for (int i = 0; i < discounts.Count; i++)
                             {
                                 var discount = discounts[i];
@@ -317,6 +369,88 @@
 
 @section Scripts {
     <style>
+        /* Photo Gallery Styles - Optimized */
+        .photo-gallery-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .photo-gallery-track {
+            display: flex;
+            gap: 15px;
+            animation: scrollGallery 30s linear infinite;
+            will-change: transform;
+        }
+
+        .photo-item {
+            flex: 0 0 auto;
+            width: 200px;
+            height: 150px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            background: white;
+            position: relative;
+        }
+
+            .photo-item:hover {
+                transform: scale(1.05);
+                animation-play-state: paused;
+            }
+
+        .gallery-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .photo-item:hover .gallery-image {
+            transform: scale(1.1);
+        }
+
+        /* Infinite scroll animation */
+        @@keyframes scrollGallery {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(calc(-200px * 10 - 15px * 10));
+            }
+        }
+
+        /* Pause animation on hover */
+        .photo-gallery-container:hover .photo-gallery-track {
+            animation-play-state: paused;
+        }
+
+        /* Responsive adjustments for photo gallery */
+        @@media (max-width: 768px) {
+            .photo-item {
+                width: 150px;
+                height: 120px;
+            }
+
+            .photo-gallery-container {
+                padding: 15px;
+            }
+
+            @@keyframes scrollGallery {
+                0% {
+                    transform: translateX(0);
+                }
+
+                100% {
+                    transform: translateX(calc(-150px * 10 - 15px * 10));
+                }
+            }
+        }
+
         /* Discount Carousel Styles */
         #discountsCarousel {
             border: 3px solid rgba(255, 255, 255, 0.2);
@@ -396,17 +530,17 @@
 
         /* Favorite Button - Inactive State (Gray) */
         .favorite-inactive i {
-            color: #6c757d !important; /* Gray color */
+            color: #6c757d !important;
             transition: color 0.3s ease;
         }
 
         .favorite-inactive:hover i {
-            color: #dc3545 !important; /* Red color on hover */
+            color: #dc3545 !important;
         }
 
         /* Favorite Button - Active State (Red) */
         .favorite-active i {
-            color: #dc3545 !important; /* Red color */
+            color: #dc3545 !important;
             animation: heartBeat 0.3s ease;
         }
 
@@ -466,31 +600,13 @@
         .bg-gradient-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-
-        /* Responsive adjustments */
-        @@media (max-width: 768px) {
-            .discount-badge-large {
-                margin-bottom: 15px;
-            }
-
-            #discountsCarousel .row {
-                text-align: center;
-            }
-
-            .carousel-indicators {
-                bottom: -25px;
-            }
-
-            .discount-badge {
-                font-size: 0.65rem;
-                padding: 3px 10px;
-            }
-        }
     </style>
 
     <script>
-        // Auto-slide carousel every 5 seconds
+        // Optimized Photo Gallery with Lazy Loading
         $(document).ready(function() {
+            //initializePhotoGallery();
+
             // Initialize carousel if it exists
             if ($('#discountsCarousel').length) {
                 var carousel = new bootstrap.Carousel(document.getElementById('discountsCarousel'), {
@@ -506,6 +622,39 @@
                 checkFavoriteStatus(productId, $(this));
             });
         });
+
+        // Initialize optimized photo gallery
+        // function initializePhotoGallery() {
+        //     const galleryTrack = document.getElementById('galleryTrack');
+        //     const imageCount = 10;
+        //     const images = [];
+
+        //     Create image elements with lazy loading
+        //     for (let i = 1; i <= imageCount; i++) {
+        //         const photoItem = document.createElement('div');
+        //         photoItem.className = 'photo-item';
+
+        //         const img = document.createElement('img');
+        //         img.className = 'gallery-image';
+        //         img.alt = `Restaurant Photo ${i}`;
+        //         img.loading = 'lazy'; Lazy loading for better performance
+        //         img.src = `/images/res${i}.jpg`;
+        //         img.onerror = function() {
+        //             this.src = '/images/placeholder.png';
+        //         };
+
+        //         photoItem.appendChild(img);
+        //         images.push(photoItem);
+        //     }
+
+        //     Duplicate images for seamless infinite scroll
+        //     const duplicatedImages = [...images, ...images];
+
+        //     Append all images to the track
+        //     duplicatedImages.forEach(item => {
+        //         galleryTrack.appendChild(item.cloneNode(true));
+        //     });
+        // }
 
         // Check if product is in favorites
         function checkFavoriteStatus(productId, button) {
@@ -614,7 +763,7 @@
     }
 
     // Check if product has active discount
-    public bool HasDiscount(MenuProduct product)
+    public bool HasDiscount(Models.MenuProduct product)
     {
         using var context = new AppDpContext();
         var now = DateTime.UtcNow;

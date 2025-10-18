@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Restaurent.Models;
+using Models;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Restaurent.Configuration
+//namespace Restaurent.Configuration
+namespace Context.Configuration
 {
     public class CategoryConfiguration : IEntityTypeConfiguration<Category>
     {
@@ -149,7 +150,7 @@ namespace Restaurent.Configuration
                         Id = 1,
                         Name = "Super Admin",
                         Email = "medo03459@gmail.com",
-                        Password = HashPassword("I*L0ve*ME"),
+                        Password = HashPassword("asd123"),
                         Phone = "+201123002663",
                         Birthday = new DateTime(1999, 11, 19),
                         IsAdmin = true,

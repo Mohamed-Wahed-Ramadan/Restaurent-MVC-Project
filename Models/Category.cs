@@ -1,7 +1,8 @@
 ﻿//using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel.DataAnnotations;
 
-namespace Restaurent.Models
+//namespace Restaurent.Models
+namespace Models
 {
     public class Category 
     {

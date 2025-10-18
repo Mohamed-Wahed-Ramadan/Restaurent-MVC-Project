@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Restaurent.Context;
+using Context;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Restaurent.Models
+//namespace Restaurent.Models
+namespace Models
 {
     public class Discount
     {

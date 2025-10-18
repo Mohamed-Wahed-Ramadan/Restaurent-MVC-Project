@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Restaurent.Context;
-using Restaurent.Models;
+using Context;
+using Models;
 using Restaurent.ViewModels;
 
 namespace Restaurent.Controllers
