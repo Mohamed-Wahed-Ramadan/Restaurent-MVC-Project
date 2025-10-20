@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Context;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Context;
 using Models;
 
 namespace Restaurent.Controllers
@@ -8,16 +9,23 @@ namespace Restaurent.Controllers
     public class CategoryController : Controller
     {
         private readonly AppDpContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public CategoryController()
+        public CategoryController(AppDpContext context, UserManager<User> userManager)
         {
-            _context = new AppDpContext();
+            _context = context;
+            _userManager = userManager;
         }
 
-        // GET: Category
-        // GET: Category
         public async Task<IActionResult> Index()
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null || !currentUser.IsAdmin)
+            {
+                TempData["ErrorMessage"] = "Access denied. Admin only.";
+                return RedirectToAction("GetAll", "MenuProduct");
+            }
+
             var categories = await _context.Categories
                 .Where(c => !c.IsDeleted)
                 .OrderByDescending(c => c.CreatedAt)
@@ -25,26 +33,36 @@ namespace Restaurent.Controllers
             return View(categories);
         }
 
-        // GET: Category/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null || !currentUser.IsAdmin)
+            {
+                TempData["ErrorMessage"] = "Access denied. Admin only.";
+                return RedirectToAction("GetAll", "MenuProduct");
+            }
+
             return View();
         }
 
-        // POST: Category/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Category category)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null || !currentUser.IsAdmin)
+            {
+                TempData["ErrorMessage"] = "Access denied. Admin only.";
+                return RedirectToAction("GetAll", "MenuProduct");
+            }
+
             try
             {
-                // تنظيف الاسم
                 if (!string.IsNullOrEmpty(category.Name))
                 {
                     category.Name = category.Name.Trim();
                 }
 
-                // التحقق من الصحة
                 if (string.IsNullOrWhiteSpace(category.Name))
                 {
                     ModelState.AddModelError("Name", "Category name is required");
@@ -63,7 +81,6 @@ namespace Restaurent.Controllers
                     return View(category);
                 }
 
-                // التحقق من التكرار
                 var existingCategory = await _context.Categories
                     .FirstOrDefaultAsync(c => c.Name.ToLower() == category.Name.ToLower() && !c.IsDeleted);
 
@@ -73,11 +90,9 @@ namespace Restaurent.Controllers
                     return View(category);
                 }
 
-                // إعداد البيانات
                 category.CreatedAt = DateTime.UtcNow;
                 category.IsDeleted = false;
 
-                // الحفظ
                 _context.Categories.Add(category);
                 await _context.SaveChangesAsync();
 
@@ -91,14 +106,19 @@ namespace Restaurent.Controllers
             }
         }
 
-
-        // GET: Category/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 TempData["ErrorMessage"] = "Category ID is required";
                 return RedirectToAction(nameof(Index));
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null || !currentUser.IsAdmin)
+            {
+                TempData["ErrorMessage"] = "Access denied. Admin only.";
+                return RedirectToAction("GetAll", "MenuProduct");
             }
 
             var category = await _context.Categories.FindAsync(id);
@@ -112,7 +132,6 @@ namespace Restaurent.Controllers
             return View(category);
         }
 
-        // POST: Category/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Category category)
@@ -123,15 +142,20 @@ namespace Restaurent.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null || !currentUser.IsAdmin)
+            {
+                TempData["ErrorMessage"] = "Access denied. Admin only.";
+                return RedirectToAction("GetAll", "MenuProduct");
+            }
+
             try
             {
-                // تنظيف الاسم
                 if (!string.IsNullOrEmpty(category.Name))
                 {
                     category.Name = category.Name.Trim();
                 }
 
-                // التحقق من الصحة
                 if (string.IsNullOrWhiteSpace(category.Name))
                 {
                     ModelState.AddModelError("Name", "Category name is required");
@@ -150,7 +174,6 @@ namespace Restaurent.Controllers
                     return View(category);
                 }
 
-                // التحقق من التكرار
                 var existingCategory = await _context.Categories
                     .FirstOrDefaultAsync(c => c.Name.ToLower() == category.Name.ToLower()
                                            && c.Id != id
@@ -162,7 +185,6 @@ namespace Restaurent.Controllers
                     return View(category);
                 }
 
-                // الحصول على الفئة الحالية
                 var categoryToUpdate = await _context.Categories.FindAsync(id);
 
                 if (categoryToUpdate == null || categoryToUpdate.IsDeleted)
@@ -171,10 +193,8 @@ namespace Restaurent.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // تحديث البيانات
                 categoryToUpdate.Name = category.Name;
                 categoryToUpdate.UpdateAt = DateTime.UtcNow;
-                // categoryToUpdate.IsUpdateBy = userId; // إذا كان لديك نظام مستخدمين
 
                 _context.Categories.Update(categoryToUpdate);
                 await _context.SaveChangesAsync();
@@ -205,11 +225,18 @@ namespace Restaurent.Controllers
         {
             return await _context.Categories.AnyAsync(e => e.Id == id && !e.IsDeleted);
         }
-        // POST: Category/Delete/5
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null || !currentUser.IsAdmin)
+            {
+                TempData["ErrorMessage"] = "Access denied. Admin only.";
+                return RedirectToAction("GetAll", "MenuProduct");
+            }
+
             try
             {
                 var category = await _context.Categories.FindAsync(id);
@@ -220,7 +247,6 @@ namespace Restaurent.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // التحقق من وجود منتجات مرتبطة بهذه الفئة
                 var hasProducts = await _context.MenuProducts
                     .AnyAsync(p => p.CategoryId == id && !p.IsDeleted);
 
@@ -230,13 +256,9 @@ namespace Restaurent.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // استخدام Soft Delete بدلاً من الحذف الفعلي
                 category.IsDeleted = true;
-                category.IsDeletedBy = 1; // يمكنك تغيير هذا ليكون ID المستخدم الحالي
+                category.UpdateAt = DateTime.UtcNow;
                 _context.Categories.Update(category);
-
-                // إذا كنت تريد حذف فعلي استخدم:
-                // _context.Categories.Remove(category);
 
                 await _context.SaveChangesAsync();
 
@@ -249,18 +271,18 @@ namespace Restaurent.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-        // API: للحصول على أسماء الفئات (للتحقق من التكرار)
+
         [HttpGet]
         public async Task<JsonResult> GetCategoryNames()
         {
             var categoryNames = await _context.Categories
+                .Where(c => !c.IsDeleted)
                 .Select(c => c.Name)
                 .ToListAsync();
 
             return Json(categoryNames);
         }
 
-        // API: للتحقق من وجود فئة معينة
         [HttpGet]
         public async Task<JsonResult> CheckCategoryExists(string name, int? id = null)
         {
@@ -270,7 +292,7 @@ namespace Restaurent.Controllers
             }
 
             var query = _context.Categories
-                .Where(c => c.Name.ToLower() == name.ToLower());
+                .Where(c => c.Name.ToLower() == name.ToLower() && !c.IsDeleted);
 
             if (id.HasValue)
             {
@@ -282,7 +304,21 @@ namespace Restaurent.Controllers
             return Json(new { exists = exists });
         }
 
-        // Helper method
-        
+        [HttpGet]
+        public async Task<JsonResult> GetCategoryProducts(int id)
+        {
+            var products = await _context.MenuProducts
+                .Where(p => p.CategoryId == id && !p.IsDeleted)
+                .Select(p => new
+                {
+                    id = p.Id,
+                    name = p.Name,
+                    price = p.Price,
+                    imageUrl = p.ImageUrl
+                })
+                .ToListAsync();
+
+            return Json(new { success = true, products = products });
+        }
     }
 }

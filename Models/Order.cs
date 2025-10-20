@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-//namespace Restaurent.Models
 namespace Models
 {
     public class Order
@@ -9,36 +8,33 @@ namespace Models
         [Key]
         public int Id { get; set; }
 
+        [Required]
         [ForeignKey("User")]
-        public int UserId { get; set; }
-        public User User { get; set; }
+        public string UserId { get; set; } // تغيير إلى string
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        [Required]
         public decimal Total { get; set; }
 
         [Required]
-        public string Status { get; set; } = "Pending"; // Pending, Preparing, Ready, Completed, Cancelled
+        public string Status { get; set; } = "Pending";
 
         public int TimePreparing { get; set; }
 
         [Required]
-        public string Location { get; set; }
+        public string OrderType { get; set; } // Delivery, DineIn, Takeaway
+
+        public string? Location { get; set; }
+        public int? TableNumber { get; set; }
+        public string? DeliveryAddress { get; set; }
 
         [Required]
-        public string OrderType { get; set; } // "DineIn" or "Delivery"
+        public string UniqueOrderId { get; set; }
 
-        public string? TableNumber { get; set; } // For dine-in orders
-        public string? DeliveryAddress { get; set; } // For delivery orders
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; }
 
-        [Required]
-        public string UniqueOrderId { get; set; } = GenerateUniqueOrderId();
-
-        public List<OrderItem>? OrderItems { get; set; } = new List<OrderItem>();
-
-        // تأكد أن الدالة static
-        public static string GenerateUniqueOrderId()
-        {
-            return $"ORD-{DateTime.Now:yyyyMMddHHmmss}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
-        }
+        // Navigation properties
+        public User User { get; set; }
+        public List<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }

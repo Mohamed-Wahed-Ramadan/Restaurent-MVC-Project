@@ -21,8 +21,8 @@
                         <div class="text-center mb-4">
                             @if (!string.IsNullOrEmpty(Model.ImageURL))
                             {
-                                <img src="@Model.ImageURL" alt="Profile Image" 
-                                     class="img-thumbnail rounded-circle mb-3" 
+                                <img src="@Model.ImageURL" alt="Profile Image"
+                                     class="img-thumbnail rounded-circle mb-3"
                                      style="width: 150px; height: 150px; object-fit: cover;"
                                      onerror="this.src='/images/default-user.png'">
                             }
@@ -33,13 +33,13 @@
                                     <i class="fas fa-user fa-3x text-white"></i>
                                 </div>
                             }
-                            <h5>@Model.Name</h5>
+                            <h5>@Model.UserName</h5>
                         </div>
 
                         <div class="form-group mb-3">
-                            <label asp-for="Name" class="form-label">Full Name *</label>
-                            <input asp-for="Name" class="form-control" />
-                            <span asp-validation-for="Name" class="text-danger"></span>
+                            <label asp-for="UserName" class="form-label">Username *</label>
+                            <input asp-for="UserName" class="form-control" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
                         </div>
 
                         <div class="form-group mb-3">
@@ -49,16 +49,17 @@
                         </div>
 
                         <div class="form-group mb-3">
-                            <label asp-for="Password" class="form-label">Password</label>
-                            <input asp-for="Password" type="password" class="form-control" placeholder="Enter new password" />
-                            <span asp-validation-for="Password" class="text-danger"></span>
+                            <label class="form-label">New Password</label>
+                            <input name="newPassword" type="password" class="form-control" placeholder="Enter new password" />
                             <small class="text-muted">Leave blank to keep current password</small>
+                            <!-- تم إزالة asp-validation-for لأن newPassword ليس في الـ Model -->
+                            <span class="text-danger" id="passwordValidation"></span>
                         </div>
 
                         <div class="form-group mb-3">
-                            <label asp-for="Phone" class="form-label">Phone</label>
-                            <input asp-for="Phone" type="tel" class="form-control" />
-                            <span asp-validation-for="Phone" class="text-danger"></span>
+                            <label asp-for="PhoneNumber" class="form-label">Phone</label>
+                            <input asp-for="PhoneNumber" type="tel" class="form-control" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                         </div>
 
                         <div class="form-group mb-3">
@@ -74,7 +75,21 @@
                             <small class="text-muted">Choose a new profile picture (optional)</small>
                         </div>
 
-                        @if (Context.Session.GetString("UserEmail") == "medo03459@gmail.com")
+                        @{
+                            var userSessionJson = Context.Session.GetString("CurrentUser");
+                            var isSuperAdmin = false;
+                            if (!string.IsNullOrEmpty(userSessionJson))
+                            {
+                                try
+                                {
+                                    var userSession = System.Text.Json.JsonSerializer.Deserialize<dynamic>(userSessionJson);
+                                    isSuperAdmin = userSession.GetProperty("Email").GetString() == "medo03459@gmail.com";
+                                }
+                                catch { }
+                            }
+                        }
+
+                        @if (isSuperAdmin)
                         {
                             <div class="form-check mb-3">
                                 <input asp-for="IsAdmin" class="form-check-input" />
@@ -92,7 +107,7 @@
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="fas fa-save"></i> Save Changes
                             </button>
-                            <a asp-action="Details" class="btn btn-secondary btn-lg">
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary btn-lg">
                                 <i class="fas fa-times"></i> Cancel
                             </a>
                         </div>
@@ -107,10 +122,10 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    
+
     <script>
         // معاينة الصورة قبل الرفع
-        document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+        document.querySelector('input[type="file"]')?.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
@@ -118,8 +133,8 @@
                     const img = document.querySelector('.img-thumbnail') || document.querySelector('.profile-placeholder');
                     if (img) {
                         if (img.classList.contains('profile-placeholder')) {
-                            img.outerHTML = `<img src="${e.target.result}" alt="Profile Preview" 
-                                                class="img-thumbnail rounded-circle mb-3 mx-auto" 
+                            img.outerHTML = `<img src="${e.target.result}" alt="Profile Preview"
+                                                class="img-thumbnail rounded-circle mb-3 mx-auto"
                                                 style="width: 150px; height: 150px; object-fit: cover;">`;
                         } else {
                             img.src = e.target.result;
@@ -130,13 +145,42 @@
             }
         });
 
-        // تحقق من كلمة المرور
+        // تحقق من كلمة المرور مع عرض الرسالة
         document.querySelector('form').addEventListener('submit', function(e) {
-            const password = document.querySelector('#Password').value;
+            const passwordInput = document.querySelector('input[name="newPassword"]');
+            const password = passwordInput.value;
+            const validationSpan = document.getElementById('passwordValidation');
+
+            // مسح أي رسائل سابقة
+            validationSpan.textContent = '';
+
             if (password && password.length < 6) {
                 e.preventDefault();
-                alert('Password must be at least 6 characters long');
+                validationSpan.textContent = 'Password must be at least 6 characters long';
+                passwordInput.focus();
                 return false;
+            }
+
+            // تحقق إضافي إذا كانت كلمة المرور تحتوي على مسافات
+            if (password && password.includes(' ')) {
+                e.preventDefault();
+                validationSpan.textContent = 'Password cannot contain spaces';
+                passwordInput.focus();
+                return false;
+            }
+        });
+
+        // تحقق فوري أثناء الكتابة
+        document.querySelector('input[name="newPassword"]')?.addEventListener('input', function(e) {
+            const password = e.target.value;
+            const validationSpan = document.getElementById('passwordValidation');
+
+            if (password && password.length < 6) {
+                validationSpan.textContent = 'Password must be at least 6 characters long';
+            } else if (password && password.includes(' ')) {
+                validationSpan.textContent = 'Password cannot contain spaces';
+            } else {
+                validationSpan.textContent = '';
             }
         });
     </script>

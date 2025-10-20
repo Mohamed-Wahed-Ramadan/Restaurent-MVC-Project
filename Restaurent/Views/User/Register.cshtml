@@ -1,4 +1,4 @@
-﻿@model Models.User
+﻿@model Restaurent.ViewModels.UserVm
 
 @{
     ViewData["Title"] = "Register";
@@ -6,7 +6,7 @@
 
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-8">
             <div class="card shadow-lg">
                 <div class="card-header bg-primary text-white text-center">
                     <h3><i class="fas fa-user-plus"></i> Create Account</h3>
@@ -15,52 +15,67 @@
                     <form asp-action="Register" method="post" enctype="multipart/form-data" id="registerForm">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                        <div class="form-group mb-3">
-                            <label asp-for="Name" class="form-label">
-                                <i class="fas fa-user"></i> Full Name *
-                            </label>
-                            <input asp-for="Name" class="form-control" placeholder="Enter your full name" />
-                            <span asp-validation-for="Name" class="text-danger"></span>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="FullName" class="form-label">
+                                        <i class="fas fa-user"></i> Full Name *
+                                    </label>
+                                    <input asp-for="FullName" class="form-control" placeholder="Enter your full name" />
+                                    <span asp-validation-for="FullName" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="Email" class="form-label">
+                                        <i class="fas fa-envelope"></i> Email *
+                                    </label>
+                                    <input asp-for="Email" type="email" class="form-control" placeholder="Enter your email" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="PhoneNumber" class="form-label">
+                                        <i class="fas fa-phone"></i> Phone Number *
+                                    </label>
+                                    <input asp-for="PhoneNumber" class="form-control" placeholder="Enter your phone number" />
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Birthday" class="form-label">
+                                        <i class="fas fa-birthday-cake"></i> Birthday *
+                                    </label>
+                                    <input asp-for="Birthday" type="date" class="form-control" />
+                                    <span asp-validation-for="Birthday" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="Password" class="form-label">
+                                        <i class="fas fa-lock"></i> Password *
+                                    </label>
+                                    <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" />
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="ConfirmPassword" class="form-label">
+                                        <i class="fas fa-lock"></i> Confirm Password *
+                                    </label>
+                                    <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="••••••••" />
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="form-group mb-3">
-                            <label asp-for="Email" class="form-label">
-                                <i class="fas fa-envelope"></i> Email *
-                            </label>
-                            <input asp-for="Email" type="email" class="form-control" placeholder="your@email.com" />
-                            <span asp-validation-for="Email" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label asp-for="Password" class="form-label">
-                                <i class="fas fa-lock"></i> Password *
-                            </label>
-                            <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" />
-                            <span asp-validation-for="Password" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label asp-for="Phone" class="form-label">
-                                <i class="fas fa-phone"></i> Phone Number
-                            </label>
-                            <input asp-for="Phone" type="tel" class="form-control" placeholder="+20 123 456 7890" />
-                            <span asp-validation-for="Phone" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label asp-for="Birthday" class="form-label">
-                                <i class="fas fa-birthday-cake"></i> Birthday *
-                            </label>
-                            <input asp-for="Birthday" type="date" class="form-control" max="@DateTime.Today.ToString("yyyy-MM-dd")" />
-                            <span asp-validation-for="Birthday" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label class="form-label">
+                            <label asp-for="ImageFile" class="form-label">
                                 <i class="fas fa-image"></i> Profile Image
                             </label>
-                            <input type="file" name="imageFile" class="form-control" accept="image/*" />
-                            <small class="text-muted">Optional: Upload a profile picture</small>
+                            <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
+                            <span asp-validation-for="ImageFile" class="text-danger"></span>
+                            <small class="form-text text-muted">Optional: Upload your profile picture (JPG, PNG, GIF)</small>
                         </div>
 
                         <div class="d-grid gap-2">
@@ -89,23 +104,59 @@
 
     <script>
         $(document).ready(function() {
+            // التحقق من العمر عند التسجيل
+            $('#Birthday').on('change', function() {
+                var birthDate = new Date($(this).val());
+                var today = new Date();
+                var age = today.getFullYear() - birthDate.getFullYear();
+                var monthDiff = today.getMonth() - birthDate.getMonth();
+
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+
+                if (age < 18) {
+                    showAlert('error', 'You must be at least 18 years old to register.');
+                }
+            });
+
             $('#registerForm').on('submit', function(e) {
                 var password = $('#Password').val();
+                var confirmPassword = $('#ConfirmPassword').val();
 
                 if (password && password.length < 6) {
                     e.preventDefault();
                     showAlert('error', 'Password must be at least 6 characters long');
                     return false;
                 }
-            });
 
-            // تحقق من البريد الإلكتروني فورياً
-            $('#Email').on('blur', function() {
-                var email = $(this).val();
-                if (email) {
-                    // يمكنك إضافة تحقق من البريد الإلكتروني هنا
+                if (password !== confirmPassword) {
+                    e.preventDefault();
+                    showAlert('error', 'Passwords do not match');
+                    return false;
                 }
             });
+
+            function showAlert(type, message) {
+                $('.alert-dismissible').remove();
+
+                var alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+                var iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+
+                var alertHtml = '<div class="alert ' + alertClass + ' alert-dismissible fade show mt-3" role="alert">' +
+                    '<i class="fas ' + iconClass + '"></i> ' +
+                    message +
+                    '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                    '</div>';
+
+                $('.card-body').prepend(alertHtml);
+
+                setTimeout(function() {
+                    $('.alert-dismissible').fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                }, 5000);
+            }
         });
     </script>
 }

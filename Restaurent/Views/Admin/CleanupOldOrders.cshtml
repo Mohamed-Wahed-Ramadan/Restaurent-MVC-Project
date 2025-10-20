@@ -1,0 +1,110 @@
+﻿@{
+    ViewData["Title"] = "Cleanup Old Orders";
+    var oldOrdersCount = ViewBag.OldOrdersCount ?? 0;
+    var cutoffDate = ViewBag.CutoffDate ?? DateTime.Now.AddDays(-7);
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-danger text-white text-center">
+                    <h3><i class="fas fa-trash-alt"></i> Cleanup Old Completed Orders</h3>
+                </div>
+                <div class="card-body p-4 text-center">
+
+                    @if (oldOrdersCount > 0)
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                            <h4 class="alert-heading">Warning!</h4>
+                            <p class="mb-3">
+                                You are about to permanently delete <strong class="text-danger">@oldOrdersCount</strong>
+                                completed orders that were finished before <strong>@cutoffDate.ToString("MMMM dd, yyyy")</strong>.
+                            </p>
+                            <hr>
+                            <p class="mb-0">
+                                <strong>This action cannot be undone!</strong> Only completed orders older than 1 week will be deleted.
+                            </p>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-3 mt-4">
+                            <form asp-action="CleanupOldOrders" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="confirm" value="true" />
+                                <button type="submit" class="btn btn-danger btn-lg"
+                                        onclick="return confirm('Are you absolutely sure you want to delete @oldOrdersCount old completed orders? This action is irreversible!')">
+                                    <i class="fas fa-trash-alt"></i> Confirm Cleanup
+                                </button>
+                            </form>
+
+                            <a asp-action="Dashboard" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle fa-2x mb-3"></i>
+                            <h4 class="alert-heading">No Cleanup Needed!</h4>
+                            <p class="mb-0">
+                                There are no completed orders older than 1 week to clean up.
+                            </p>
+                        </div>
+
+                        <div class="mt-4">
+                            <a asp-action="Dashboard" class="btn btn-primary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="card mt-4 border-0">
+                <div class="card-body">
+                    <h5><i class="fas fa-info-circle text-info me-2"></i>About Order Cleanup</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-caret-right text-muted me-2"></i>Only <strong>completed</strong> orders older than 1 week are affected</li>
+                        <li><i class="fas fa-caret-right text-muted me-2"></i>Pending, preparing, and active orders are never deleted</li>
+                        <li><i class="fas fa-caret-right text-muted me-2"></i>This helps maintain database performance</li>
+                        <li><i class="fas fa-caret-right text-muted me-2"></i>Recommended to run weekly</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // تأكيد إضافي قبل الحذف
+        document.addEventListener('DOMContentLoaded', function() {
+            const confirmBtn = document.querySelector('.btn-danger');
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', function(e) {
+                    const orderCount = @oldOrdersCount;
+                    if (!confirm(`WARNING: This will permanently delete ${orderCount} completed orders. This action cannot be undone! Are you absolutely sure?`)) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+    </script>
+
+    <style>
+        .card {
+            border-radius: 15px;
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+
+        
+    </style>
+}

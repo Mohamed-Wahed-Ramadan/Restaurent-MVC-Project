@@ -11,9 +11,12 @@
             <a asp-action="Dashboard" class="btn btn-secondary">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </a>
-            <button class="btn btn-warning" onclick="cleanupOldOrders()">
-                <i class="fas fa-broom"></i> Cleanup Old Orders
-            </button>
+            @if (User.IsInRole("Admin") || User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value == "medo03459@gmail.com")
+            {
+                <button class="btn btn-warning" onclick="cleanupOldOrders()">
+                    <i class="fas fa-broom"></i> Cleanup Old Orders
+                </button>
+            }
         </div>
     </div>
 
@@ -91,7 +94,7 @@
                                         <strong>@order.UniqueOrderId</strong>
                                     </td>
                                     <td>
-                                        @order.User?.Name<br>
+                                        @order.User?.UserName<br> <!-- تغيير من Name إلى UserName -->
                                         <small class="text-muted">@order.User?.Email</small>
                                     </td>
                                     <td>
@@ -183,7 +186,8 @@
 
             $.post('@Url.Action("UpdateOrderStatus", "Admin")', {
                 orderId: orderId,
-                status: newStatus
+                status: newStatus,
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
             }, function(response) {
                 if (response.success) {
                     // تحديث واجهة المستخدم
@@ -212,174 +216,184 @@
             $('#orderDetailsModal').modal('show');
 
             // تحميل تفاصيل الطلب
-            $.get('@Url.Action("GetOrderDetails", "Admin")', { orderId: orderId }, function(order) {
-                const userAge = calculateAge(order.user.birthday);
+            $.get('@Url.Action("GetOrderDetails", "Admin")', { orderId: orderId }, function(response) {
+                if (response.success) {
+                    const order = response.data;
+                    const userAge = calculateAge(order.user.birthday);
 
-                const detailsHtml = `
-                    <div class="row">
-                        <!-- معلومات العميل -->
-                        <div class="col-md-4">
-                            <div class="card border-primary mb-3">
-                                <div class="card-header bg-primary text-white">
-                                    <i class="fas fa-user me-2"></i>Customer Information
-                                </div>
-                                <div class="card-body">
-                                    <div class="mb-3">
-                                        <label class="text-muted small">Full Name</label>
-                                        <p class="mb-0 fw-bold">${order.user.name}</p>
+                    const detailsHtml = `
+                        <div class="row">
+                            <!-- معلومات العميل -->
+                            <div class="col-md-4">
+                                <div class="card border-primary mb-3">
+                                    <div class="card-header bg-primary text-white">
+                                        <i class="fas fa-user me-2"></i>Customer Information
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="text-muted small">Email Address</label>
-                                        <p class="mb-0">
-                                            <i class="fas fa-envelope me-2 text-primary"></i>${order.user.email}
-                                        </p>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="text-muted small">Phone Number</label>
-                                        <p class="mb-0">
-                                            <i class="fas fa-phone me-2 text-success"></i>${order.user.phone}
-                                        </p>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="text-muted small">Age</label>
-                                        <p class="mb-0">
-                                            <i class="fas fa-birthday-cake me-2 text-warning"></i>${userAge} years old
-                                        </p>
-                                    </div>
-                                    ${order.user.imageURL ? `
-                                        <div class="text-center mt-3">
-                                            <img src="${order.user.imageURL}" alt="${order.user.name}"
-                                                 class="rounded-circle border border-3 border-primary"
-                                                 style="width: 100px; height: 100px; object-fit: cover;">
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="text-muted small">Username</label>
+                                            <p class="mb-0 fw-bold">${order.user.name}</p>
                                         </div>
-                                    ` : ''}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- معلومات الطلب -->
-                        <div class="col-md-8">
-                            <div class="card border-success mb-3">
-                                <div class="card-header bg-success text-white">
-                                    <i class="fas fa-shopping-cart me-2"></i>Order Information
-                                </div>
-                                <div class="card-body">
-                                    <div class="row mb-3">
-                                        <div class="col-6">
-                                            <label class="text-muted small">Order ID</label>
-                                            <p class="mb-0 fw-bold text-primary">${order.uniqueOrderId}</p>
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="text-muted small">Order Date</label>
-                                            <p class="mb-0">${formatDate(order.createdAt)}</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="row mb-3">
-                                        <div class="col-6">
-                                            <label class="text-muted small">Order Type</label>
+                                        <div class="mb-3">
+                                            <label class="text-muted small">Email Address</label>
                                             <p class="mb-0">
-                                                <span class="badge" style="${order.orderType === 'Delivery' ? 'background-color: #3498db;' : 'background-color: #9b59b6;'}">
-                                                    <i class="fas fa-${order.orderType === 'Delivery' ? 'truck' : 'utensils'} me-1"></i>
-                                                    ${order.orderType}
-                                                </span>
+                                                <i class="fas fa-envelope me-2 text-primary"></i>${order.user.email}
                                             </p>
                                         </div>
-                                        <div class="col-6">
-                                            <label class="text-muted small">Status</label>
+                                        <div class="mb-3">
+                                            <label class="text-muted small">Phone Number</label>
                                             <p class="mb-0">
-                                                <span class="badge status-badge" style="${getStatusBadgeStyle(order.status)}">
-                                                    ${order.status}
-                                                </span>
+                                                <i class="fas fa-phone me-2 text-success"></i>${order.user.phone || 'Not provided'}
                                             </p>
                                         </div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="text-muted small">
-                                            <i class="fas fa-map-marker-alt me-2"></i>
-                                            ${order.orderType === 'Delivery' ? 'Delivery Address' : 'Table Number'}
-                                        </label>
-                                        <p class="mb-0 fw-bold">${order.location}</p>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="text-muted small">Estimated Preparation Time</label>
-                                        <p class="mb-0">
-                                            <i class="fas fa-clock me-2 text-warning"></i>
-                                            <strong>${order.timePreparing} minutes</strong>
-                                        </p>
+                                        <div class="mb-3">
+                                            <label class="text-muted small">Age</label>
+                                            <p class="mb-0">
+                                                <i class="fas fa-birthday-cake me-2 text-warning"></i>${userAge} years old
+                                            </p>
+                                        </div>
+                                        ${order.user.imageURL ? `
+                                            <div class="text-center mt-3">
+                                                <img src="${order.user.imageURL}" alt="${order.user.name}"
+                                                     class="rounded-circle border border-3 border-primary"
+                                                     style="width: 100px; height: 100px; object-fit: cover;">
+                                            </div>
+                                        ` : ''}
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- عناصر الطلب -->
-                            <div class="card border-warning">
-                                <div class="card-header bg-warning">
-                                    <i class="fas fa-hamburger me-2"></i>Order Items
+                            <!-- معلومات الطلب -->
+                            <div class="col-md-8">
+                                <div class="card border-success mb-3">
+                                    <div class="card-header bg-success text-white">
+                                        <i class="fas fa-shopping-cart me-2"></i>Order Information
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row mb-3">
+                                            <div class="col-6">
+                                                <label class="text-muted small">Order ID</label>
+                                                <p class="mb-0 fw-bold text-primary">${order.uniqueOrderId}</p>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="text-muted small">Order Date</label>
+                                                <p class="mb-0">${formatDate(order.createdAt)}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-3">
+                                            <div class="col-6">
+                                                <label class="text-muted small">Order Type</label>
+                                                <p class="mb-0">
+                                                    <span class="badge" style="${order.orderType === 'Delivery' ? 'background-color: #3498db;' : 'background-color: #9b59b6;'}">
+                                                        <i class="fas fa-${order.orderType === 'Delivery' ? 'truck' : 'utensils'} me-1"></i>
+                                                        ${order.orderType}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div class="col-6">
+                                                <label class="text-muted small">Status</label>
+                                                <p class="mb-0">
+                                                    <span class="badge status-badge" style="${getStatusBadgeStyle(order.status)}">
+                                                        ${order.status}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="text-muted small">
+                                                <i class="fas fa-map-marker-alt me-2"></i>
+                                                ${order.orderType === 'Delivery' ? 'Delivery Address' : 'Table Number'}
+                                            </label>
+                                            <p class="mb-0 fw-bold">${order.location}</p>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="text-muted small">Estimated Preparation Time</label>
+                                            <p class="mb-0">
+                                                <i class="fas fa-clock me-2 text-warning"></i>
+                                                <strong>${order.timePreparing} minutes</strong>
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm">
-                                            <thead>
-                                                <tr>
-                                                    <th>Item</th>
-                                                    <th>Image</th>
-                                                    <th>Quantity</th>
-                                                    <th>Price</th>
-                                                    <th>Total</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                ${order.orderItems.map(item => `
+
+                                <!-- عناصر الطلب -->
+                                <div class="card border-warning">
+                                    <div class="card-header bg-warning">
+                                        <i class="fas fa-hamburger me-2"></i>Order Items
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm">
+                                                <thead>
                                                     <tr>
-                                                        <td>
-                                                            <strong>${item.menuProduct.name}</strong><br>
-                                                            <small class="text-muted">${item.menuProduct.description.substring(0, 50)}...</small>
-                                                        </td>
-                                                        <td>
-                                                            <img src="${item.menuProduct.imageUrl}"
-                                                                 alt="${item.menuProduct.name}"
-                                                                 class="rounded"
-                                                                 style="width: 50px; height: 50px; object-fit: cover;"
-                                                                 onerror="this.src='/images/placeholder.png'">
-                                                        </td>
-                                                        <td>
-                                                            <span class="badge bg-secondary">${item.quantity}</span>
-                                                        </td>
-                                                        <td>${formatCurrency(item.unitPrice)}</td>
-                                                        <td><strong>${formatCurrency(item.total)}</strong></td>
+                                                        <th>Item</th>
+                                                        <th>Image</th>
+                                                        <th>Quantity</th>
+                                                        <th>Price</th>
+                                                        <th>Total</th>
                                                     </tr>
-                                                `).join('')}
-                                            </tbody>
-                                            <tfoot>
-                                                <tr class="table-active">
-                                                    <td colspan="4" class="text-end"><strong>Total Amount:</strong></td>
-                                                    <td>
-                                                        <strong class="text-success fs-5">
-                                                            ${formatCurrency(order.total)}
-                                                        </strong>
-                                                    </td>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
+                                                </thead>
+                                                <tbody>
+                                                    ${order.orderItems.map(item => `
+                                                        <tr>
+                                                            <td>
+                                                                <strong>${item.menuProduct.name}</strong><br>
+                                                                <small class="text-muted">${item.menuProduct.description ? item.menuProduct.description.substring(0, 50) + '...' : 'No description'}</small>
+                                                            </td>
+                                                            <td>
+                                                                <img src="${item.menuProduct.imageUrl}"
+                                                                     alt="${item.menuProduct.name}"
+                                                                     class="rounded"
+                                                                     style="width: 50px; height: 50px; object-fit: cover;"
+                                                                     onerror="this.src='/images/placeholder.png'">
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge bg-secondary">${item.quantity}</span>
+                                                            </td>
+                                                            <td>${formatCurrency(item.unitPrice)}</td>
+                                                            <td><strong>${formatCurrency(item.total)}</strong></td>
+                                                        </tr>
+                                                    `).join('')}
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr class="table-active">
+                                                        <td colspan="4" class="text-end"><strong>Total Amount:</strong></td>
+                                                        <td>
+                                                            <strong class="text-success fs-5">
+                                                                ${formatCurrency(order.total)}
+                                                            </strong>
+                                                        </td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="alert alert-info mb-0">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <strong>Note:</strong> This order was placed on ${formatDate(order.createdAt)}
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="alert alert-info mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Note:</strong> This order was placed on ${formatDate(order.createdAt)}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
 
-                $('#orderDetailsContent').html(detailsHtml);
+                    $('#orderDetailsContent').html(detailsHtml);
+                } else {
+                    $('#orderDetailsContent').html(`
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            ${response.message}
+                        </div>
+                    `);
+                }
             }).fail(function() {
                 $('#orderDetailsContent').html(`
                     <div class="alert alert-danger">
@@ -398,12 +412,12 @@
 
         function getStatusBadgeStyle(status) {
             switch (status.toLowerCase()) {
-                case 'pending': return 'background-color: #e67e22;'; // برتقالي غامق
-                case 'preparing': return 'background-color: #3498db;'; // أزرق غامق
-                case 'ready': return 'background-color: #9b59b6;'; // بنفسجي
-                case 'completed': return 'background-color: #27ae60;'; // أخضر غامق
-                case 'cancelled': return 'background-color: #c0392b;'; // أحمر غامق
-                default: return 'background-color: #7f8c8d;'; // رمادي غامق
+                case 'pending': return 'background-color: #e67e22;';
+                case 'preparing': return 'background-color: #3498db;';
+                case 'ready': return 'background-color: #9b59b6;';
+                case 'completed': return 'background-color: #27ae60;';
+                case 'cancelled': return 'background-color: #c0392b;';
+                default: return 'background-color: #7f8c8d;';
             }
         }
 
@@ -461,7 +475,7 @@
         $(document).ready(function() {
             $('#ordersTable').DataTable({
                 pageLength: 10,
-                order: [[2, 'desc']], // الترتيب حسب التاريخ
+                order: [[2, 'desc']],
                 language: {
                     search: "Search Orders:",
                     lengthMenu: "Show _MENU_ orders per page",

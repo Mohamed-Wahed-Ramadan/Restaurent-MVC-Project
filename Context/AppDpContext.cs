@@ -1,36 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Context.Configuration;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Models;
-using Context.Configuration;
 
-//namespace Restaurent.Context
 namespace Context
 {
-    public class AppDpContext : DbContext
+    public class AppDpContext : IdentityDbContext<User>
     {
-        // أضف هذا الكونستركتور
-        //public AppDpContext(DbContextOptions<AppDpContext> options) : base(options)
-        //{
-        //}
-
-        // احتفظ بالكونستركتور القديم لأغراض التوافق
-        public AppDpContext()
+        public AppDpContext(DbContextOptions<AppDpContext> options) : base(options)
         {
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer(Connection.DataSource);
-            }
-        }
-
-        // DbSets الحالية
         public DbSet<Category> Categories { get; set; }
         public DbSet<MenuProduct> MenuProducts { get; set; }
-        public DbSet<User> Users { get; set; }
-
-        // DbSets الجديدة
         public DbSet<Cart> Carts { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
@@ -39,20 +21,21 @@ namespace Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // تطبيق التهيئة للنماذج الحالية
+            base.OnModelCreating(modelBuilder);
+
+            // تطبيق التهيئة للنماذج
             modelBuilder.ApplyConfiguration(new CategoryConfiguration());
             modelBuilder.ApplyConfiguration(new MenuProductConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfiguration());
 
-            // تكوين العلاقات الجديدة
+            // تكوين العلاقات والفهارس
             ConfigureRelationships(modelBuilder);
-
-            base.OnModelCreating(modelBuilder);
+            ConfigureIndexes(modelBuilder);
         }
 
         private void ConfigureRelationships(ModelBuilder modelBuilder)
         {
-            // تكوين العلاقة بين User و Cart
+            // Cart Relationships
             modelBuilder.Entity<Cart>()
                 .HasOne(c => c.User)
                 .WithMany(u => u.CartItems)
@@ -65,14 +48,14 @@ namespace Context
                 .HasForeignKey(c => c.MenuProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // تكوين العلاقة بين User و Order
+            // Order Relationships
             modelBuilder.Entity<Order>()
                 .HasOne(o => o.User)
                 .WithMany(u => u.Orders)
                 .HasForeignKey(o => o.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // تكوين العلاقة بين Order و OrderItem
+            // OrderItem Relationships
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.Order)
                 .WithMany(o => o.OrderItems)
@@ -85,7 +68,7 @@ namespace Context
                 .HasForeignKey(oi => oi.MenuProductId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // تكوين العلاقة بين User و Favorite
+            // Favorite Relationships
             modelBuilder.Entity<Favorite>()
                 .HasOne(f => f.User)
                 .WithMany(u => u.Favorites)
@@ -98,27 +81,48 @@ namespace Context
                 .HasForeignKey(f => f.MenuProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // تكوين العلاقة بين Discount و Category
+            // Discount Relationships
             modelBuilder.Entity<Discount>()
                 .HasOne(d => d.Category)
                 .WithMany()
                 .HasForeignKey(d => d.CategoryId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // ضمان أن UniqueOrderId فريد
+            // MenuProduct Relationships
+            modelBuilder.Entity<MenuProduct>()
+                .HasOne(mp => mp.Category)
+                .WithMany(c => c.MenuProduct)
+                .HasForeignKey(mp => mp.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        private void ConfigureIndexes(ModelBuilder modelBuilder)
+        {
+            // Unique Indexes
             modelBuilder.Entity<Order>()
                 .HasIndex(o => o.UniqueOrderId)
                 .IsUnique();
 
-            // ضمان أن مجموعة (UserId, MenuProductId) فريدة في Cart
             modelBuilder.Entity<Cart>()
                 .HasIndex(c => new { c.UserId, c.MenuProductId })
                 .IsUnique();
 
-            // ضمان أن مجموعة (UserId, MenuProductId) فريدة في Favorite
             modelBuilder.Entity<Favorite>()
                 .HasIndex(f => new { f.UserId, f.MenuProductId })
                 .IsUnique();
+
+            // Performance Indexes
+            modelBuilder.Entity<MenuProduct>()
+                .HasIndex(mp => mp.Name);
+
+            modelBuilder.Entity<Category>()
+                .HasIndex(c => c.Name);
+
+            modelBuilder.Entity<Order>()
+                .HasIndex(o => o.Status);
+
+            modelBuilder.Entity<Order>()
+                .HasIndex(o => o.CreatedAt);
         }
     }
 }

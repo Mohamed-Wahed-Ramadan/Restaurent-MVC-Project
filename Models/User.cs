@@ -1,30 +1,31 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 //namespace Restaurent.Models
 namespace Models
 {
-    public class User
+    public class User : IdentityUser
     {
-        [Key]
-        public int Id { get; set; }
+        //[Key]
+        //public int Id { get; set; }
 
-        [Required]
-        [StringLength(100)]
-        public string Name { get; set; }
+        //[Required]
+        //[StringLength(100)]
+        //public string Name { get; set; }
 
-        [Required]
-        [EmailAddress]
-        [StringLength(100)]
-        public string Email { get; set; }
+        //[Required]
+        //[EmailAddress]
+        //[StringLength(100)]
+        //public string Email { get; set; }
 
-        [Required]
-        [StringLength(255)]
-        public string Password { get; set; }
+        //[Required]
+        //[StringLength(255)]
+        //public string Password { get; set; }
 
-        [Phone]
-        [StringLength(20)]
-        public string Phone { get; set; }
+        //[Phone]
+        //[StringLength(20)]
+        //public string Phone { get; set; }
 
         public bool IsAdmin { get; set; } = false;
 

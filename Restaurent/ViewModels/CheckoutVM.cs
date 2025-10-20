@@ -1,4 +1,6 @@
-﻿namespace Restaurent.ViewModels
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Restaurent.ViewModels
 {
     public class CheckoutVm
     {
@@ -11,9 +13,12 @@
         public decimal DiscountAmount { get; set; }
         public string AppliedDiscountName { get; set; }
 
-        // باقي الخصائص
+        // باقي الخصائص مع Data Annotations
+        [Required(ErrorMessage = "Please select order type")]
         public string OrderType { get; set; }
+
         public int? TableNumber { get; set; }
+
         public string DeliveryAddress { get; set; }
     }
 }

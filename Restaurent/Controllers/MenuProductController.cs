@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Context;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Context;
 using Models;
 using Restaurent.ViewModels;
+using System.Text.Json;
 
 namespace Restaurent.Controllers
 {
@@ -11,14 +13,15 @@ namespace Restaurent.Controllers
     {
         private readonly AppDpContext _context;
         private readonly IWebHostEnvironment _environment;
+        private readonly UserManager<User> _userManager;
 
-        public MenuProductController(IWebHostEnvironment environment)
+        public MenuProductController(AppDpContext context, IWebHostEnvironment environment, UserManager<User> userManager)
         {
-            _context = new AppDpContext();
+            _context = context;
             _environment = environment;
+            _userManager = userManager;
         }
 
-        // عرض منتج واحد
         public async Task<IActionResult> Showprd(int? id)
         {
             if (id == null)
@@ -35,12 +38,35 @@ namespace Restaurent.Controllers
                 return NotFound();
             }
 
-            // التحقق إذا كان المنتج في المفضلة
-            var userId = HttpContext.Session.GetInt32("UserId");
-            if (userId != null)
+            // استخدام النظام الموحد للجلسة
+            var userSessionJson = HttpContext.Session.GetString("CurrentUser");
+            if (!string.IsNullOrEmpty(userSessionJson))
             {
-                ViewBag.IsFavorite = await _context.Favorites
-                    .AnyAsync(f => f.UserId == userId && f.MenuProductId == id);
+                try
+                {
+                    var userSession = JsonSerializer.Deserialize<Dictionary<string, object>>(userSessionJson);
+                    if (userSession != null && userSession.ContainsKey("Id"))
+                    {
+                        var userId = userSession["Id"]?.ToString();
+                        if (!string.IsNullOrEmpty(userId))
+                        {
+                            ViewBag.IsFavorite = await _context.Favorites
+                                .AnyAsync(f => f.UserId == userId && f.MenuProductId == id);
+                        }
+                        else
+                        {
+                            ViewBag.IsFavorite = false;
+                        }
+                    }
+                    else
+                    {
+                        ViewBag.IsFavorite = false;
+                    }
+                }
+                catch
+                {
+                    ViewBag.IsFavorite = false;
+                }
             }
             else
             {
@@ -50,7 +76,6 @@ namespace Restaurent.Controllers
             return View(menu);
         }
 
-        // عرض جميع المنتجات
         public async Task<IActionResult> GetAll()
         {
             try
@@ -60,19 +85,49 @@ namespace Restaurent.Controllers
                     .Where(p => !p.IsDeleted)
                     .ToListAsync();
 
-                // التحقق من المفضلة لكل منتج
-                var userId = HttpContext.Session.GetInt32("UserId");
-                if (userId != null)
+                // استخدام النظام الموحد للجلسة
+                var userSessionJson = HttpContext.Session.GetString("CurrentUser");
+                if (!string.IsNullOrEmpty(userSessionJson))
                 {
-                    var favorites = await _context.Favorites
-                        .Where(f => f.UserId == userId)
-                        .Select(f => f.MenuProductId)
-                        .ToListAsync();
+                    try
+                    {
+                        var userSession = JsonSerializer.Deserialize<Dictionary<string, object>>(userSessionJson);
+                        if (userSession != null && userSession.ContainsKey("Id"))
+                        {
+                            var userId = userSession["Id"]?.ToString();
 
-                    ViewBag.Favorites = favorites;
+                            if (!string.IsNullOrEmpty(userId))
+                            {
+                                var favorites = await _context.Favorites
+                                    .Where(f => f.UserId == userId)
+                                    .Select(f => f.MenuProductId)
+                                    .ToListAsync();
+
+                                ViewBag.Favorites = favorites;
+                                ViewBag.UserId = userId;
+                                ViewBag.IsAdmin = userSession.ContainsKey("IsAdmin") && bool.Parse(userSession["IsAdmin"]?.ToString() ?? "false");
+                            }
+                            else
+                            {
+                                SetDefaultViewBag();
+                            }
+                        }
+                        else
+                        {
+                            SetDefaultViewBag();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // في حالة خطأ في قراءة الجلسة
+                        SetDefaultViewBag();
+                    }
+                }
+                else
+                {
+                    SetDefaultViewBag();
                 }
 
-                // التحقق من العروض النشطة
                 var activeDiscounts = await _context.Discounts
                     .Where(d => d.IsActive && d.StartDate <= DateTime.UtcNow && d.EndDate >= DateTime.UtcNow)
                     .ToListAsync();
@@ -88,7 +143,6 @@ namespace Restaurent.Controllers
             }
         }
 
-        // إنشاء منتج جديد
         public async Task<IActionResult> Create()
         {
             var cats = await _context.Categories.ToListAsync();
@@ -110,7 +164,7 @@ namespace Restaurent.Controllers
                 return View(menuVM);
             }
 
-            if (await _context.MenuProducts.AnyAsync(p => p.Name == menuVM.Name))
+            if (await _context.MenuProducts.AnyAsync(p => p.Name == menuVM.Name && !p.IsDeleted))
             {
                 ModelState.AddModelError("Name", "A product with this name already exists.");
                 menuVM.Categories = await GetCategoriesList();
@@ -137,8 +191,6 @@ namespace Restaurent.Controllers
             return RedirectToAction("GetAll");
         }
 
-        // تعديل منتج
-        // تعديل منتج - GET
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -146,7 +198,6 @@ namespace Restaurent.Controllers
                 return NotFound();
             }
 
-            // السماح بتعديل المنتجات المحذوفة أيضاً
             var product = await _context.MenuProducts.FindAsync(id);
 
             if (product == null)
@@ -169,7 +220,6 @@ namespace Restaurent.Controllers
                 Categories = await GetCategoriesList()
             };
 
-            // تمرير معلومة إذا كان المنتج محذوف
             if (product.IsDeleted)
             {
                 TempData["IsDeleted"] = true;
@@ -196,7 +246,6 @@ namespace Restaurent.Controllers
                 return NotFound();
             }
 
-            // التحقق من الأسماء المكررة (استثناء المنتج الحالي)
             if (await _context.MenuProducts.AnyAsync(p => p.Name == viewModel.Name && p.Id != id && !p.IsDeleted))
             {
                 ModelState.AddModelError("Name", "A product with this name already exists.");
@@ -204,7 +253,6 @@ namespace Restaurent.Controllers
                 return View(viewModel);
             }
 
-            // تحديث بيانات المنتج
             product.Name = viewModel.Name;
             product.Description = viewModel.Description;
             product.Price = viewModel.Price;
@@ -226,7 +274,6 @@ namespace Restaurent.Controllers
             product.DayStock = viewModel.DayStock;
             product.UpdatedAt = DateTime.UtcNow;
 
-            // إرجاع المنتج إذا كان محذوف (استعادة المنتج)
             if (product.IsDeleted)
             {
                 product.IsDeleted = false;
@@ -243,7 +290,6 @@ namespace Restaurent.Controllers
             return RedirectToAction(nameof(GetAll));
         }
 
-        // حذف منتج (Soft Delete)
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -284,7 +330,6 @@ namespace Restaurent.Controllers
             return RedirectToAction("GetAll");
         }
 
-        // حذف نهائي
         [HttpPost]
         public async Task<IActionResult> PermanentDelete(int id)
         {
@@ -302,60 +347,81 @@ namespace Restaurent.Controllers
             return RedirectToAction("GetAll");
         }
 
-        // إضافة إلى السلة من صفحة التفاصيل
         [HttpPost]
         public async Task<IActionResult> AddToCartFromDetails(int productId, int quantity = 1)
         {
-            var userId = HttpContext.Session.GetInt32("UserId");
-            if (userId == null)
+            // استخدام النظام الموحد للجلسة
+            var userSessionJson = HttpContext.Session.GetString("CurrentUser");
+            if (string.IsNullOrEmpty(userSessionJson))
             {
                 TempData["ErrorMessage"] = "Please login first to add items to cart";
                 return RedirectToAction("Login", "User");
             }
 
-            var product = await _context.MenuProducts.FindAsync(productId);
-            if (product == null || product.IsDeleted)
+            try
             {
-                TempData["ErrorMessage"] = "Product not found";
-                return RedirectToAction("GetAll");
-            }
+                var userSession = JsonSerializer.Deserialize<Dictionary<string, object>>(userSessionJson);
+                if (userSession == null || !userSession.ContainsKey("Id"))
+                {
+                    TempData["ErrorMessage"] = "Please login first to add items to cart";
+                    return RedirectToAction("Login", "User");
+                }
 
-            if (product.Quantity < quantity)
-            {
-                TempData["ErrorMessage"] = "Insufficient stock";
+                var userId = userSession["Id"]?.ToString();
+                if (string.IsNullOrEmpty(userId))
+                {
+                    TempData["ErrorMessage"] = "Please login first to add items to cart";
+                    return RedirectToAction("Login", "User");
+                }
+
+                var product = await _context.MenuProducts.FindAsync(productId);
+                if (product == null || product.IsDeleted)
+                {
+                    TempData["ErrorMessage"] = "Product not found";
+                    return RedirectToAction("GetAll");
+                }
+
+                if (product.Quantity < quantity)
+                {
+                    TempData["ErrorMessage"] = "Insufficient stock";
+                    return RedirectToAction("Showprd", new { id = productId });
+                }
+
+                var existingCartItem = await _context.Carts
+                    .FirstOrDefaultAsync(c => c.UserId == userId && c.MenuProductId == productId);
+
+                if (existingCartItem != null)
+                {
+                    existingCartItem.Quantity += quantity;
+                    existingCartItem.Total = existingCartItem.Quantity * product.Price;
+                    existingCartItem.UpdatedAt = DateTime.UtcNow;
+                }
+                else
+                {
+                    var cartItem = new Cart
+                    {
+                        UserId = userId,
+                        MenuProductId = productId,
+                        Quantity = quantity,
+                        Total = quantity * product.Price,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    await _context.Carts.AddAsync(cartItem);
+                }
+
+                await _context.SaveChangesAsync();
+                await UpdateCartCount();
+
+                TempData["SuccessMessage"] = "Product added to cart successfully!";
                 return RedirectToAction("Showprd", new { id = productId });
             }
-
-            var existingCartItem = await _context.Carts
-                .FirstOrDefaultAsync(c => c.UserId == userId && c.MenuProductId == productId);
-
-            if (existingCartItem != null)
+            catch (Exception ex)
             {
-                existingCartItem.Quantity += quantity;
-                existingCartItem.Total = existingCartItem.Quantity * product.Price;
-                existingCartItem.UpdatedAt = DateTime.UtcNow;
+                TempData["ErrorMessage"] = "Please login first to add items to cart";
+                return RedirectToAction("Login", "User");
             }
-            else
-            {
-                var cartItem = new Cart
-                {
-                    UserId = userId.Value,
-                    MenuProductId = productId,
-                    Quantity = quantity,
-                    Total = quantity * product.Price,
-                    CreatedAt = DateTime.UtcNow
-                };
-                await _context.Carts.AddAsync(cartItem);
-            }
-
-            await _context.SaveChangesAsync();
-            await UpdateCartCount();
-
-            TempData["SuccessMessage"] = "Product added to cart successfully!";
-            return RedirectToAction("Showprd", new { id = productId });
         }
 
-        // البحث والتصفية
         [HttpGet]
         public async Task<IActionResult> Search(string searchTerm, int? categoryId, decimal? minPrice, decimal? maxPrice)
         {
@@ -387,22 +453,36 @@ namespace Restaurent.Controllers
 
             var results = await query.ToListAsync();
 
-            // التحقق من المفضلة
-            var userId = HttpContext.Session.GetInt32("UserId");
-            if (userId != null)
+            // استخدام النظام الموحد للجلسة
+            var userSessionJson = HttpContext.Session.GetString("CurrentUser");
+            if (!string.IsNullOrEmpty(userSessionJson))
             {
-                var favorites = await _context.Favorites
-                    .Where(f => f.UserId == userId)
-                    .Select(f => f.MenuProductId)
-                    .ToListAsync();
+                try
+                {
+                    var userSession = JsonSerializer.Deserialize<Dictionary<string, object>>(userSessionJson);
+                    if (userSession != null && userSession.ContainsKey("Id"))
+                    {
+                        var userId = userSession["Id"]?.ToString();
+                        if (!string.IsNullOrEmpty(userId))
+                        {
+                            var favorites = await _context.Favorites
+                                .Where(f => f.UserId == userId)
+                                .Select(f => f.MenuProductId)
+                                .ToListAsync();
 
-                ViewBag.Favorites = favorites;
+                            ViewBag.Favorites = favorites;
+                        }
+                    }
+                }
+                catch
+                {
+                    // تجاهل الخطأ
+                }
             }
 
             return View("GetAll", results);
         }
 
-        // الحصول على المنتجات المميزة (لها خصومات)
         public async Task<IActionResult> FeaturedProducts()
         {
             var activeDiscounts = await _context.Discounts
@@ -426,57 +506,46 @@ namespace Restaurent.Controllers
                 featuredProducts.AddRange(products);
             }
 
-            // إزالة التكرارات
             featuredProducts = featuredProducts.Distinct().ToList();
 
             ViewBag.ActiveDiscounts = activeDiscounts;
             return View("GetAll", featuredProducts);
         }
 
-        // دالة مساعدة لحفظ الصور
-        private async Task<string?> SaveProductImage(IFormFile? imageFile)
+        public async Task<IActionResult> LowStockProducts()
         {
-            if (imageFile == null || imageFile.Length == 0)
-                return null;
-
-            var uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "products");
-            if (!Directory.Exists(uploadsFolder))
+            // استخدام النظام الموحد للجلسة
+            var userSessionJson = HttpContext.Session.GetString("CurrentUser");
+            if (string.IsNullOrEmpty(userSessionJson))
             {
-                Directory.CreateDirectory(uploadsFolder);
+                TempData["ErrorMessage"] = "Access denied. Admin only.";
+                return RedirectToAction("GetAll");
             }
 
-            var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(imageFile.FileName)}";
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            try
             {
-                await imageFile.CopyToAsync(fileStream);
+                var userSession = JsonSerializer.Deserialize<Dictionary<string, object>>(userSessionJson);
+                if (userSession == null || !userSession.ContainsKey("IsAdmin") || !bool.Parse(userSession["IsAdmin"]?.ToString() ?? "false"))
+                {
+                    TempData["ErrorMessage"] = "Access denied. Admin only.";
+                    return RedirectToAction("GetAll");
+                }
+
+                var lowStockProducts = await _context.MenuProducts
+                    .Include(p => p.Category)
+                    .Where(p => !p.IsDeleted && p.Quantity <= 10)
+                    .OrderBy(p => p.Quantity)
+                    .ToListAsync();
+
+                return View(lowStockProducts);
             }
-
-            return $"/images/products/{uniqueFileName}";
-        }
-
-        // دالة مساعدة للحصول على قائمة الفئات
-        private async Task<SelectList> GetCategoriesList()
-        {
-            var cats = await _context.Categories.ToListAsync();
-            return new SelectList(cats, "Id", "Name");
-        }
-
-        // دالة مساعدة لتحديث عدد عناصر السلة في الجلسة
-        private async Task UpdateCartCount()
-        {
-            var userId = HttpContext.Session.GetInt32("UserId");
-            if (userId != null)
+            catch
             {
-                var count = await _context.Carts
-                    .Where(c => c.UserId == userId)
-                    .SumAsync(c => c.Quantity);
-                HttpContext.Session.SetInt32("CartCount", count);
+                TempData["ErrorMessage"] = "Access denied. Admin only.";
+                return RedirectToAction("GetAll");
             }
         }
 
-        // API للحصول على تفاصيل المنتج (للاستخدام في AJAX)
         [HttpGet]
         public async Task<JsonResult> GetProductDetails(int id)
         {
@@ -499,7 +568,7 @@ namespace Restaurent.Controllers
                     price = product.Price,
                     description = product.Description,
                     imageUrl = product.ImageUrl,
-                    category = product.Category.Name,
+                    category = product.Category?.Name,
                     minTime = product.MinTime,
                     maxTime = product.MaxTime,
                     quantity = product.Quantity,
@@ -508,7 +577,6 @@ namespace Restaurent.Controllers
             });
         }
 
-        // التحقق من المخزون
         [HttpGet]
         public async Task<JsonResult> CheckStock(int productId, int quantity = 1)
         {
@@ -537,60 +605,54 @@ namespace Restaurent.Controllers
             });
         }
 
-        // المنتجات ذات المخزون المنخفض (للالأدمن)
-        public async Task<IActionResult> LowStockProducts()
-        {
-            var isAdmin = HttpContext.Session.GetString("IsAdmin") == "True";
-            if (!isAdmin)
-            {
-                TempData["ErrorMessage"] = "Access denied. Admin only.";
-                return RedirectToAction("GetAll");
-            }
-
-            var lowStockProducts = await _context.MenuProducts
-                .Include(p => p.Category)
-                .Where(p => !p.IsDeleted && p.Quantity <= 10)
-                .OrderBy(p => p.Quantity)
-                .ToListAsync();
-
-            return View(lowStockProducts);
-        }
-
-        // تحديث المخزون (للالأدمن)
         [HttpPost]
         public async Task<JsonResult> UpdateStock(int productId, int newQuantity)
         {
-            var isAdmin = HttpContext.Session.GetString("IsAdmin") == "True";
-            if (!isAdmin)
+            // استخدام النظام الموحد للجلسة
+            var userSessionJson = HttpContext.Session.GetString("CurrentUser");
+            if (string.IsNullOrEmpty(userSessionJson))
             {
                 return Json(new { success = false, message = "Access denied" });
             }
 
-            var product = await _context.MenuProducts.FindAsync(productId);
-            if (product == null || product.IsDeleted)
+            try
             {
-                return Json(new { success = false, message = "Product not found" });
+                var userSession = JsonSerializer.Deserialize<Dictionary<string, object>>(userSessionJson);
+                if (userSession == null || !userSession.ContainsKey("IsAdmin") || !bool.Parse(userSession["IsAdmin"]?.ToString() ?? "false"))
+                {
+                    return Json(new { success = false, message = "Access denied" });
+                }
+
+                var product = await _context.MenuProducts.FindAsync(productId);
+                if (product == null || product.IsDeleted)
+                {
+                    return Json(new { success = false, message = "Product not found" });
+                }
+
+                if (newQuantity < 0)
+                {
+                    return Json(new { success = false, message = "Quantity cannot be negative" });
+                }
+
+                product.Quantity = newQuantity;
+                product.UpdatedAt = DateTime.UtcNow;
+
+                _context.Update(product);
+                await _context.SaveChangesAsync();
+
+                return Json(new
+                {
+                    success = true,
+                    message = "Stock updated successfully",
+                    newQuantity = newQuantity
+                });
             }
-
-            if (newQuantity < 0)
+            catch
             {
-                return Json(new { success = false, message = "Quantity cannot be negative" });
+                return Json(new { success = false, message = "Access denied" });
             }
-
-            product.Quantity = newQuantity;
-            product.UpdatedAt = DateTime.UtcNow;
-
-            _context.Update(product);
-            await _context.SaveChangesAsync();
-
-            return Json(new
-            {
-                success = true,
-                message = "Stock updated successfully",
-                newQuantity = newQuantity
-            });
         }
-        // API للتحقق من المنتجات المكررة
+
         [HttpGet]
         public async Task<JsonResult> CheckExistingProduct(string name)
         {
@@ -599,7 +661,6 @@ namespace Restaurent.Controllers
                 return Json(new { exists = false });
             }
 
-            // البحث عن منتج بنفس الاسم (بما في ذلك المحذوف)
             var existingProduct = await _context.MenuProducts
                 .Include(p => p.Category)
                 .FirstOrDefaultAsync(p => p.Name.ToLower() == name.ToLower());
@@ -623,6 +684,71 @@ namespace Restaurent.Controllers
             }
 
             return Json(new { exists = false });
+        }
+
+        // ========== الدوال المساعدة ==========
+
+        private async Task<string?> SaveProductImage(IFormFile? imageFile)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+                return null;
+
+            var uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "products");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(imageFile.FileName)}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(fileStream);
+            }
+
+            return $"/images/products/{uniqueFileName}";
+        }
+
+        private async Task<SelectList> GetCategoriesList()
+        {
+            var cats = await _context.Categories.ToListAsync();
+            return new SelectList(cats, "Id", "Name");
+        }
+
+        private async Task UpdateCartCount()
+        {
+            var userSessionJson = HttpContext.Session.GetString("CurrentUser");
+            if (!string.IsNullOrEmpty(userSessionJson))
+            {
+                try
+                {
+                    var userSession = JsonSerializer.Deserialize<Dictionary<string, object>>(userSessionJson);
+                    if (userSession != null && userSession.ContainsKey("Id"))
+                    {
+                        var userId = userSession["Id"]?.ToString();
+                        if (!string.IsNullOrEmpty(userId))
+                        {
+                            var count = await _context.Carts
+                                .Where(c => c.UserId == userId)
+                                .SumAsync(c => c.Quantity);
+                            HttpContext.Session.SetInt32("CartCount", count);
+                        }
+                    }
+                }
+                catch
+                {
+                    // تجاهل الخطأ
+                }
+            }
+        }
+
+        // دالة مساعدة لتعيين القيم الافتراضية لـ ViewBag
+        private void SetDefaultViewBag()
+        {
+            ViewBag.Favorites = new List<int>();
+            ViewBag.UserId = null;
+            ViewBag.IsAdmin = false;
         }
     }
 }

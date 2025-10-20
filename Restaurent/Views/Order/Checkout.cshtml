@@ -1,4 +1,4 @@
-﻿@model Restaurent.ViewModels.CheckoutVM
+﻿@model Restaurent.ViewModels.CheckoutVm
 
 @{
     ViewData["Title"] = "Checkout";
@@ -14,12 +14,14 @@
                     <h5 class="mb-0"><i class="fas fa-info-circle"></i> Order Information</h5>
                 </div>
                 <div class="card-body">
-                    <form asp-action="PlaceOrder" method="post">
+                    <form asp-action="PlaceOrder" method="post" id="checkoutForm">
+                        @Html.AntiForgeryToken()
+
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label class="form-label">Order Type *</label>
-                                    <select asp-for="OrderType" class="form-select" id="orderType">
+                                    <select asp-for="OrderType" class="form-select" id="orderType" required>
                                         <option value="">Select Order Type</option>
                                         <option value="DineIn">Dine In</option>
                                         <option value="Delivery">Delivery</option>
@@ -33,8 +35,8 @@
                         <div id="dineInFields" class="row" style="display: none;">
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label asp-for="TableNumber" class="form-label">Table Number *</label>
-                                    <input asp-for="TableNumber" class="form-control" placeholder="Enter table number" />
+                                    <label class="form-label">Table Number *</label>
+                                    <input asp-for="TableNumber" type="number" class="form-control" placeholder="Enter table number" />
                                     <span asp-validation-for="TableNumber" class="text-danger"></span>
                                 </div>
                             </div>
@@ -44,7 +46,7 @@
                         <div id="deliveryFields" class="row" style="display: none;">
                             <div class="col-md-12">
                                 <div class="form-group mb-3">
-                                    <label asp-for="DeliveryAddress" class="form-label">Delivery Address *</label>
+                                    <label class="form-label">Delivery Address *</label>
                                     <textarea asp-for="DeliveryAddress" class="form-control" rows="3"
                                               placeholder="Enter your complete delivery address"></textarea>
                                     <span asp-validation-for="DeliveryAddress" class="text-danger"></span>
@@ -52,8 +54,19 @@
                             </div>
                         </div>
 
+                        <!-- Estimated Time Display -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="alert alert-warning" id="timeAlert" style="display: none;">
+                                    <i class="fas fa-clock"></i>
+                                    <strong>Estimated Time: </strong>
+                                    <span id="estimatedTimeDisplay">Calculating...</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-group mt-4">
-                            <button type="submit" class="btn btn-success btn-lg">
+                            <button type="submit" class="btn btn-success btn-lg" id="placeOrderBtn">
                                 <i class="fas fa-check-circle"></i> Place Order
                             </button>
                             <a asp-controller="Cart" asp-action="Index" class="btn btn-secondary">
@@ -102,14 +115,6 @@
                         <h5>Total:</h5>
                         <h5 class="text-success">@Model.Total.ToString("C2")</h5>
                     </div>
-
-                    <div class="alert alert-info mt-3">
-                        <i class="fas fa-clock"></i>
-                        <small>
-                            Estimated preparation time:
-                            <strong id="estimatedTime">15-25 minutes</strong>
-                        </small>
-                    </div>
                 </div>
             </div>
         </div>
@@ -119,6 +124,21 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
+            // دالة لحساب الوقت التقديري
+            function updateEstimatedTime(orderType) {
+                if (orderType) {
+                    $.get('@Url.Action("GetEstimatedTime", "Order")', { orderType: orderType }, function(data) {
+                        if (data.success) {
+                            $('#timeAlert').show();
+                            $('#estimatedTimeDisplay').text(data.estimatedTime);
+                        }
+                    });
+                } else {
+                    $('#timeAlert').hide();
+                }
+            }
+
+            // تحديث الحقول عند تغيير نوع الطلب
             $('#orderType').change(function() {
                 var orderType = $(this).val();
 
@@ -129,34 +149,26 @@
                 // إظهار الحقول المناسبة
                 if (orderType === 'DineIn') {
                     $('#dineInFields').show();
-                    $('#estimatedTime').text('15-25 minutes');
+                    updateEstimatedTime('DineIn');
                 } else if (orderType === 'Delivery') {
                     $('#deliveryFields').show();
-                    $('#estimatedTime').text('30-45 minutes');
+                    updateEstimatedTime('Delivery');
+                } else {
+                    $('#timeAlert').hide();
                 }
             });
 
-            // تفعيل التحقق من الصحة
-            $('form').validate({
-                rules: {
-                    OrderType: "required",
-                    TableNumber: {
-                        required: function() {
-                            return $('#orderType').val() === 'DineIn';
-                        }
-                    },
-                    DeliveryAddress: {
-                        required: function() {
-                            return $('#orderType').val() === 'Delivery';
-                        }
-                    }
-                },
-                messages: {
-                    OrderType: "Please select order type",
-                    TableNumber: "Table number is required for dine-in orders",
-                    DeliveryAddress: "Delivery address is required for delivery orders"
+            // إظهار الوقت التقديري تلقائياً إذا كان هناك نوع طلب محدد
+            var initialOrderType = $('#orderType').val();
+            if (initialOrderType) {
+                updateEstimatedTime(initialOrderType);
+                if (initialOrderType === 'DineIn') {
+                    $('#dineInFields').show();
+                } else if (initialOrderType === 'Delivery') {
+                    $('#deliveryFields').show();
                 }
-            });
+            }
         });
     </script>
 }
+

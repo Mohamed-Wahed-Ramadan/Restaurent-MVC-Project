@@ -1,4 +1,6 @@
-﻿@{
+﻿@model Restaurent.ViewModels.LoginVM
+
+@{
     ViewData["Title"] = "Login";
 }
 
@@ -10,24 +12,52 @@
                     <h3><i class="fas fa-sign-in-alt"></i> Login</h3>
                 </div>
                 <div class="card-body p-4">
+                    <!-- عرض رسائل النجاح أو الخطأ -->
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
                     <form asp-action="Login" method="post" id="loginForm">
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                         <div class="form-group mb-3">
-                            <label class="form-label">
-                                <i class="fas fa-envelope"></i> Email
+                            <label for="Email" class="form-label">
+                                <i class="fas fa-envelope"></i> Email *
                             </label>
-                            <input name="email" type="email" class="form-control"
-                                   placeholder="your@email.com" required />
+                            <input asp-for="Email" type="email" class="form-control" id="Email" placeholder="Enter your email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label class="form-label">
-                                <i class="fas fa-lock"></i> Password
+                        <div class="form-group mb-3 position-relative">
+                            <label for="Password" class="form-label">
+                                <i class="fas fa-lock"></i> Password *
                             </label>
-                            <input name="password" type="password" class="form-control"
-                                   placeholder="••••••••" required />
+                            <input asp-for="Password" type="password" class="form-control" id="Password" placeholder="••••••••" />
+                            <span class="password-toggle position-absolute" style="right: 15px; top: 38px; cursor: pointer;">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                            <span asp-validation-for="Password" class="text-danger"></span>
                         </div>
+
+                        <div class="form-check mb-3">
+                            <input asp-for="RememberMe" class="form-check-input" id="RememberMe" />
+                            <label for="RememberMe" class="form-check-label">
+                                Remember me
+                            </label>
+                        </div>
+
+                        <input type="hidden" asp-for="ReturnUrl" />
 
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-success btn-lg">
@@ -38,9 +68,12 @@
                         <div class="text-center mt-3">
                             <p>
                                 Don't have an account?
-                                <a asp-action="Register" class="text-decoration-none">Register here</a>
+                                <a asp-action="Register" class="text-decoration-none fw-bold">Register here</a>
                             </p>
                         </div>
+
+                        <!-- Super Admin Info for testing -->
+                        
                     </form>
                 </div>
             </div>
@@ -49,18 +82,46 @@
 </div>
 
 @section Scripts {
-    <script>
-        $(document).ready(function() {
-            $('#loginForm').on('submit', function(e) {
-                var email = $('input[name="email"]').val();
-                var password = $('input[name="password"]').val();
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 
-                if (!email || !password) {
-                    e.preventDefault();
-                    showAlert('error', 'Please fill in all fields');
-                    return false;
-                }
-            });
-        });
-    </script>
+    <style>
+        .form-control {
+            transition: all 0.3s ease;
+            border: 2px solid #e9ecef;
+        }
+
+        .form-control:focus {
+            border-color: #198754;
+            box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+        }
+
+        .form-group.focused label {
+            color: #198754;
+            font-weight: 600;
+        }
+
+        .password-toggle {
+            color: #6c757d;
+            transition: color 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            color: #198754;
+        }
+
+        .btn-success {
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(25, 135, 84, 0.3);
+        }
+
+    </style>
+
+   
 }
+<script src="./js/site.js"></script>

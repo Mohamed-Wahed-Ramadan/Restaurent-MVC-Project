@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "Admin Dashboard";
+    var userEmail = Context.Session.GetString("UserEmail");
+    var isSuperAdmin = userEmail == "medo03459@gmail.com" || userEmail == "4dm1n@gmail.com";
 }
 
 <div class="container-fluid mt-4">
@@ -91,15 +93,18 @@
                     <a asp-controller="Admin" asp-action="Discounts" class="list-group-item list-group-item-action">
                         <i class="fas fa-tag me-2"></i>Manage Discounts
                     </a>
-                    <a asp-controller="Admin" asp-action="ManageOrders" class="list-group-item list-group-item-action">
-                        <i class="fas fa-clipboard-list me-2"></i>Manage Orders
-                    </a>
-                    <a asp-controller="User" asp-action="ManageUsers" class="list-group-item list-group-item-action">
-                        <i class="fas fa-users-cog me-2"></i>Manage Users
-                    </a>
-                    <a asp-controller="Admin" asp-action="CleanupOldOrders" class="list-group-item list-group-item-action text-danger">
-                        <i class="fas fa-trash me-2"></i>Cleanup Old Orders
-                    </a>
+                    
+
+                    @* عرض Manage Users للـ Super Admins فقط *@
+                    @if (isSuperAdmin)
+                    {
+                        <a class="list-group-item list-group-item-action text-warning" asp-controller="User" asp-action="ManageUsers">
+                            <i class="fas fa-users-cog"></i> Manage Users
+                        </a>
+                        <a asp-controller="Admin" asp-action="CleanupOldOrders" class="list-group-item list-group-item-action text-danger">
+                            <i class="fas fa-trash me-2"></i>Cleanup Old Orders
+                        </a>
+                    }
                 </div>
             </div>
         </div>

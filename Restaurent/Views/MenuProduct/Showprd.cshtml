@@ -2,8 +2,29 @@
 
 @{
     ViewData["Title"] = "Showprd";
-    var isAdmin = Context.Session.GetString("IsAdmin") == "True";
-    var userId = Context.Session.GetInt32("UserId");
+
+    // استخدام النظام الموحد للجلسة
+    var userSessionJson = Context.Session.GetString("CurrentUser");
+    var isLoggedIn = !string.IsNullOrEmpty(userSessionJson);
+    var isAdmin = false;
+    var userId = "";
+
+    if (isLoggedIn)
+    {
+        try
+        {
+            var userSession = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.Nodes.JsonObject>(userSessionJson);
+            if (userSession != null)
+            {
+                isAdmin = userSession["IsAdmin"]?.GetValue<bool>() ?? false;
+                userId = userSession["Id"]?.GetValue<string>() ?? "";
+            }
+        }
+        catch
+        {
+            isLoggedIn = false;
+        }
+    }
 }
 
 <div class="container mt-4">
@@ -29,7 +50,7 @@
                     <!-- Action Buttons Section -->
                     <div class="d-grid gap-2">
                         <!-- Add to Cart Button - Visible for all logged in users -->
-                        @if (userId != null)
+                        @if (isLoggedIn)
                         {
                             if (Model.Quantity > 0)
                             {
@@ -245,9 +266,13 @@
                         updateCartCount();
                     } else {
                         showToast(response.message, 'error');
+                        if (response.redirect) {
+                            window.location.href = response.redirect;
+                        }
                     }
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.log('Error:', error);
                     showToast('An error occurred. Please try again.', 'error');
                 }
             });

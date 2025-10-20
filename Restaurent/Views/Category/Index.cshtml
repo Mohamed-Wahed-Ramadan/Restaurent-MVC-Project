@@ -1,9 +1,55 @@
 ﻿@using Microsoft.EntityFrameworkCore
 @using Context
 @model List<Models.Category>
+@inject AppDpContext _context
 
 @{
     ViewData["Title"] = "Manage Categories";
+
+    // قراءة بيانات المستخدم من الجلسة بدلاً من User.Identity
+    var userSessionJson = Context.Session.GetString("CurrentUser");
+    var isLoggedIn = !string.IsNullOrEmpty(userSessionJson);
+    var isAdmin = false;
+    var isSuperAdmin = false;
+
+    if (isLoggedIn)
+    {
+        try
+        {
+            var userSession = System.Text.Json.JsonSerializer.Deserialize<dynamic>(userSessionJson);
+            isAdmin = userSession.GetProperty("IsAdmin").GetBoolean();
+            isSuperAdmin = userSession.GetProperty("Email").GetString() == "medo03459@gmail.com" ||
+                          userSession.GetProperty("Email").GetString() == "4dm1n@gmail.com";
+        }
+        catch
+        {
+            isLoggedIn = false;
+        }
+    }
+
+    // المستخدم مسؤول إذا كان أدمن أو سوبر أدمن
+    var isAuthorized = isAdmin || isSuperAdmin;
+}
+
+@if (!isAuthorized)
+{
+    <div class="alert alert-danger text-center mt-4">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Access Denied!</strong> You don't have permission to access this page.
+        <div class="mt-2">
+            <small class="text-muted">
+                @if (!isLoggedIn)
+                {
+                    <span>Please <a asp-controller="User" asp-action="Login" class="alert-link">login</a> first.</span>
+                }
+                else
+                {
+                    <span>Admin privileges required.</span>
+                }
+            </small>
+        </div>
+    </div>
+    return;
 }
 
 <div class="container mt-4">
@@ -14,6 +60,18 @@
                 <i class="fas fa-tags text-primary"></i> Manage Categories
             </h2>
             <p class="text-muted mb-0">Organize your products into categories</p>
+            @if (isSuperAdmin)
+            {
+                <small class="text-success">
+                    <i class="fas fa-crown"></i> Super Admin Mode
+                </small>
+            }
+            else if (isAdmin)
+            {
+                <small class="text-info">
+                    <i class="fas fa-user-shield"></i> Admin Mode
+                </small>
+            }
         </div>
         <a asp-action="Create" class="btn btn-success btn-lg shadow-sm">
             <i class="fas fa-plus-circle"></i> Add New Category
@@ -282,8 +340,7 @@
     {
         try
         {
-            var context = new AppDpContext();
-            return await context.MenuProducts.CountAsync(p => p.CategoryId == categoryId && !p.IsDeleted);
+            return await _context.MenuProducts.CountAsync(p => p.CategoryId == categoryId && !p.IsDeleted);
         }
         catch
         {
