@@ -18,7 +18,6 @@ namespace Restaurent.Controllers
         [HttpPost]
         public async Task<IActionResult> ToggleFavorite(int productId)
         {
-            // استخدام النظام الموحد للجلسة
             var userSessionJson = HttpContext.Session.GetString("CurrentUser");
             if (string.IsNullOrEmpty(userSessionJson))
             {
@@ -99,7 +98,6 @@ namespace Restaurent.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // استخدام النظام الموحد للجلسة
             var userSessionJson = HttpContext.Session.GetString("CurrentUser");
             if (string.IsNullOrEmpty(userSessionJson))
             {
@@ -138,7 +136,6 @@ namespace Restaurent.Controllers
         [HttpGet]
         public async Task<JsonResult> IsFavorite(int productId)
         {
-            // استخدام النظام الموحد للجلسة
             var userSessionJson = HttpContext.Session.GetString("CurrentUser");
             if (string.IsNullOrEmpty(userSessionJson))
             {

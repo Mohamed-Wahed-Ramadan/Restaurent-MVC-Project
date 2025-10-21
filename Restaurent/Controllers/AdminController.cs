@@ -21,7 +21,6 @@ namespace Restaurent.Controllers
             _userManager = userManager;
         }
 
-        // ========== الدوال المساعدة ==========
 
         private async Task<bool> IsAdminUser()
         {
@@ -64,7 +63,6 @@ namespace Restaurent.Controllers
             }
         }
 
-        // ========== Dashboard والإحصائيات ==========
 
         public async Task<IActionResult> Dashboard()
         {
@@ -156,7 +154,6 @@ namespace Restaurent.Controllers
         }
 
         // ========== تنظيف الطلبات القديمة ==========
-        // ========== تنظيف الطلبات القديمة ==========
 
         [HttpGet]
         public async Task<IActionResult> CleanupOldOrders()
@@ -167,8 +164,7 @@ namespace Restaurent.Controllers
                 return RedirectToAction("Dashboard");
             }
 
-            // تغيير من شهر إلى أسبوع
-            var cutoffDate = DateTime.Now.AddDays(-7); // أسبوع بدل شهر
+            var cutoffDate = DateTime.Now.AddDays(-7); // أسبوع  
             var oldCompletedOrders = await _context.Orders
                 .Where(o => o.Status == "Completed" && o.CreatedAt < cutoffDate)
                 .ToListAsync();
@@ -200,8 +196,7 @@ namespace Restaurent.Controllers
 
             try
             {
-                // تغيير من شهر إلى أسبوع
-                var cutoffDate = DateTime.Now.AddDays(-7); // أسبوع بدل شهر
+                var cutoffDate = DateTime.Now.AddDays(-7); // أسبوع 
                 var oldCompletedOrders = await _context.Orders
                     .Where(o => o.Status == "Completed" && o.CreatedAt < cutoffDate)
                     .ToListAsync();
@@ -283,7 +278,6 @@ namespace Restaurent.Controllers
             return Json(new { success = true, data = orderData });
         }
 
-        // ========== إدارة الخصومات ==========
 
         public async Task<IActionResult> Discounts()
         {

@@ -22,7 +22,6 @@ namespace Restaurent.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
         {
-            // استخدام النظام الموحد للجلسة
             var userSessionJson = HttpContext.Session.GetString("CurrentUser");
             if (string.IsNullOrEmpty(userSessionJson))
             {
@@ -89,7 +88,6 @@ namespace Restaurent.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // استخدام النظام الموحد للجلسة
             var userSessionJson = HttpContext.Session.GetString("CurrentUser");
             if (string.IsNullOrEmpty(userSessionJson))
             {
@@ -144,7 +142,6 @@ namespace Restaurent.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateQuantity(int cartId, int quantity)
         {
-            // استخدام النظام الموحد للجلسة
             var userSessionJson = HttpContext.Session.GetString("CurrentUser");
             if (string.IsNullOrEmpty(userSessionJson))
             {
@@ -217,7 +214,6 @@ namespace Restaurent.Controllers
         [HttpPost]
         public async Task<IActionResult> RemoveFromCart(int cartId)
         {
-            // استخدام النظام الموحد للجلسة
             var userSessionJson = HttpContext.Session.GetString("CurrentUser");
             if (string.IsNullOrEmpty(userSessionJson))
             {
@@ -259,7 +255,6 @@ namespace Restaurent.Controllers
         [HttpGet]
         public async Task<JsonResult> GetCartCount()
         {
-            // استخدام النظام الموحد للجلسة
             var userSessionJson = HttpContext.Session.GetString("CurrentUser");
             if (string.IsNullOrEmpty(userSessionJson))
             {

@@ -78,7 +78,6 @@ namespace Restaurent.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(User model, IFormFile? imageFile, string? newPassword)
         {
-            // إزالة الخصائص غير المطلوبة من ModelState
             ModelState.Remove("PasswordHash");
             ModelState.Remove("SecurityStamp");
             ModelState.Remove("ConcurrencyStamp");
@@ -87,7 +86,6 @@ namespace Restaurent.Controllers
             ModelState.Remove("imageFile");
             ModelState.Remove("newPassword");
 
-            // إزالة خصائص Navigation
             ModelState.Remove("Orders");
             ModelState.Remove("CartItems");
             ModelState.Remove("Favorites");
@@ -112,14 +110,12 @@ namespace Restaurent.Controllers
                     return RedirectToAction("Details");
                 }
 
-                // التحقق من أن المستخدم يحاول تعديل حسابه فقط
                 if (existingUser.Id != currentUserId)
                 {
                     TempData["ErrorMessage"] = "You can only edit your own profile";
                     return RedirectToAction("Details");
                 }
 
-                // تحديث البيانات الأساسية
                 existingUser.UserName = model.UserName;
                 existingUser.Email = model.Email;
                 existingUser.PhoneNumber = model.PhoneNumber;
@@ -132,7 +128,6 @@ namespace Restaurent.Controllers
                     existingUser.ImageURL = await SaveImage(imageFile);
                 }
 
-                // تحديث كلمة المرور إذا تم إدخال واحدة
                 if (!string.IsNullOrEmpty(newPassword))
                 {
                     if (newPassword.Length < 6)
@@ -153,7 +148,6 @@ namespace Restaurent.Controllers
                     }
                 }
 
-                // تحديث بيانات المستخدم
                 var updateResult = await _userManager.UpdateAsync(existingUser);
                 if (updateResult.Succeeded)
                 {
@@ -181,7 +175,6 @@ namespace Restaurent.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            // مسح بيانات RememberMe قبل تسجيل الخروج
             HttpContext.Session.Remove("UseRememberMe");
 
             await _signinManager.SignOutAsync();
@@ -203,7 +196,6 @@ namespace Restaurent.Controllers
                     return View(vm);
                 }
 
-                // تحديد إذا كان المستخدم أدمن أم لا
                 bool isAdmin = user.IsAdmin;
 
                 // المنطق الصحيح:
@@ -326,13 +318,11 @@ namespace Restaurent.Controllers
 
             var usersQuery = _userManager.Users.AsQueryable();
 
-            // تطبيق الفلترة بناءً على المستخدم الحالي
             if (currentUserEmail == SECOND_SUPER_ADMIN_EMAIL)
             {
                 usersQuery = usersQuery.Where(u => u.Email != SUPER_ADMIN_EMAIL);
             }
 
-            // تطبيق البحث إذا كان موجوداً
             if (!string.IsNullOrEmpty(search))
             {
                 search = search.Trim().ToLower();

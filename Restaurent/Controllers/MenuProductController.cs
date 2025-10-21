@@ -38,7 +38,6 @@ namespace Restaurent.Controllers
                 return NotFound();
             }
 
-            // استخدام النظام الموحد للجلسة
             var userSessionJson = HttpContext.Session.GetString("CurrentUser");
             if (!string.IsNullOrEmpty(userSessionJson))
             {
@@ -85,7 +84,6 @@ namespace Restaurent.Controllers
                     .Where(p => !p.IsDeleted)
                     .ToListAsync();
 
-                // استخدام النظام الموحد للجلسة
                 var userSessionJson = HttpContext.Session.GetString("CurrentUser");
                 if (!string.IsNullOrEmpty(userSessionJson))
                 {
@@ -119,7 +117,6 @@ namespace Restaurent.Controllers
                     }
                     catch (Exception ex)
                     {
-                        // في حالة خطأ في قراءة الجلسة
                         SetDefaultViewBag();
                     }
                 }
@@ -350,7 +347,6 @@ namespace Restaurent.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToCartFromDetails(int productId, int quantity = 1)
         {
-            // استخدام النظام الموحد للجلسة
             var userSessionJson = HttpContext.Session.GetString("CurrentUser");
             if (string.IsNullOrEmpty(userSessionJson))
             {
@@ -453,7 +449,6 @@ namespace Restaurent.Controllers
 
             var results = await query.ToListAsync();
 
-            // استخدام النظام الموحد للجلسة
             var userSessionJson = HttpContext.Session.GetString("CurrentUser");
             if (!string.IsNullOrEmpty(userSessionJson))
             {
@@ -514,7 +509,6 @@ namespace Restaurent.Controllers
 
         public async Task<IActionResult> LowStockProducts()
         {
-            // استخدام النظام الموحد للجلسة
             var userSessionJson = HttpContext.Session.GetString("CurrentUser");
             if (string.IsNullOrEmpty(userSessionJson))
             {
@@ -608,7 +602,6 @@ namespace Restaurent.Controllers
         [HttpPost]
         public async Task<JsonResult> UpdateStock(int productId, int newQuantity)
         {
-            // استخدام النظام الموحد للجلسة
             var userSessionJson = HttpContext.Session.GetString("CurrentUser");
             if (string.IsNullOrEmpty(userSessionJson))
             {

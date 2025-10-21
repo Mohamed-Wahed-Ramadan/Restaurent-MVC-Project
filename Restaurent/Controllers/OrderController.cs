@@ -22,7 +22,6 @@ namespace Restaurent.Controllers
 
         public async Task<IActionResult> Checkout()
         {
-            // استخدام النظام الموحد للجلسة
             var userSessionJson = HttpContext.Session.GetString("CurrentUser");
             if (string.IsNullOrEmpty(userSessionJson))
             {
@@ -67,7 +66,6 @@ namespace Restaurent.Controllers
                     return RedirectToAction("Index", "Cart");
                 }
 
-                // التحقق من توفر المخزون
                 foreach (var cartItem in cartItems)
                 {
                     var product = await _context.MenuProducts.FindAsync(cartItem.MenuProductId);
@@ -131,7 +129,6 @@ namespace Restaurent.Controllers
                     return RedirectToAction("Login", "User");
                 }
 
-                // التحقق من الصحة المبدئي
                 bool isValid = true;
 
                 if (string.IsNullOrEmpty(model.OrderType))
@@ -154,7 +151,6 @@ namespace Restaurent.Controllers
 
                 if (!isValid)
                 {
-                    // إعادة تحميل بيانات السلة إذا فشل التحقق
                     var cartItems = await _context.Carts
                         .Include(c => c.MenuProduct)
                         .Where(c => c.UserId == userId)
@@ -198,7 +194,6 @@ namespace Restaurent.Controllers
                     return RedirectToAction("Index", "Cart");
                 }
 
-                // التحقق النهائي من المخزون قبل إنشاء الطلب
                 foreach (var cartItem in cartItemsToOrder)
                 {
                     if (cartItem.MenuProduct.Quantity < cartItem.Quantity)
@@ -231,7 +226,6 @@ namespace Restaurent.Controllers
                         CreatedAt = DateTime.UtcNow
                     };
 
-                    // إضافة عناصر الطلب
                     foreach (var cartItem in cartItemsToOrder)
                     {
                         var orderItem = new OrderItem
@@ -244,7 +238,6 @@ namespace Restaurent.Controllers
                         };
                         order.OrderItems.Add(orderItem);
 
-                        // تحديث المخزون
                         cartItem.MenuProduct.Quantity -= cartItem.Quantity;
                         cartItem.MenuProduct.UpdatedAt = DateTime.UtcNow;
                     }
@@ -252,7 +245,6 @@ namespace Restaurent.Controllers
                     await _context.Orders.AddAsync(order);
                     await _context.SaveChangesAsync();
 
-                    // حذف عناصر السلة بعد نجاح الطلب
                     _context.Carts.RemoveRange(cartItemsToOrder);
                     await _context.SaveChangesAsync();
 
@@ -579,7 +571,6 @@ namespace Restaurent.Controllers
                 using var transaction = await _context.Database.BeginTransactionAsync();
                 try
                 {
-                    // استعادة المخزون
                     foreach (var orderItem in order.OrderItems)
                     {
                         orderItem.MenuProduct.Quantity += orderItem.Quantity;
