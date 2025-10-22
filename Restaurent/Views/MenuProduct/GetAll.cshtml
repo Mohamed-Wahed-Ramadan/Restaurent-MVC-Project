@@ -44,41 +44,32 @@
         .Where(c => !c.IsDeleted)
         .OrderBy(c => c.Name)
         .ToListAsync();
-
-    // تجميع المنتجات حسب الفئة
-    var productsByCategory = Model.GroupBy(p => p.Category?.Name ?? "Uncategorized")
-                                 .OrderBy(g => g.Key);
-    var totalProducts = Model.Count();
-
-    // حساب نطاق الأسعار
-    var minPrice = Model.Any() ? Model.Min(p => p.Price) : 0;
-    var maxPrice = Model.Any() ? Model.Max(p => p.Price) : 200;
 }
 
 <div class="container-fluid px-3 px-md-5 mt-4">
     <!-- Carousel Section -->
-    <div id="carouselExample" class="carousel slide mb-4">
+    <div id="carouselExample" class="carousel slide carousel-fade mb-4" data-bs-ride="carousel">
         <div class="carousel-inner">
-            <div class="carousel-item active" style="width:100% ; height:500px;">
-                <img src="/images/res1.jpg" class="d-block w-100" style="width:100% ; height:100%;" alt="Restaurant Image 1">
+            <div class="carousel-item active">
+                <img src="/images/res1.jpg" class="d-block w-100" style="height:500px; object-fit: cover;" alt="Restaurant Image 1" loading="lazy">
             </div>
-            <div class="carousel-item" style="width:100% ; height:500px;">
-                <img src="/images/res7.jpg" class="d-block w-100" style="width:100% ; height:100%;" alt="Restaurant Image 2">
+            <div class="carousel-item">
+                <img src="/images/res7.jpg" class="d-block w-100" style="height:500px; object-fit: cover;" alt="Restaurant Image 2" loading="lazy">
             </div>
-            <div class="carousel-item" style="width:100% ; height:500px;">
-                <img src="/images/res2.jpg" class="d-block w-100" style="width:100% ; height:100%;" alt="Restaurant Image 3">
+            <div class="carousel-item">
+                <img src="/images/res2.jpg" class="d-block w-100" style="height:500px; object-fit: cover;" alt="Restaurant Image 3" loading="lazy">
             </div>
-            <div class="carousel-item" style="width:100% ; height:500px;">
-                <img src="/images/res3.jpg" class="d-block w-100" style="width:100% ; height:100%;" alt="Restaurant Image 4">
+            <div class="carousel-item">
+                <img src="/images/res3.jpg" class="d-block w-100" style="height:500px; object-fit: cover;" alt="Restaurant Image 4" loading="lazy">
             </div>
-            <div class="carousel-item" style="width:100% ; height:500px;">
-                <img src="/images/res4.jpg" class="d-block w-100" style="width:100% ; height:100%;" alt="Restaurant Image 5">
+            <div class="carousel-item">
+                <img src="/images/res4.jpg" class="d-block w-100" style="height:500px; object-fit: cover;" alt="Restaurant Image 5" loading="lazy">
             </div>
-            <div class="carousel-item" style="width:100% ; height:500px;">
-                <img src="/images/res5.jpg" class="d-block w-100" style="width:100% ; height:100%;" alt="Restaurant Image 6">
+            <div class="carousel-item">
+                <img src="/images/res5.jpg" class="d-block w-100" style="height:500px; object-fit: cover;" alt="Restaurant Image 6" loading="lazy">
             </div>
-            <div class="carousel-item" style="width:100% ; height:500px;">
-                <img src="/images/res6.jpg" class="d-block w-100" style="width:100% ; height:100%;" alt="Restaurant Image 7">
+            <div class="carousel-item">
+                <img src="/images/res6.jpg" class="d-block w-100" style="height:500px; object-fit: cover;" alt="Restaurant Image 7" loading="lazy">
             </div>
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
@@ -97,8 +88,8 @@
             @if (ViewBag.ActiveDiscounts != null && ((List<Models.Discount>)ViewBag.ActiveDiscounts).Any())
             {
                 <!-- Discounts Carousel -->
-                <div id="discountsCarousel" class="carousel slide bg-gradient shadow-sm rounded" data-bs-ride="carousel" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <div class="carousel-inner py-3">
+                <div id="discountsCarousel" class="carousel slide shadow-sm rounded" data-bs-ride="carousel" style="background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%);">
+                    <div class="carousel-inner py-2">
                         @{
                             var discounts = (List<Models.Discount>)ViewBag.ActiveDiscounts;
                             for (int i = 0; i < discounts.Count; i++)
@@ -108,46 +99,32 @@
                                     <div class="container">
                                         <div class="row align-items-center text-white px-3">
                                             <div class="col-md-2 text-center">
-                                                <div class="discount-badge-large">
-                                                    <i class="fas fa-percentage fa-2x mb-2"></i>
-                                                    <h2 class="mb-0 fw-bold">@discount.DiscountPercentage%</h2>
-                                                    <small>OFF</small>
+                                                <div class="discount-badge-large bg-white text-dark rounded p-2">
+                                                    <h2 class="mb-0 fw-bold text-success">@discount.DiscountPercentage%</h2>
+                                                    <small class="text-muted">OFF</small>
                                                 </div>
                                             </div>
-                                            <div class="col-md-7">
-                                                <h4 class="mb-2 fw-bold">
-                                                    <i class="fas fa-tag me-2"></i>@discount.Name
-                                                </h4>
-                                                <p class="mb-2">@discount.Description</p>
-                                                <div class="d-flex gap-3 flex-wrap">
+                                            <div class="col-md-8">
+                                                <h5 class="mb-1 fw-bold">@discount.Name</h5>
+                                                <p class="mb-1 small">@discount.Description</p>
+                                                <div class="d-flex gap-2 flex-wrap">
                                                     @if (discount.CategoryId != null)
                                                     {
                                                         <span class="badge bg-light text-dark">
-                                                            <i class="fas fa-utensils me-1"></i>@discount.Category?.Name
-                                                        </span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="badge bg-success">
-                                                            <i class="fas fa-check-circle me-1"></i>All Categories
+                                                            @discount.Category?.Name
                                                         </span>
                                                     }
                                                     @if (discount.IsAgeBased)
                                                     {
-                                                        <span class="badge bg-info">
-                                                            <i class="fas fa-users me-1"></i>Ages @discount.MinAge - @discount.MaxAge
+                                                        <span class="badge bg-warning text-dark">
+                                                            Ages @discount.MinAge - @discount.MaxAge
                                                         </span>
                                                     }
                                                 </div>
                                             </div>
-                                            <div class="col-md-3 text-center">
-                                                <div class="d-flex flex-column">
-                                                    <small class="mb-1 opacity-75">Valid Until</small>
-                                                    <h5 class="mb-0 fw-bold">@discount.EndDate.ToString("MMM dd, yyyy")</h5>
-                                                    <small class="mt-2 badge bg-warning text-dark">
-                                                        <i class="fas fa-clock me-1"></i>Limited Time
-                                                    </small>
-                                                </div>
+                                            <div class="col-md-2 text-center">
+                                                <small class="mb-1 opacity-75 d-block">Valid Until</small>
+                                                <strong>@discount.EndDate.ToString("MMM dd")</strong>
                                             </div>
                                         </div>
                                     </div>
@@ -166,37 +143,25 @@
                             <span class="carousel-control-next-icon" aria-hidden="true"></span>
                             <span class="visually-hidden">Next</span>
                         </button>
-
-                        <div class="carousel-indicators">
-                            @for (int i = 0; i < discounts.Count; i++)
-                            {
-                                <button type="button" data-bs-target="#discountsCarousel"
-                                        data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")"
-                                        aria-current="@(i == 0 ? "true" : "false")"
-                                        aria-label="Slide @(i + 1)"></button>
-                            }
-                        </div>
                     }
                 </div>
             }
             else
             {
                 <div class="alert alert-dismissible fade show border-0 shadow-sm mb-0"
-                     style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                     style="background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);">
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
                     <div class="row align-items-center text-white py-2">
                         <div class="col-md-2 text-center">
-                            <i class="fas fa-gift fa-3x"></i>
+                            <i class="fas fa-gift fa-2x"></i>
                         </div>
                         <div class="col-md-8">
-                            <h4 class="mb-1 fw-bold">
-                                <i class="fas fa-sparkles me-2"></i>Special Offers Coming Soon!
-                            </h4>
-                            <p class="mb-0">Stay tuned for exclusive deals and amazing discounts on your favorite dishes</p>
+                            <h5 class="mb-1 fw-bold">Special Offers Coming Soon!</h5>
+                            <p class="mb-0 small">Stay tuned for exclusive deals and amazing discounts</p>
                         </div>
                         <div class="col-md-2 text-center">
-                            <span class="badge bg-light text-dark fs-6 px-3 py-2">
-                                <i class="fas fa-bell me-1"></i>Get Notified
+                            <span class="badge bg-light text-dark px-3 py-2">
+                                <i class="fas fa-bell me-1"></i>Notify Me
                             </span>
                         </div>
                     </div>
@@ -205,141 +170,56 @@
         </div>
     </div>
 
-    <!-- Advanced Search Section -->
+    <!-- Enhanced Interactive Search Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-gradient text-white py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0">
-                            <i class="fas fa-search me-2"></i>Search & Filter Menu
-                        </h4>
-                        <button class="btn btn-light btn-sm" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#searchFilters" aria-expanded="true" aria-controls="searchFilters">
-                            <i class="fas fa-filter me-1"></i>Toggle Filters
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body collapse show" id="searchFilters">
-                    <div class="row g-3">
-                        <!-- Search by Name -->
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">
-                                <i class="fas fa-font me-1"></i>Search by Name
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <div class="row g-3 align-items-end">
+                        <!-- Search Input -->
+                        <div class="col-md-8">
+                            <label for="interactiveSearch" class="form-label fw-bold text-dark mb-2">
+                                <i class="fas fa-search me-2 text-primary"></i>Search Products
                             </label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light">
-                                    <i class="fas fa-utensils text-primary"></i>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-end-0">
+                                    <i class="fas fa-search text-primary"></i>
                                 </span>
-                                <input type="text" class="form-control" id="searchByName"
-                                       placeholder="Enter product name..."
+                                <input type="text"
+                                       class="form-control border-start-0"
+                                       id="interactiveSearch"
+                                       placeholder="Search by product name, description, or category..."
                                        autocomplete="off">
-                                <button class="btn btn-outline-secondary" type="button" onclick="clearSearchName()">
+                                <button class="btn btn-outline-secondary" type="button" onclick="clearInteractiveSearch()">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
-                            <small class="text-muted">Search for dishes by name</small>
                         </div>
 
-                        <!-- Filter by Category -->
+                        <!-- Category Filter -->
                         <div class="col-md-4">
-                            <label class="form-label fw-bold">
-                                <i class="fas fa-list me-1"></i>Filter by Category
+                            <label for="categoryFilter" class="form-label fw-bold text-dark mb-2">
+                                <i class="fas fa-filter me-2 text-primary"></i>Filter by Category
                             </label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light">
-                                    <i class="fas fa-filter text-success"></i>
-                                </span>
-                                <select class="form-select" id="filterCategory">
-                                    <option value="">All Categories</option>
-                                    @foreach (var category in activeCategories)
-                                    {
-                                        <option value="@category.Name">@category.Name</option>
-                                    }
-                                </select>
-                                <button class="btn btn-outline-secondary" type="button" onclick="clearCategory()">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                            <small class="text-muted">@activeCategories.Count categories available</small>
-                        </div>
-
-                        <!-- Price Range -->
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">
-                                <i class="fas fa-money-bill-wave me-1"></i>Price Range (EGP)
-                            </label>
-                            <div class="d-flex gap-2 align-items-center">
-                                <input type="number" class="form-control" id="minPrice"
-                                       placeholder="Min" min="0" max="@maxPrice" value="@minPrice">
-                                <span class="text-muted">-</span>
-                                <input type="number" class="form-control" id="maxPrice"
-                                       placeholder="Max" min="0" max="@maxPrice" value="@maxPrice">
-                                <button class="btn btn-outline-secondary" type="button" onclick="resetPriceRange()">
-                                    <i class="fas fa-redo"></i>
-                                </button>
-                            </div>
-                            <div class="mt-2">
-                                <input type="range" class="form-range" id="priceRange"
-                                       min="@minPrice" max="@maxPrice" value="@maxPrice">
-                                <div class="d-flex justify-content-between">
-                                    <small class="text-muted">@minPrice EGP</small>
-                                    <small class="text-primary fw-bold" id="currentPrice">@maxPrice EGP</small>
-                                    <small class="text-muted">@maxPrice EGP</small>
-                                </div>
-                            </div>
+                            <select class="form-select form-select-lg" id="categoryFilter">
+                                <option value="">All Categories</option>
+                                @foreach (var category in activeCategories)
+                                {
+                                    <option value="@category.Id">@category.Name</option>
+                                }
+                            </select>
                         </div>
                     </div>
 
-                    <!-- Advanced Filters Row -->
-                    <div class="row g-3 mt-2">
-                        <!-- Sort By -->
-                        <div class="col-md-3">
-                            <label class="form-label fw-bold">
-                                <i class="fas fa-sort me-1"></i>Sort By
-                            </label>
-                            <select class="form-select" id="sortBy">
-                                <option value="name-asc">Name (A-Z)</option>
-                                <option value="name-desc">Name (Z-A)</option>
-                                <option value="price-asc">Price (Low to High)</option>
-                                <option value="price-desc">Price (High to Low)</option>
-                                <option value="popular">Most Popular</option>
-                            </select>
-                        </div>
-
-                        <!-- Availability Filter -->
-                        <div class="col-md-3">
-                            <label class="form-label fw-bold">
-                                <i class="fas fa-box me-1"></i>Availability
-                            </label>
-                            <select class="form-select" id="availabilityFilter">
-                                <option value="all">All Items</option>
-                                <option value="in-stock">In Stock Only</option>
-                                <option value="low-stock">Low Stock</option>
-                            </select>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="col-md-6 d-flex align-items-end gap-2">
-                            <button class="btn btn-primary flex-fill" onclick="applyFilters()">
-                                <i class="fas fa-search me-2"></i>Apply Filters
-                            </button>
-                            <button class="btn btn-outline-secondary flex-fill" onclick="resetAllFilters()">
-                                <i class="fas fa-redo me-2"></i>Reset All
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Results Summary -->
+                    <!-- Search Status -->
                     <div class="row mt-3">
                         <div class="col-12">
-                            <div class="alert alert-info mb-0 d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    <strong id="resultsCount">@totalProducts</strong> products found
-                                    <span id="activeFiltersText"></span>
-                                </div>
-                                <div class="d-flex gap-2" id="activeFilterBadges">
+                            <div id="searchStatus" class="d-none">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span id="resultsCount" class="badge bg-primary fs-6"></span>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="resetInteractiveSearch()">
+                                        <i class="fas fa-redo me-1"></i>Reset
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -349,164 +229,202 @@
         </div>
     </div>
 
-    <!-- Products by Category -->
+    <!-- Loading Spinner -->
+    <div id="searchLoading" class="text-center d-none my-4">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted mt-2">Searching products...</p>
+    </div>
+
+    <!-- Products Container -->
     <div id="productsContainer">
-        @foreach (var categoryGroup in productsByCategory)
-        {
-            <div class="category-section mb-5" data-category="@categoryGroup.Key">
-                <!-- Category Header -->
-                <div class="category-header bg-gradient-primary text-white p-4 rounded-top">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h3 class="mb-0">
-                            <i class="fas fa-utensils me-2"></i>
-                            @categoryGroup.Key
-                        </h3>
-                        <span class="badge bg-light text-dark fs-6 category-count">
-                            @categoryGroup.Count() Items
-                        </span>
+        @{
+            // تجميع المنتجات حسب الفئة
+            var productsByCategory = Model.GroupBy(p => p.Category?.Name ?? "Uncategorized")
+            .OrderBy(g => g.Key);
+
+            foreach (var categoryGroup in productsByCategory)
+            {
+                <div class="category-section mb-5" data-category="@categoryGroup.Key" data-category-id="@categoryGroup.First().CategoryId">
+                    <!-- Category Header -->
+                    <div class="category-header p-3 mb-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0 fw-bold" style="color: #8B4513;">
+                                <i class="fas fa-utensils me-2" style="color: #8B4513;"></i>
+                                @categoryGroup.Key
+                            </h3>
+                            <span class="badge bg-primary fs-6 category-count">
+                                @categoryGroup.Count() Items
+                            </span>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Products Grid -->
-                <div class="row g-4 p-4 bg-light rounded-bottom">
-                    @foreach (var item in categoryGroup)
-                    {
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3 product-item"
-                             data-category="@categoryGroup.Key"
-                             data-name="@item.Name.ToLower()"
-                             data-description="@item.Description.ToLower()"
-                             data-price="@item.Price"
-                             data-quantity="@item.Quantity"
-                             data-product-id="@item.Id">
+                    <!-- Products Grid -->
+                    <div class="row g-4 rounded-bottom">
+                        @foreach (var item in categoryGroup)
+                        {
+                            <div class="col-12 col-sm-6 col-md-4 col-lg-3 product-item"
+                                 data-category="@item.Category?.Name"
+                                 data-category-id="@item.CategoryId"
+                                 data-name="@item.Name.ToLower()"
+                                 data-description="@item.Description?.ToLower()"
+                                 data-price="@item.Price"
+                                 data-quantity="@item.Quantity"
+                                 data-daystock="@item.DayStock"
+                                 data-product-id="@item.Id">
 
-                            <div class="card product-card h-100 shadow-sm position-relative">
-                                @if (HasDiscount(item))
-                                {
-                                    <div class="position-absolute top-0 start-0 m-0" style="z-index: 10;">
-                                        <div class="discount-badge">
-                                            <i class="fas fa-tag"></i> OFFER!
-                                        </div>
-                                    </div>
-                                }
-
-                                <div class="position-relative">
-                                    <img src="@Url.Content(item.ImageUrl)" alt="@item.Name"
-                                         class="card-img-top product-image"
-                                         style="height: 200px; width: 100%; object-fit: cover;"
-                                         onerror="this.src='/images/placeholder.png'">
-
-                                    @if (isLoggedIn)
+                                <div class="card product-card h-100 shadow-sm position-relative border-0 bg-transparent">
+                                    @if (HasDiscount(item))
                                     {
-                                        <div class="position-absolute top-0 end-0 m-2">
-                                            @{
-                                                var isFavorite = favorites.Contains(item.Id);
-                                            }
-                                            <button class="favorite-btn @(isFavorite ? "favorite-active" : "favorite-inactive")"
-                                                    onclick="toggleFavorite('@item.Id', this)"
-                                                    title="@(isFavorite ? "Remove from favorites" : "Add to favorites")">
-                                                <i class="fas fa-heart"></i>
-                                            </button>
+                                        <div class="position-absolute top-0 start-0 m-2" style="z-index: 10;">
+                                            <div class="discount-badge bg-success text-white px-2 py-1 rounded">
+                                                <i class="fas fa-tag me-1"></i> OFFER
+                                            </div>
                                         </div>
                                     }
 
-                                    <div class="position-absolute bottom-0 start-0 m-2">
-                                        <span class="badge bg-success fs-6">@item.Price EGP</span>
+                                    <div class="position-relative product-image-container">
+                                        <img src="@Url.Content(item.ImageUrl)" alt="@item.Name"
+                                             class="card-img-top product-image"
+                                             style="height: 220px; width: 100%; "
+                                             onerror="this.src='/images/placeholder.png'" loading="lazy">
+
+                                        <!-- السعر على طرف الصورة -->
+                                        <div class="position-absolute bottom-0 end-0 m-2 price-on-image">
+                                            <div class="price-badge">
+                                                <span class="fw-bold">@item.Price SAR</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Details Button and Description - Appears on Hover -->
+                                        <div class="product-overlay d-flex flex-column align-items-center justify-content-center">
+                                            <a asp-action="Showprd" asp-route-id="@item.Id"
+                                               class="btn btn-primary btn-details mb-3">
+                                                <i class="fas fa-eye me-1"></i> View Details
+                                            </a>
+                                            <!-- الوصف باللون الذهبي -->
+                                            <p class="gold-description text-center mb-0">
+                                                @(item.Description?.Length > 80 ? item.Description.Substring(0, 80) + "..." : item.Description)
+                                            </p>
+                                        </div>
+
+                                        @if (isLoggedIn)
+                                        {
+                                            <div class="position-absolute top-0 end-0 m-2" style="z-index: 20;">
+                                                @{
+                                                    var isFavorite = favorites.Contains(item.Id);
+                                                }
+                                                <button class="favorite-btn @(isFavorite ? "favorite-active" : "favorite-inactive")"
+                                                        onclick="toggleFavorite('@item.Id', this)"
+                                                        title="@(isFavorite ? "Remove from favorites" : "Add to favorites")">
+                                                    <i class="fas fa-heart"></i>
+                                                </button>
+                                            </div>
+                                        }
+
+                                        @if (item.Quantity < 10 && item.Quantity > 0)
+                                        {
+                                            <div class="position-absolute top-0 start-0 m-2">
+                                                <span class="badge bg-warning text-dark">Low Stock</span>
+                                            </div>
+                                        }
+                                        else if (item.Quantity <= 0)
+                                        {
+                                            <div class="position-absolute top-0 start-0 m-2">
+                                                <span class="badge bg-danger">Out of Stock</span>
+                                            </div>
+                                        }
                                     </div>
 
-                                    @if (item.Quantity < 10 && item.Quantity > 0)
-                                    {
-                                        <div class="position-absolute bottom-0 end-0 m-2">
-                                            <span class="badge bg-danger">Low Stock</span>
-                                        </div>
-                                    }
-                                </div>
+                                    <div class="card-body d-flex flex-column p-3">
+                                        <h5 class="card-title text-dark mb-1">@item.Name</h5>
 
-                                <div class="card-body d-flex flex-column">
-                                    <h5 class="card-title">@item.Name</h5>
-                                    <p class="card-text text-muted flex-grow-1">
-                                        @(item.Description?.Length > 80 ? item.Description.Substring(0, 80) + "..." : item.Description)
-                                    </p>
-
-                                    <div class="mt-auto">
-                                        <div class="row text-center small text-muted mb-3">
-                                            <div class="col-4">
-                                                <i class="fas fa-clock"></i><br>
-                                                @item.MinTime-@item.MaxTime min
-                                            </div>
-                                            <div class="col-4">
-                                                <i class="fas fa-box"></i><br>
-                                                @item.Quantity left
-                                            </div>
-                                            <div class="col-4">
-                                                <i class="fas fa-fire"></i><br>
-                                                @item.DayStock/day
+                                        <!-- Stock Information -->
+                                        <div class="stock-info mb-3">
+                                            <div class="row text-center small text-muted">
+                                                <div class="col-4">
+                                                    <i class="fas fa-clock"></i><br>
+                                                    @item.MinTime-@item.MaxTime min
+                                                </div>
+                                                <div class="col-4">
+                                                    <i class="fas fa-box"></i><br>
+                                                    @item.Quantity left
+                                                </div>
+                                                <div class="col-4">
+                                                    <i class="fas fa-fire"></i><br>
+                                                    @item.DayStock/day
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <div class="d-grid gap-2">
+                                        <div class="d-grid gap-2 mt-auto">
                                             @if (item.Quantity > 0)
                                             {
-                                                <button class="btn btn-success btn-sm"
+                                                <button class="btn btn-brown btn-sm"
                                                         onclick="addToCart('@item.Id')">
-                                                    <i class="fas fa-cart-plus"></i> Add to Cart
+                                                    <i class="fas fa-cart-plus me-1"></i> Add to Cart
                                                 </button>
                                             }
                                             else
                                             {
                                                 <button class="btn btn-secondary btn-sm" disabled>
-                                                    <i class="fas fa-times"></i> Out of Stock
+                                                    <i class="fas fa-times me-1"></i> Out of Stock
                                                 </button>
                                             }
 
-                                            <a asp-action="Showprd" asp-route-id="@item.Id"
-                                               class="btn btn-info btn-sm">
-                                                <i class="fas fa-eye"></i> Details
-                                            </a>
-
+                                            <!-- Admin Actions - Only visible for admin -->
                                             @if (isAdmin)
                                             {
-                                                <div class="btn-group w-100" role="group">
-                                                    <a asp-action="Edit" asp-route-id="@item.Id"
-                                                       class="btn btn-warning btn-sm">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <a asp-action="Delete" asp-route-id="@item.Id"
-                                                       class="btn btn-danger btn-sm">
-                                                        <i class="fas fa-trash"></i>
-                                                    </a>
+                                                <div class="admin-actions mt-2 pt-2 border-top">
+                                                    <div class="btn-group w-100" role="group">
+                                                        <a asp-action="Edit" asp-route-id="@item.Id"
+                                                           class="btn btn-warning btn-sm">
+                                                            <i class="fas fa-edit me-1"></i>Edit
+                                                        </a>
+                                                        <a asp-action="Delete" asp-route-id="@item.Id"
+                                                           class="btn btn-danger btn-sm">
+                                                            <i class="fas fa-trash me-1"></i>Delete
+                                                        </a>
+                                                    </div>
                                                 </div>
                                             }
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    }
+                        }
+                    </div>
                 </div>
-            </div>
+            }
         }
     </div>
 
     <!-- No Results Message -->
     <div id="noResults" class="text-center d-none mt-5">
-        <div class="alert alert-warning py-5">
+        <div class="alert alert-warning py-5 bg-transparent border">
             <i class="fas fa-search fa-3x mb-3 text-warning"></i>
-            <h3>No products found</h3>
-            <p class="mb-3">Try adjusting your search criteria or browse different categories</p>
-            <button class="btn btn-primary" onclick="resetAllFilters()">
-                <i class="fas fa-redo me-2"></i>Reset Filters
+            <h3 class="text-dark">This product is not available</h3>
+            <p class="mb-3 text-muted">No products match your search criteria. Try adjusting your search or browse different categories.</p>
+            <button class="btn btn-primary" onclick="resetInteractiveSearch()">
+                <i class="fas fa-redo me-2"></i>Show All Products
             </button>
         </div>
+    </div>
+
+    <!-- Floating Food Icons -->
+    <div id="floatingIcons" class="floating-icons-container">
+        <!-- Icons will be added by JavaScript -->
     </div>
 
     <!-- Call to Action Section -->
     <div class="row mt-5 mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);">
+            <div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);">
                 <div class="card-body text-center text-white py-4">
                     <h3 class="mb-3">
                         <i class="fas fa-star me-2"></i>
-                        Hungry for More Deals?
+                        Hungry for More?
                         <i class="fas fa-star ms-2"></i>
                     </h3>
                     <p class="lead mb-3">
@@ -538,22 +456,32 @@
 
 @section Scripts {
     <style>
-        .discount-badge-large {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            padding: 15px;
-            backdrop-filter: blur(10px);
+        /* Global Styles */
+        :root {
+            --primary-color: #1976d2;
+            --secondary-color: #388e3c;
+            --accent-color: #ff9800;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --bg-light: #f8f9fa;
         }
 
-        .discount-badge {
-            background: linear-gradient(135deg, #f12711 0%, #f5af19 100%);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 0 0 10px 0;
-            font-weight: bold;
-            font-size: 0.75rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-            animation: pulse 2s infinite;
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+        }
+
+        .carousel-fade .carousel-item {
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+            .carousel-fade .carousel-item.active {
+                opacity: 1;
+            }
+
+        .discount-badge-large {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         .favorite-btn {
@@ -568,6 +496,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 20;
         }
 
         .favorite-inactive i {
@@ -586,21 +515,150 @@
 
         .product-card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+            background: transparent !important;
         }
 
             .product-card:hover {
                 transform: translateY(-5px);
-                box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
             }
 
-        .bg-gradient-primary {
+        /* Product Image Container */
+        .product-image-container {
+            overflow: hidden;
+            position: relative;
+            border-radius: 8px;
+        }
+
+        .product-image {
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.03);
+        }
+
+        /* السعر على الصورة */
+        .price-on-image {
+            z-index: 15;
+        }
+
+        .price-badge {
+            background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+            color: #000;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Product Overlay for Details Button */
+        .product-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .product-card:hover .product-overlay {
+            opacity: 1;
+        }
+
+        .btn-details {
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-weight: 600;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .btn-details {
+            transform: translateY(0);
+        }
+
+        /* الوصف الذهبي */
+        .gold-description {
+            color: #D4AF37;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-top: 15px;
+            max-width: 90%;
+            transform: translateY(20px);
+            transition: transform 0.3s ease 0.1s;
+            opacity: 0;
+        }
+
+        .product-card:hover .gold-description {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* زر الإضافة إلى السلة باللون البني */
+        .btn-brown {
+            background-color: #8B4513 !important;
+            color: white !important;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+            .btn-brown:hover {
+                background-color: #654321 !important;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+
+        /* Search Status */
+        .search-status-bar {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            padding: 12px 20px;
         }
 
-        .filter-badge {
-            animation: slideIn 0.3s ease;
+        .form-select:focus, .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(25, 118, 210, 0.25);
         }
 
+        /* Floating Icons */
+        .floating-icons-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-icon {
+            position: absolute;
+            font-size: 24px;
+            opacity: 0.1;
+            animation: float 15s infinite linear;
+            color: var(--primary-color);
+        }
+
+        /* Stock Info */
+        .stock-info {
+            background-color: rgba(0,0,0,0.03);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Animations */
         @@keyframes pulse {
             0%, 100% {
                 transform: scale(1);
@@ -621,31 +679,361 @@
             }
         }
 
-        @@keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
+        @@keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
             }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            100% {
+                transform: translateY(-100px) rotate(360deg);
             }
         }
 
-        .form-control:focus, .form-select:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        /* تحسين التجاوب */
+        @@media (max-width: 768px) {
+            .input-group-lg {
+                margin-bottom: 15px;
+            }
+
+            .form-select-lg {
+                margin-bottom: 15px;
+            }
+
+            .product-card {
+                margin-bottom: 20px;
+            }
+
+            .category-header h3 {
+                font-size: 1.5rem;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            .container-fluid {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .card-body {
+                padding: 15px;
+            }
+
+            .product-image {
+                height: 180px !important;
+            }
+        }
+
+        /* Dark mode support */
+        @@media (prefers-color-scheme: dark) {
+            .card {
+                background-color: #2d3748 !important;
+                color: #e2e8f0 !important;
+            }
+
+            .text-dark {
+                color: #e2e8f0 !important;
+            }
+
+            .text-muted {
+                color: #a0aec0 !important;
+            }
+
+            .bg-light {
+                background-color: #4a5568 !important;
+            }
         }
     </style>
 
     <script>
-        // Global variables for filters
-        let originalMinPrice = @minPrice;
-        let originalMaxPrice = @maxPrice;
+        // Global variables
+        let searchTimeout;
 
         $(document).ready(function() {
-            // Initialize carousel
+            // Initialize carousels
+            initializeCarousels();
+
+            // Set up interactive search event listeners
+            $('#interactiveSearch').on('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(performInteractiveSearch, 300);
+            });
+
+            $('#categoryFilter').on('change', function() {
+                performInteractiveSearch();
+            });
+
+            // Create floating icons
+            createFloatingIcons();
+        });
+
+        // Interactive search function
+        function performInteractiveSearch() {
+            const searchTerm = $('#interactiveSearch').val().trim();
+            const categoryId = $('#categoryFilter').val();
+
+            // Show loading spinner
+            $('#searchLoading').removeClass('d-none');
+            $('#productsContainer').addClass('opacity-50');
+
+            $.ajax({
+                url: '@Url.Action("InteractiveSearch", "MenuProduct")',
+                type: 'GET',
+                data: {
+                    searchTerm: searchTerm,
+                    categoryId: categoryId || ''
+                },
+                success: function(response) {
+                    if (response.success) {
+                        updateProductsDisplay(response.products, response.totalCount, response.hasResults);
+                    } else {
+                        showToast('Search failed: ' + response.message, 'error');
+                        resetToOriginalView();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Search error:', error);
+                    showToast('An error occurred during search', 'error');
+                    resetToOriginalView();
+                },
+                complete: function() {
+                    $('#searchLoading').addClass('d-none');
+                    $('#productsContainer').removeClass('opacity-50');
+                }
+            });
+        }
+
+        // Update products display based on search results
+        function updateProductsDisplay(products, totalCount, hasResults) {
+            const $container = $('#productsContainer');
+            const $noResults = $('#noResults');
+            const $searchStatus = $('#searchStatus');
+            const $resultsCount = $('#resultsCount');
+
+            if (!hasResults || products.length === 0) {
+                // Show no results message
+                $container.html('');
+                $noResults.removeClass('d-none');
+                $searchStatus.removeClass('d-none');
+                $resultsCount.text('0 products found');
+                return;
+            }
+
+            // Hide no results message
+            $noResults.addClass('d-none');
+            $searchStatus.removeClass('d-none');
+            $resultsCount.text(totalCount + ' product(s) found');
+
+            // Group products by category
+            const productsByCategory = groupProductsByCategory(products);
+
+            // Generate HTML for products
+            let html = '';
+            for (const [categoryName, categoryProducts] of Object.entries(productsByCategory)) {
+                html += generateCategorySection(categoryName, categoryProducts);
+            }
+
+            $container.html(html);
+
+            // Re-initialize favorite buttons and other interactive elements
+            initializeProductInteractions();
+        }
+
+        // Group products by category
+        function groupProductsByCategory(products) {
+            const groups = {};
+            products.forEach(product => {
+                const category = product.category || 'Uncategorized';
+                if (!groups[category]) {
+                    groups[category] = [];
+                }
+                groups[category].push(product);
+            });
+            return groups;
+        }
+
+        // Generate category section HTML
+        function generateCategorySection(categoryName, products) {
+            return `
+                <div class="category-section mb-5">
+                    <div class="category-header p-3 mb-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0 fw-bold" style="color: #8B4513;">
+                                <i class="fas fa-utensils me-2" style="color: #8B4513;"></i>
+                                ${categoryName}
+                            </h3>
+                            <span class="badge bg-primary fs-6 category-count">
+                                ${products.length} Items
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row g-4 rounded-bottom">
+                        ${products.map(product => generateProductCard(product)).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate product card HTML
+        function generateProductCard(product) {
+            const isOutOfStock = product.quantity <= 0;
+            const isLowStock = product.quantity < 10 && product.quantity > 0;
+            const favoriteClass = product.isFavorite ? 'favorite-active' : 'favorite-inactive';
+            const favoriteTitle = product.isFavorite ? 'Remove from favorites' : 'Add to favorites';
+
+            return `
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 product-item"
+                     data-product-id="${product.id}">
+                    <div class="card product-card h-100 shadow-sm position-relative border-0 bg-transparent">
+                        ${product.hasDiscount ? `
+                            <div class="position-absolute top-0 start-0 m-2" style="z-index: 10;">
+                                <div class="discount-badge bg-success text-white px-2 py-1 rounded">
+                                    <i class="fas fa-tag me-1"></i> OFFER
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div class="position-relative product-image-container">
+                            <div style="height: 220px; width: 100%; ">
+                                <img src="${product.imageUrl}" alt="${product.name}"
+                                 class="card-img-top product-image"
+                                 style="height: 100%; width: 100%; "
+                                 onerror="this.src='/images/placeholder.png'" loading="lazy">
+                            </div>
+
+                            <div class="position-absolute bottom-0 end-0 m-2 price-on-image">
+                                <div class="price-badge">
+                                    <span class="fw-bold">${product.price} SAR</span>
+                                </div>
+                            </div>
+
+                            <div class="product-overlay d-flex flex-column align-items-center justify-content-center">
+                                <a href="/MenuProduct/Showprd/${product.id}"
+                                   class="btn btn-primary btn-details mb-3">
+                                    <i class="fas fa-eye me-1"></i> View Details
+                                </a>
+                                <p class="gold-description text-center mb-0">
+                                    ${product.description && product.description.length > 80 ?
+                                      product.description.substring(0, 80) + '...' :
+                                      product.description || ''}
+                                </p>
+                            </div>
+
+                            ${@isLoggedIn.ToString().ToLower() ? `
+                                <div class="position-absolute top-0 end-0 m-2" style="z-index: 20;">
+                                    <button class="favorite-btn ${favoriteClass}"
+                                            onclick="toggleFavorite('${product.id}', this)"
+                                            title="${favoriteTitle}">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                </div>
+                            ` : ''}
+
+                            ${isLowStock ? `
+                                <div class="position-absolute top-0 start-0 m-2">
+                                    <span class="badge bg-warning text-dark">Low Stock</span>
+                                </div>
+                            ` : ''}
+
+                            ${isOutOfStock ? `
+                                <div class="position-absolute top-0 start-0 m-2">
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <div class="card-body d-flex flex-column p-3">
+                            <h5 class="card-title text-dark mb-1">${product.name}</h5>
+
+                            <div class="stock-info mb-3">
+                                <div class="row text-center small text-muted">
+                                    <div class="col-4">
+                                        <i class="fas fa-clock"></i><br>
+                                        ${product.minTime}-${product.maxTime} min
+                                    </div>
+                                    <div class="col-4">
+                                        <i class="fas fa-box"></i><br>
+                                        ${product.quantity} left
+                                    </div>
+                                    <div class="col-4">
+                                        <i class="fas fa-fire"></i><br>
+                                        ${product.dayStock}/day
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 mt-auto">
+                                ${!isOutOfStock ? `
+                                    <button class="btn btn-brown btn-sm"
+                                            onclick="addToCart('${product.id}')">
+                                        <i class="fas fa-cart-plus me-1"></i> Add to Cart
+                                    </button>
+                                ` : `
+                                    <button class="btn btn-secondary btn-sm" disabled>
+                                        <i class="fas fa-times me-1"></i> Out of Stock
+                                    </button>
+                                `}
+
+                                ${@isAdmin.ToString().ToLower() ? `
+                                    <div class="admin-actions mt-2 pt-2 border-top">
+                                        <div class="btn-group w-100" role="group">
+                                            <a href="/MenuProduct/Edit/${product.id}"
+                                               class="btn btn-warning btn-sm">
+                                                <i class="fas fa-edit me-1"></i>Edit
+                                            </a>
+                                            <a href="/MenuProduct/Delete/${product.id}"
+                                               class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash me-1"></i>Delete
+                                            </a>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize product interactions after dynamic loading
+        function initializeProductInteractions() {
+            // Re-initialize favorite buttons
+            $('.favorite-btn').each(function() {
+                const productId = $(this).closest('.product-item').data('product-id');
+                // يمكن إضافة أي تفاعلات إضافية هنا
+            });
+        }
+
+        // Clear interactive search
+        function clearInteractiveSearch() {
+            $('#interactiveSearch').val('');
+            performInteractiveSearch();
+        }
+
+        // Reset interactive search
+        function resetInteractiveSearch() {
+            $('#interactiveSearch').val('');
+            $('#categoryFilter').val('');
+            performInteractiveSearch();
+        }
+
+        // Reset to original view
+        function resetToOriginalView() {
+            $('#searchStatus').addClass('d-none');
+            $('#noResults').addClass('d-none');
+            // إعادة تحميل الصفحة لعرض جميع المنتجات
+            location.reload();
+        }
+
+        // Initialize carousels
+        function initializeCarousels() {
+            if ($('#carouselExample').length) {
+                new bootstrap.Carousel(document.getElementById('carouselExample'), {
+                    interval: 4000,
+                    wrap: true,
+                    pause: 'hover'
+                });
+            }
+
             if ($('#discountsCarousel').length) {
                 new bootstrap.Carousel(document.getElementById('discountsCarousel'), {
                     interval: 5000,
@@ -653,273 +1041,29 @@
                     pause: 'hover'
                 });
             }
-
-            // Initialize price range slider
-            initializePriceSlider();
-
-            // Add event listeners for real-time search
-            $('#searchByName').on('input', debounce(applyFilters, 300));
-            $('#filterCategory').on('change', applyFilters);
-            $('#minPrice, #maxPrice').on('input', debounce(applyFilters, 500));
-            $('#sortBy').on('change', applyFilters);
-            $('#availabilityFilter').on('change', applyFilters);
-
-            // Check favorite status
-            $('.favorite-btn').each(function() {
-                var productId = $(this).closest('.product-item').data('product-id');
-                checkFavoriteStatus(productId, $(this));
-            });
-        });
-
-        // Price slider initialization
-        function initializePriceSlider() {
-            $('#priceRange').on('input', function() {
-                var value = $(this).val();
-                $('#maxPrice').val(value);
-                $('#currentPrice').text(value + ' EGP');
-            });
-
-            $('#maxPrice').on('input', function() {
-                var value = $(this).val();
-                $('#priceRange').val(value);
-                $('#currentPrice').text(value + ' EGP');
-            });
         }
 
-        // Debounce function for search optimization
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
+        // Create floating food icons
+        function createFloatingIcons() {
+            const icons = ['🥘', '🍕', '🍔', '🍟', '🌭', '🍿', '🧁', '🍩', '🍪', '🥨', '🥐', '🍇', '🍈', '🍉', '🍊', '🍋', '🍌', '🍍', '🥭', '🍎', '🍏', '🍐', '🍑', '🍒', '🍓', '🥝', '🍅', '🥥', '🥑', '🍆', '🥔', '🥕', '🌽', '🌶️', '🥒', '🥬', '🥦', '🧄', '🧅', '🍄', '🥜', '🌰', '🍞', '🥐', '🥖', '🥨', '🥯', '🥞', '🧇', '🍗', '🍖', '🥩', '🥓', '🍔', '🍟', '🍕', '🌭', '🥪', '🌮', '🌯', '🥙', '🧆', '🥚', '🍳', '🥘', '🍲', '🥣', '🥗', '🍿', '🧈', '🧂', '🥫', '🍱', '🍘', '🍙', '🍚', '🍛', '🍜', '🍝', '🍠', '🍢', '🍣', '🍤', '🍥', '🥮', '🍡', '🥟', '🥠', '🥡', '🍦', '🍧', '🍨', '🍩', '🍪', '🎂', '🍰', '🧁', '🥧', '🍫', '🍬', '🍭', '🍮', '🍯', '🍼', '🥛', '☕', '🍵', '🍶', '🍾', '🍷', '🍸', '🍹', '🍺', '🍻', '🥂', '🥃', '🥤', '🧃', '🧉', '🧊'];
+            const container = $('#floatingIcons');
 
-        // Apply all filters
-        function applyFilters() {
-            const searchName = $('#searchByName').val().toLowerCase().trim();
-            const selectedCategory = $('#filterCategory').val();
-            const minPrice = parseFloat($('#minPrice').val()) || 0;
-            const maxPrice = parseFloat($('#maxPrice').val()) || originalMaxPrice;
-            const sortBy = $('#sortBy').val();
-            const availability = $('#availabilityFilter').val();
+            for (let i = 0; i < 15; i++) {
+                const icon = $('<div class="floating-icon">' + icons[Math.floor(Math.random() * icons.length)] + '</div>');
 
-            let visibleCount = 0;
-            let activeFilters = [];
+                // Random position and animation
+                const left = Math.random() * 100;
+                const delay = Math.random() * 15;
+                const duration = 15 + Math.random() * 10;
 
-            // Hide all products initially
-            $('.product-item').hide();
-            $('.category-section').hide();
-
-            // Filter products
-            $('.product-item').each(function() {
-                const $product = $(this);
-                const productName = $product.data('name');
-                const productDescription = $product.data('description');
-                const productCategory = $product.data('category');
-                const productPrice = parseFloat($product.data('price'));
-                const productQuantity = parseInt($product.data('quantity'));
-
-                let showProduct = true;
-
-                // Name filter
-                if (searchName && !productName.includes(searchName) && !productDescription.includes(searchName)) {
-                    showProduct = false;
-                }
-
-                // Category filter
-                if (selectedCategory && productCategory !== selectedCategory) {
-                    showProduct = false;
-                }
-
-                // Price filter
-                if (productPrice < minPrice || productPrice > maxPrice) {
-                    showProduct = false;
-                }
-
-                // Availability filter
-                if (availability === 'in-stock' && productQuantity <= 0) {
-                    showProduct = false;
-                } else if (availability === 'low-stock' && (productQuantity <= 0 || productQuantity >= 10)) {
-                    showProduct = false;
-                }
-
-                if (showProduct) {
-                    $product.show();
-                    visibleCount++;
-                }
-            });
-
-            // Sort products
-            sortProducts(sortBy);
-
-            // Show/hide categories and update counts
-            $('.category-section').each(function() {
-                const $categorySection = $(this);
-                const visibleProducts = $categorySection.find('.product-item:visible').length;
-
-                if (visibleProducts > 0) {
-                    $categorySection.show();
-                    $categorySection.find('.category-count').text(visibleProducts + ' Items');
-                }
-            });
-
-            // Update results count
-            $('#resultsCount').text(visibleCount);
-
-            // Build active filters badges
-            if (searchName) {
-                activeFilters.push({ label: 'Name', value: searchName, clearFunc: 'clearSearchName' });
-            }
-            if (selectedCategory) {
-                activeFilters.push({ label: 'Category', value: selectedCategory, clearFunc: 'clearCategory' });
-            }
-            if (minPrice > originalMinPrice || maxPrice < originalMaxPrice) {
-                activeFilters.push({ label: 'Price', value: minPrice + '-' + maxPrice + ' EGP', clearFunc: 'resetPriceRange' });
-            }
-            if (availability !== 'all') {
-                activeFilters.push({ label: 'Availability', value: availability, clearFunc: 'clearAvailability' });
-            }
-
-            updateActiveFilterBadges(activeFilters);
-
-            // Show/hide no results message
-            if (visibleCount === 0) {
-                $('#noResults').removeClass('d-none');
-                $('#productsContainer').hide();
-            } else {
-                $('#noResults').addClass('d-none');
-                $('#productsContainer').show();
-            }
-        }
-
-        // Sort products
-        function sortProducts(sortBy) {
-            $('.category-section').each(function() {
-                const $categorySection = $(this);
-                const $productsContainer = $categorySection.find('.row.g-4');
-                const $products = $productsContainer.find('.product-item:visible');
-
-                $products.sort(function(a, b) {
-                    const $a = $(a);
-                    const $b = $(b);
-
-                    switch(sortBy) {
-                        case 'name-asc':
-                            return $a.data('name').localeCompare($b.data('name'));
-                        case 'name-desc':
-                            return $b.data('name').localeCompare($a.data('name'));
-                        case 'price-asc':
-                            return $a.data('price') - $b.data('price');
-                        case 'price-desc':
-                            return $b.data('price') - $a.data('price');
-                        case 'popular':
-                            return $b.data('quantity') - $a.data('quantity');
-                        default:
-                            return 0;
-                    }
+                icon.css({
+                    left: left + '%',
+                    animationDelay: delay + 's',
+                    animationDuration: duration + 's'
                 });
 
-                $products.detach().appendTo($productsContainer);
-            });
-        }
-
-        // Update active filter badges
-        function updateActiveFilterBadges(filters) {
-            const $container = $('#activeFilterBadges');
-            $container.empty();
-
-            if (filters.length > 0) {
-                $('#activeFiltersText').html(' - <span class="badge bg-primary">' + filters.length + ' filter(s) active</span>');
-
-                filters.forEach(filter => {
-                    const badge = $(`
-                        <span class="badge bg-secondary filter-badge">
-                            <strong>${filter.label}:</strong> ${filter.value}
-                            <button type="button" class="btn-close btn-close-white btn-sm ms-1"
-                                    onclick="${filter.clearFunc}()"
-                                    style="font-size: 0.6rem; vertical-align: middle;">
-                            </button>
-                        </span>
-                    `);
-                    $container.append(badge);
-                });
-            } else {
-                $('#activeFiltersText').text('');
+                container.append(icon);
             }
-        }
-
-        // Clear functions
-        function clearSearchName() {
-            $('#searchByName').val('');
-            applyFilters();
-        }
-
-        function clearCategory() {
-            $('#filterCategory').val('');
-            applyFilters();
-        }
-
-        function resetPriceRange() {
-            $('#minPrice').val(originalMinPrice);
-            $('#maxPrice').val(originalMaxPrice);
-            $('#priceRange').val(originalMaxPrice);
-            $('#currentPrice').text(originalMaxPrice + ' EGP');
-            applyFilters();
-        }
-
-        function clearAvailability() {
-            $('#availabilityFilter').val('all');
-            applyFilters();
-        }
-
-        function resetAllFilters() {
-            $('#searchByName').val('');
-            $('#filterCategory').val('');
-            $('#minPrice').val(originalMinPrice);
-            $('#maxPrice').val(originalMaxPrice);
-            $('#priceRange').val(originalMaxPrice);
-            $('#currentPrice').text(originalMaxPrice + ' EGP');
-            $('#sortBy').val('name-asc');
-            $('#availabilityFilter').val('all');
-
-            // Show all products
-            $('.product-item').show();
-            $('.category-section').show();
-
-            // Reset category counts
-            $('.category-section').each(function() {
-                const $categorySection = $(this);
-                const totalProducts = $categorySection.find('.product-item').length;
-                $categorySection.find('.category-count').text(totalProducts + ' Items');
-            });
-
-            $('#resultsCount').text($('.product-item').length);
-            $('#activeFiltersText').text('');
-            $('#activeFilterBadges').empty();
-            $('#noResults').addClass('d-none');
-            $('#productsContainer').show();
-
-            showToast('All filters have been reset', 'success');
-        }
-
-        // Check favorite status
-        function checkFavoriteStatus(productId, button) {
-            $.get('@Url.Action("IsFavorite", "Favorite")', { productId: productId }, function(data) {
-                if (data.isFavorite) {
-                    $(button).removeClass('favorite-inactive').addClass('favorite-active');
-                    $(button).attr('title', 'Remove from favorites');
-                } else {
-                    $(button).removeClass('favorite-active').addClass('favorite-inactive');
-                    $(button).attr('title', 'Add to favorites');
-                }
-            }).fail(function() {
-                console.log('Failed to check favorite status');
-            });
         }
 
         // Toggle favorite

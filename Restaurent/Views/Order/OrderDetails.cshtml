@@ -68,16 +68,16 @@
                                                 <span>@item.ProductName</span>
                                             </div>
                                         </td>
-                                        <td>@item.UnitPrice.ToString("C2")</td>
+                                        <td>@item.UnitPrice.ToString("N2") SAR</td>
                                         <td>@item.Quantity</td>
-                                        <td>@item.Total.ToString("C2")</td>
+                                        <td>@item.Total.ToString("N2") SAR</td>
                                     </tr>
                                 }
                             </tbody>
                             <tfoot>
                                 <tr>
                                     <td colspan="3" class="text-end"><strong>Total:</strong></td>
-                                    <td><strong>@Model.Total.ToString("C2")</strong></td>
+                                    <td><strong>@Model.Total.ToString("N2") SAR</strong></td>
                                 </tr>
                             </tfoot>
                         </table>

@@ -743,5 +743,109 @@ namespace Restaurent.Controllers
             ViewBag.UserId = null;
             ViewBag.IsAdmin = false;
         }
+
+        [HttpGet]
+        public async Task<JsonResult> InteractiveSearch(string searchTerm, int? categoryId)
+        {
+            try
+            {
+                var query = _context.MenuProducts
+                    .Include(p => p.Category)
+                    .Where(p => !p.IsDeleted);
+
+                // تطبيق البحث إذا كان هناك مصطلح بحث
+                if (!string.IsNullOrEmpty(searchTerm))
+                {
+                    searchTerm = searchTerm.ToLower();
+                    query = query.Where(p =>
+                        p.Name.ToLower().Contains(searchTerm) ||
+                        p.Description.ToLower().Contains(searchTerm) ||
+                        p.Category.Name.ToLower().Contains(searchTerm)
+                    );
+                }
+
+                // تطبيق فلتر الفئة إذا تم اختيارها
+                if (categoryId.HasValue && categoryId > 0)
+                {
+                    query = query.Where(p => p.CategoryId == categoryId);
+                }
+
+                var results = await query
+                    .OrderBy(p => p.Name)
+                    .ToListAsync();
+
+                // جلب المفضلات إذا كان المستخدم مسجل الدخول
+                var userSessionJson = HttpContext.Session.GetString("CurrentUser");
+                var favorites = new List<int>();
+
+                if (!string.IsNullOrEmpty(userSessionJson))
+                {
+                    try
+                    {
+                        var userSession = JsonSerializer.Deserialize<Dictionary<string, object>>(userSessionJson);
+                        if (userSession != null && userSession.ContainsKey("Id"))
+                        {
+                            var userId = userSession["Id"]?.ToString();
+                            if (!string.IsNullOrEmpty(userId))
+                            {
+                                favorites = await _context.Favorites
+                                    .Where(f => f.UserId == userId)
+                                    .Select(f => f.MenuProductId)
+                                    .ToListAsync();
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // تجاهل الخطأ في حالة وجود مشكلة في الجلسة
+                    }
+                }
+
+                // إرجاع النتائج كـ JSON
+                return Json(new
+                {
+                    success = true,
+                    products = results.Select(p => new
+                    {
+                        id = p.Id,
+                        name = p.Name,
+                        description = p.Description,
+                        price = p.Price,
+                        imageUrl = p.ImageUrl,
+                        category = p.Category?.Name,
+                        quantity = p.Quantity,
+                        minTime = p.MinTime,
+                        maxTime = p.MaxTime,
+                        dayStock = p.DayStock,
+                        isFavorite = favorites.Contains(p.Id),
+                        hasDiscount = HasDiscount(p) // استخدام الدالة المساعدة الموجودة
+                    }),
+                    totalCount = results.Count,
+                    hasResults = results.Any()
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "An error occurred during search",
+                    totalCount = 0,
+                    hasResults = false
+                });
+            }
+        }
+
+        // دالة مساعدة للتحقق من وجود خصم (نفس الدالة الموجودة في الـ View)
+        private bool HasDiscount(MenuProduct product)
+        {
+            var now = DateTime.UtcNow;
+            return _context.Discounts.Any(d =>
+                d.IsActive &&
+                d.StartDate <= now &&
+                d.EndDate >= now &&
+                (d.CategoryId == null || d.CategoryId == product.CategoryId)
+            );
+        }
     }
 }

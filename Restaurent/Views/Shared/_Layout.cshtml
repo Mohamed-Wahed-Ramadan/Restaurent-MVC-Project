@@ -3,12 +3,12 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Restaurant - @ViewData["Title"]</title>
+    <title>Dukkan Waffle - @ViewData["Title"]</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="icon" type="image/png" href="~/images/log0.png" />
+    <link rel="icon" type="image/png" href="~/images/logo.png" />
 
     <style>
         :root {
@@ -17,7 +17,7 @@
             --dark-gray: #2B2B2B;
             --wine-dark: #8B0000;
             --cream: #F5E8C7;
-            --orange-warm: #E4572E;
+            --orange-warm: #FF69B4;
             --white: #FFFFFF;
         }
 
@@ -30,7 +30,7 @@
             background-color: #1f1f1f !important;
         }
 
-        /* جعل النافبار ثابت في الأعلى */
+        /* جعل النافبار ثابت */
         .navbar {
             position: fixed !important;
             top: 0;
@@ -41,9 +41,8 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
-        /* تعديل الهيكل الرئيسي */
         body {
-            padding-top: 76px; /* تعويض ارتفاع النافبار */
+            padding-top: 76px;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -54,20 +53,17 @@
             padding: 2rem 0;
         }
 
-        /* جعل الفوتر يلتصق بالأسفل */
         footer {
             margin-top: auto;
             background: linear-gradient(135deg, var(--dark-gray), #3a3a3a) !important;
         }
 
-        /* تحسينات التصميم العصري */
         .navbar-brand {
             font-weight: 700;
             background: linear-gradient(135deg, var(--gold-light), var(--orange-warm));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-right: 2rem;
         }
 
         .nav-link {
@@ -95,27 +91,9 @@
                 box-shadow: 0 5px 15px rgba(228, 87, 46, 0.4);
             }
 
-        /* تحسينات الفوتر */
         .footer-text {
             color: #b0b0b0 !important;
-            transition: all 0.3s ease;
         }
-
-        .footer-heading {
-            color: #d0d0d0 !important;
-            transition: all 0.3s ease;
-        }
-
-        .footer-link {
-            color: #b0b0b0 !important;
-            transition: all 0.3s ease;
-            text-decoration: none !important;
-        }
-
-            .footer-link:hover {
-                color: var(--gold-light) !important;
-                transform: translateX(5px);
-            }
 
         .social-icons {
             display: flex;
@@ -131,7 +109,6 @@
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.1);
             color: #b0b0b0;
-            text-decoration: none;
             transition: all 0.3s ease;
         }
 
@@ -140,72 +117,7 @@
                 color: var(--gold-light) !important;
             }
 
-            .social-icon.facebook:hover {
-                background: #1877f2;
-                color: white !important;
-            }
-
-            .social-icon.twitter:hover {
-                background: #1da1f2;
-                color: white !important;
-            }
-
-            .social-icon.instagram:hover {
-                background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-                color: white !important;
-            }
-
-            .social-icon.youtube:hover {
-                background: #ff0000;
-                color: white !important;
-            }
-
-        /* تحسينات Dropdown */
-        .dropdown-menu {
-            border: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-radius: 10px;
-            background: linear-gradient(135deg, var(--white), var(--cream));
-        }
-
-        .dropdown-item {
-            padding: 0.75rem 1.5rem;
-            transition: all 0.3s ease;
-            border-radius: 5px;
-            margin: 2px 5px;
-        }
-
-            .dropdown-item:hover {
-                background: linear-gradient(135deg, var(--gold-light), var(--gold-bronze));
-                transform: translateX(5px);
-                color: var(--dark-gray) !important;
-            }
-
-        .dropdown-header-custom {
-            padding: 1rem;
-            background: linear-gradient(135deg, var(--gold-light), var(--orange-warm));
-            color: var(--dark-gray);
-            border-radius: 10px 10px 0 0;
-            margin: -0.5rem -0.5rem 0.5rem -0.5rem;
-        }
-
-        .user-avatar-small {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--gold-light);
-        }
-
-        .user-avatar-large {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid var(--gold-light);
-        }
-
-        /* تحسينات Badge السلة */
+        /* cart badge */
         .nav-cart-icon {
             position: relative;
         }
@@ -227,22 +139,30 @@
             justify-content: center;
         }
 
-        /* تحسينات الأزرار */
+        .user-avatar-small {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid var(--gold-light);
+        }
+
         .user-badge-admin, .user-badge-user {
             background: linear-gradient(135deg, var(--gold-light), var(--orange-warm));
             padding: 0.5rem 1rem;
             border-radius: 25px;
-            transition: all 0.3s ease;
             color: var(--dark-gray) !important;
             font-weight: 600;
         }
 
-            .user-badge-admin:hover, .user-badge-user:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 8px rgba(196, 154, 108, 0.4);
-            }
+        /* الفوتر ثابت تحت */
+        html, body {
+            height: 100%;
+        }
 
-        /* تحسينات التنبيهات */
+        footer {
+            flex-shrink: 0;
+        }
+
         .alert-fixed {
             position: fixed;
             top: 80px;
@@ -253,89 +173,36 @@
             max-width: 500px;
         }
 
-        .alert {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        /* تحسينات التجاوب للشاشات الصغيرة */
         @@media (max-width: 768px) {
-            body
-
-        {
-            padding-top: 66px;
-        }
-
-        .navbar-collapse {
-            background: linear-gradient(135deg, var(--dark-gray), #3a3a3a);
-            padding: 1rem;
-            border-radius: 0 0 10px 10px;
-            margin-top: 8px;
-        }
-
-        .nav-item {
-            margin: 5px 0;
-        }
-
-        .btn-outline-light {
-            margin-top: 10px;
-        }
-
-        .social-icons {
-            justify-content: center;
-            margin-bottom: 1rem;
-        }
-
-        .footer .row {
-            text-align: center;
-        }
-
-        .dropdown-menu {
-            position: static !important;
-            transform: none !important;
-            margin-top: 10px;
-        }
-
-        }
-       
-
-        /* إصلاح مشكلة الـ dropdown على الشاشات الصغيرة */
-        @@media (max-width: 991px) {
-            .navbar-nav .dropdown-menu
-
-        {
-            position: absolute;
-            left: 0;
-            right: auto;
-        }
-
+            .navbar-collapse {
+                background: linear-gradient(135deg, var(--dark-gray), #3a3a3a);
+                padding: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <!-- اسم المطعم على اليمين -->
-                <a class="navbar-brand" asp-controller="MenuProduct" asp-action="GetAll">
-                    <i class="fas fa-utensils"></i> Restaurant
-                </a>
+            <div class="container-fluid px-4">
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <!-- يسار: اسم المطعم و Home -->
+                <div class="d-flex align-items-center">
+                    <a class="navbar-brand me-3" asp-controller="MenuProduct" asp-action="GetAll">
+                       <img src="~/images/logo.png" alt="logo Dukkan Waffle" style="width:40px; height:40px;"/> Dukkan Waffle <i class="fas fa-utensils"></i>
+                    </a>
+                    <a class="nav-link" asp-controller="MenuProduct" asp-action="GetAll">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                </div>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <!-- كل العناصر على الشمال -->
-                    <ul class="navbar-nav me-auto">
-                        <!-- صفحة الهوم على الشمال -->
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="MenuProduct" asp-action="GetAll">
-                                <i class="fas fa-home"></i> Home
-                            </a>
-                        </li>
+                <!-- يمين: باقى العناصر -->
+                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                    <ul class="navbar-nav align-items-center">
 
                         @{
                             var userSessionJson = Context.Session.GetString("CurrentUser");
@@ -371,9 +238,8 @@
 
                         @if (isLoggedIn)
                         {
-                            <!-- زر السلة -->
                             <li class="nav-item">
-                                <a class="nav-link nav-cart-icon" asp-controller="Cart" asp-action="Index" title="Shopping Cart">
+                                <a class="nav-link nav-cart-icon" asp-controller="Cart" asp-action="Index">
                                     <i class="fas fa-shopping-cart"></i>
                                     @if (cartCount > 0)
                                     {
@@ -381,26 +247,20 @@
                                     }
                                 </a>
                             </li>
-
-                            <!-- زر المفضلة -->
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Favorite" asp-action="Index" title="My Favorites">
+                                <a class="nav-link" asp-controller="Favorite" asp-action="Index">
                                     <i class="fas fa-heart"></i>
                                 </a>
                             </li>
-
-                            <!-- زر الطلبات -->
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Order" asp-action="MyOrders" title="My Orders">
+                                <a class="nav-link" asp-controller="Order" asp-action="MyOrders">
                                     <i class="fas fa-clipboard-list"></i>
                                 </a>
                             </li>
 
-                            <!-- Dropdown المستخدم -->
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle d-flex align-items-center @(isAdmin ? "user-badge-admin" : "user-badge-user")"
-                                   href="#" id="userDropdown" role="button"
-                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                   href="#" id="userDropdown" data-bs-toggle="dropdown">
                                     @if (!string.IsNullOrEmpty(userImage))
                                     {
                                         <img src="@userImage" alt="@userName" class="user-avatar-small me-2" />
@@ -411,45 +271,7 @@
                                     }
                                     <span>@userName</span>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-start dropdown-menu-custom"
-                                    aria-labelledby="userDropdown">
-
-                                    <div class="dropdown-header-custom">
-                                        <div class="text-center">
-                                            @if (!string.IsNullOrEmpty(userImage))
-                                            {
-                                                <img src="@userImage" alt="@userName" class="user-avatar-large mb-2" />
-                                            }
-                                            else
-                                            {
-                                                <i class="fas @(isAdmin ? "fa-user-shield" : "fa-user-circle") fa-3x mb-2"></i>
-                                            }
-                                            <h6 class="mb-0">@userName</h6>
-                                            <small>@userEmail</small>
-                                            <br />
-                                            <small>
-                                                @if (isSuperAdmin)
-                                                {
-                                                    <span class="badge bg-danger">
-                                                        <i class="fas fa-crown"></i> Super Admin
-                                                    </span>
-                                                }
-                                                else if (isAdmin)
-                                                {
-                                                    <span class="badge bg-warning text-dark">
-                                                        <i class="fas fa-user-shield"></i> Administrator
-                                                    </span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-info">
-                                                        <i class="fas fa-user"></i> Regular User
-                                                    </span>
-                                                }
-                                            </small>
-                                        </div>
-                                    </div>
-
+                                <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
                                         <a class="dropdown-item" asp-controller="User" asp-action="Details" asp-route-id="@userId">
                                             <i class="fas fa-user-circle me-2"></i> My Profile
@@ -460,41 +282,20 @@
                                             <i class="fas fa-edit me-2"></i> Edit Profile
                                         </a>
                                     </li>
-
                                     @if (isAdmin)
                                     {
-                                        <li><hr class="dropdown-divider"></li>
+                                        <li><hr class="dropdown-divider" /></li>
                                         <li>
                                             <a class="dropdown-item" asp-controller="Admin" asp-action="Dashboard">
-                                                <i class="fas fa-tachometer-alt me-2"></i> Admin Dashboard
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="MenuProduct" asp-action="Create">
-                                                <i class="fas fa-plus-circle me-2"></i> Add Product
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Discounts">
-                                                <i class="fas fa-tag me-2"></i> Manage Discounts
+                                                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
                                             </a>
                                         </li>
                                     }
-
-                                    @if (isSuperAdmin)
-                                    {
-                                        <li>
-                                            <a class="dropdown-item" asp-controller="User" asp-action="ManageUsers">
-                                                <i class="fas fa-users-cog me-2"></i> Manage Users
-                                            </a>
-                                        </li>
-                                    }
-
-                                    <li><hr class="dropdown-divider"></li>
+                                    <li><hr class="dropdown-divider" /></li>
                                     <li>
-                                        <form asp-controller="User" asp-action="Logout" method="post" id="logoutForm">
+                                        <form asp-controller="User" asp-action="Logout" method="post">
                                             @Html.AntiForgeryToken()
-                                            <button type="submit" class="dropdown-item text-danger border-0 bg-transparent w-100 text-start">
+                                            <button type="submit" class="dropdown-item text-danger">
                                                 <i class="fas fa-sign-out-alt me-2"></i> Logout
                                             </button>
                                         </form>
@@ -504,23 +305,20 @@
                         }
                         else
                         {
-                            <!-- Not Logged In -->
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="User" asp-action="Login">
                                     <i class="fas fa-sign-in-alt"></i> Login
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link btn btn-primary text-white ms-2"
-                                   asp-controller="User" asp-action="Register">
+                            <li class="nav-item ms-2">
+                                <a class="nav-link btn btn-primary text-white" asp-controller="User" asp-action="Register">
                                     <i class="fas fa-user-plus"></i> Register
                                 </a>
                             </li>
                         }
 
-                        <!-- Dark Mode Button -->
-                        <li class="nav-item">
-                            <button id="themeButton" class="btn btn-outline-light ms-2">
+                        <li class="nav-item ms-2">
+                            <button id="themeButton" class="btn btn-outline-light">
                                 <i class="fas fa-moon"></i>
                             </button>
                         </li>
@@ -530,7 +328,6 @@
         </nav>
     </header>
 
-    <!-- منطقة التنبيهات -->
     <div class="alert-fixed">
         @if (TempData["SuccessMessage"] != null)
         {
@@ -548,95 +345,151 @@
         }
     </div>
 
-    <main role="main" class="main-content">
+    <main class="main-content">
         @RenderBody()
     </main>
 
-    <footer class="bg-dark text-white py-4">
+    <footer class="footer-section py-5 mt-auto">
         <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <!-- اللوجو والوصف -->
-                    <div class="d-flex align-items-center mb-3">
-                        <img src="/images/log0.png" alt="Restaurant Logo"
-                             class="me-3" style="width: 50px; height: 50px; object-fit: contain;">
-                        <div>
-                            <h5 class="mb-1"><i class="fas fa-utensils"></i> Restaurant</h5>
-                            <p class="footer-text">Professional restaurant management system</p>
-                        </div>
-                    </div>
-                    <p class="footer-text small">
-                        Serving delicious meals since 2024. Experience the best dining with us!
-                    </p>
+            <div class="row text-center text-md-start align-items-start">
+
+                <!-- اليسار -->
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <a class="navbar-brand me-3" asp-controller="MenuProduct" asp-action="GetAll">
+                        <img src="~/images/logo.png" alt="logo Dukkan Waffle" style="width:50px; height:50px ;" /> Dukkan Waffle <i class="fas fa-utensils"></i>
+                    </a>
+                    <p class="text-light mt-2">Taste the difference with every bite – where quality meets flavor.</p>
                 </div>
-                <div class="col-md-3">
-                    <h6 class="footer-heading">Quick Links</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <a asp-controller="MenuProduct" asp-action="GetAll"
-                               class="text-decoration-none footer-link">
-                                <i class="fas fa-utensils me-2"></i>Our Menu
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a asp-controller="Cart" asp-action="Index"
-                               class="text-decoration-none footer-link">
-                                <i class="fas fa-shopping-cart me-2"></i>Shopping Cart
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a asp-controller="Favorite" asp-action="Index"
-                               class="text-decoration-none footer-link">
-                                <i class="fas fa-heart me-2"></i>My Favorites
-                            </a>
-                        </li>
-                    </ul>
+
+                <!-- الوسط -->
+                <div class="col-md-4 mb-4 mb-md-0 d-flex flex-column align-items-center">
+                    <a href="/MenuProduct/GetAll" class="footer-link mb-2">Home</a>
+                    <a href="/Cart/Index" class="footer-link mb-2">Cart</a>
+                    <a href="/Favorite/Index" class="footer-link mb-2">Favorite</a>
                 </div>
-                <div class="col-md-3">
-                    <h6 class="footer-heading">Follow Us</h6>
+
+                <!-- اليمين -->
+
+                <div class="col-md-4 d-flex justify-content-md-end justify-content-center">
                     <div class="social-icons">
-                        <a href="#" class="social-icon facebook" title="Facebook">
-                            <i class="fab fa-facebook-f"></i>
-                        </a>
-                        <a href="#" class="social-icon twitter" title="Twitter">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="social-icon instagram" title="Instagram">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="social-icon youtube" title="YouTube">
-                            <i class="fab fa-youtube"></i>
-                        </a>
-                    </div>
-                    <div class="mt-3">
-                        <small class="footer-text">
-                            <i class="fas fa-phone me-1"></i> +20 1123002663<br>
-                            <i class="fas fa-envelope me-1"></i> mohamed.wahed.work@gmail.com
-                        </small>
+                        
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
             </div>
-            <hr class="bg-secondary my-4" />
-            <div class="text-center">
-                <p class="mb-0 footer-text">
-                    &copy; @DateTime.Now.Year - Restaurant Manager. All rights reserved. |
-                    Made with <i class="fas fa-heart text-danger"></i> for food lovers
+
+            <hr class="footer-divider my-4" />
+
+            <!-- الأسفل -->
+            <div class="text-center mt-3">
+                <p class="footer-text mb-0">
+                    &copy; @DateTime.Now.Year - <strong>Dukkan Waffle</strong> | Crafted with
+                    <i class="fas fa-heart text-danger"></i> by Mohamed Wahed
                 </p>
             </div>
         </div>
+
+        <style>
+            :root {
+                --gold: #C49A6C;
+                --dark-gray: #2B2B2B;
+                --light-gray: #b0b0b0;
+            }
+
+            .footer-section {
+                background: linear-gradient(135deg, var(--dark-gray), #3a3a3a);
+                color: var(--light-gray);
+                position: relative;
+                bottom: 0;
+                width: 100%;
+                text-align: left;
+            }
+
+            .brand-text {
+                background: linear-gradient(135deg, var(--gold), #E4572E);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            .footer-link {
+                color: var(--light-gray);
+                text-decoration: none;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                font-size: 1.05rem;
+            }
+
+                .footer-link:hover {
+                    color: var(--gold);
+                    transform: translateY(-2px);
+                }
+
+            .social-icons {
+                display: flex;
+                gap: 15px;
+            }
+
+            .social-icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 45px;
+                height: 45px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.1);
+                color: var(--light-gray);
+                font-size: 1.2rem;
+                text-decoration: none;
+                transition: all 0.5s ease;
+            }
+
+                .social-icon:hover {
+                    color: var(--gold);
+                    transform: rotate(360deg) scale(1.1);
+                    background: rgba(255, 255, 255, 0.15);
+                    box-shadow: 0 0 10px var(--gold);
+                }
+
+            .footer-text {
+                color: var(--light-gray);
+                font-size: 0.95rem;
+            }
+
+            .footer-divider {
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            /* تحسين التجاوب */
+            @@media (max-width: 768px) {
+                .footer-section
+
+            {
+                text-align: center;
+            }
+
+            .social-icons {
+                justify-content: center;
+                margin-top: 10px;
+            }
+
+            .footer-link {
+                font-size: 1rem;
+            }
+
+            }
+        </style>
     </footer>
+
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script>
-        // Auto-hide alerts
-        setTimeout(function() {
-            $('.alert').fadeOut('slow');
-        }, 5000);
+        setTimeout(() => $('.alert').fadeOut('slow'), 5000);
 
-        // Dark Mode functionality
         document.addEventListener("DOMContentLoaded", function () {
             const themeButton = document.getElementById("themeButton");
 
@@ -645,85 +498,21 @@
                     document.body.classList.add("dark-mode");
                     document.querySelector(".navbar").classList.add("dark-mode");
                     themeButton.innerHTML = '<i class="fas fa-sun"></i>';
-                    themeButton.title = "Light Mode";
                 } else {
                     document.body.classList.remove("dark-mode");
                     document.querySelector(".navbar").classList.remove("dark-mode");
                     themeButton.innerHTML = '<i class="fas fa-moon"></i>';
-                    themeButton.title = "Dark Mode";
                 }
             }
 
-            function getCookie(name) {
-                const value = "; " + document.cookie;
-                const parts = value.split("; " + name + "=");
-                if (parts.length === 2) return parts.pop().split(";").shift();
-            }
-
-            const currentTheme = getCookie("theme") || "light";
+            const currentTheme = (document.cookie.match(/theme=(dark|light)/) || [])[1] || "light";
             applyTheme(currentTheme);
 
-            themeButton.addEventListener("click", function () {
+            themeButton.addEventListener("click", () => {
                 const newTheme = document.body.classList.contains("dark-mode") ? "light" : "dark";
                 applyTheme(newTheme);
                 document.cookie = `theme=${newTheme}; path=/; max-age=31536000`;
             });
-        });
-
-        // تحديث عدد عناصر السلة
-        function updateCartCount() {
-            $.get('@Url.Action("GetCartCount", "Cart")', function(data) {
-                $('.cart-badge').text(data.count);
-                if (data.count > 0) {
-                    $('.cart-badge').show();
-                } else {
-                    $('.cart-badge').hide();
-                }
-            });
-        }
-
-        // تحديث عدد السلة عند تحميل الصفحة
-        $(document).ready(function() {
-            updateCartCount();
-        });
-
-        // إضافة تأثيرات تفاعلية إضافية
-        document.addEventListener('DOMContentLoaded', function() {
-            // تأثير للروابط في الفوتر
-            const footerLinks = document.querySelectorAll('.footer-link');
-            footerLinks.forEach(link => {
-                link.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateX(8px)';
-                });
-
-                link.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateX(0)';
-                });
-            });
-
-            // تأثير للأيقونات
-            const socialIcons = document.querySelectorAll('.social-icon');
-            socialIcons.forEach(icon => {
-                icon.addEventListener('mouseenter', function() {
-                    this.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
-                });
-
-                icon.addEventListener('mouseleave', function() {
-                    this.style.boxShadow = 'none';
-                });
-            });
-
-            // تأثير للوجو
-            const logo = document.querySelector('img[alt="Restaurant Logo"]');
-            if (logo) {
-                logo.addEventListener('mouseenter', function() {
-                    this.style.transform = 'rotate(5deg) scale(1.1)';
-                });
-
-                logo.addEventListener('mouseleave', function() {
-                    this.style.transform = 'rotate(0) scale(1)';
-                });
-            }
         });
     </script>
 

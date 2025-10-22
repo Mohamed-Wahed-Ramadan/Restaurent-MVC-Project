@@ -5,16 +5,149 @@
     var userId = Context.Session.GetInt32("UserId");
 }
 
+<style>
+    /* تحسينات عامة للبطاقات */
+    .product-card {
+        transition: all 0.3s ease;
+        border: none;
+        overflow: hidden;
+    }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        }
+
+    .product-image {
+        transition: transform 0.5s ease;
+    }
+
+    .product-card:hover .product-image {
+        transform: scale(1.05);
+    }
+
+    /* تحسينات زر المفضلة */
+    .favorite-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background-color: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+        color: #ccc;
+        font-size: 1.1rem;
+    }
+
+        .favorite-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .favorite-btn.active {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+            .favorite-btn.active:hover {
+                background: linear-gradient(135deg, #ff5252, #ff7b7b);
+                transform: scale(1.15);
+            }
+
+    @@keyframes pulse {
+        0%
+
+    {
+        box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 107, 107, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 107, 107, 0);
+    }
+
+    }
+
+    /* تحسينات الأزرار */
+    .btn {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .btn-success {
+        background: linear-gradient(to right, #28a745, #20c997);
+        border: none;
+    }
+
+    .btn-info {
+        background: linear-gradient(to right, #17a2b8, #6f42c1);
+        border: none;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    /* تحسينات الشارات */
+    .badge {
+        font-weight: 500;
+        border-radius: 6px;
+    }
+
+    /* تحسينات النص */
+    .card-title {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-text {
+        line-height: 1.5;
+    }
+
+    /* تحسينات الصورة */
+    .position-relative {
+        overflow: hidden;
+    }
+
+    /* تحسينات التخطيط */
+    .container {
+        max-width: 1200px;
+    }
+
+    h2 {
+        color: #397;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        h2 i {
+            color: #ff6b6b;
+        }
+</style>
+
 <div class="container mt-4">
     <h2><i class="fas fa-heart"></i> My Favorites</h2>
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info text-center">
-            <i class="fas fa-heart fa-3x mb-3 text-muted"></i>
-            <h4>No favorites yet</h4>
-            <p>Start adding your favorite products to this list!</p>
-            <a asp-controller="MenuProduct" asp-action="GetAll" class="btn btn-primary">
+        <div class="alert alert-info text-center py-5">
+            <i class="fas fa-heart fa-4x mb-3 text-muted"></i>
+            <h4 class="text-muted">No favorites yet</h4>
+            <p class="text-muted">Start adding your favorite products to this list!</p>
+            <a asp-controller="MenuProduct" asp-action="GetAll" class="btn btn-primary mt-3">
                 <i class="fas fa-utensils"></i> Browse Menu
             </a>
         </div>
@@ -29,7 +162,7 @@
                         <div class="position-relative">
                             <img src="@Url.Content(product.ImageUrl)" alt="@product.Name"
                                  class="card-img-top product-image"
-                                 style="height: 200px; width: 100%; object-fit: cover;"
+                                 style="height: 200px; width: 100%; "
                                  onerror="this.src='/images/default.png'">
 
                             <div class="position-absolute top-0 end-0 m-2">
@@ -41,7 +174,7 @@
                             </div>
 
                             <div class="position-absolute top-0 start-0 m-2">
-                                <span class="badge bg-success fs-6">@product.Price EGP</span>
+                                <span class="badge bg-success fs-6">@product.Price SAR</span>
                             </div>
 
                             @if (product.Quantity < 10)

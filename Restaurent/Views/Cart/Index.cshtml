@@ -34,7 +34,7 @@
                                 </div>
                                 <div class="col-md-4">
                                     <h5>@item.ProductName</h5>
-                                    <p class="text-muted mb-0">@item.Price.ToString("C2") each</p>
+                                    <p class="text-muted mb-0">@item.Price.ToString("N2") SAR each</p>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="input-group">
@@ -53,7 +53,7 @@
                                     </div>
                                 </div>
                                 <div class="col-md-2">
-                                    <h5 class="text-success">@item.Total.ToString("C2")</h5>
+                                    <h5 class="text-success">@item.Total.ToString("N2") SAR</h5>
                                 </div>
                                 <div class="col-md-1">
                                     <button class="btn btn-danger btn-sm"
@@ -75,11 +75,11 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
                             <span>Subtotal:</span>
-                            <span id="subtotal">@Model.SubTotal.ToString("C2")</span>
+                            <span id="subtotal">@Model.SubTotal.ToString("N2") SAR</span>
                         </div>
                         <div class="d-flex justify-content-between mb-3">
                             <span>Total:</span>
-                            <span id="total" class="fw-bold fs-5">@Model.Total.ToString("C2")</span>
+                            <span id="total" class="fw-bold fs-5">@Model.Total.ToString("N2") SAR</span>
                         </div>
                         <div class="d-grid">
                             <a asp-controller="Order" asp-action="Checkout"

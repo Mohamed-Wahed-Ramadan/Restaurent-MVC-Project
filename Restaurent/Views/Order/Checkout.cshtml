@@ -89,23 +89,23 @@
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div>
                                 <h6 class="mb-0">@item.ProductName</h6>
-                                <small class="text-muted">@item.Quantity x @item.Price.ToString("C2")</small>
+                                <small class="text-muted">@item.Quantity x @item.Price.ToString("N2") SAR</small>
                             </div>
-                            <span class="fw-bold">@item.Total.ToString("C2")</span>
+                            <span class="fw-bold">@item.Total.ToString("N2") SAR</span>
                         </div>
                         <hr class="my-2">
                     }
 
                     <div class="d-flex justify-content-between mb-2">
                         <span>Subtotal:</span>
-                        <span>@ViewBag.Subtotal.ToString("C2")</span>
+                        <span>@ViewBag.Subtotal.ToString("N2") SAR</span>
                     </div>
 
                     @if (ViewBag.Discount > 0)
                     {
                         <div class="d-flex justify-content-between mb-2 text-success">
                             <span><i class="fas fa-tag"></i> Discount:</span>
-                            <span>-@ViewBag.Discount.ToString("C2")</span>
+                            <span>-@ViewBag.Discount.ToString("N2") SAR</span>
                         </div>
                     }
 
@@ -113,7 +113,7 @@
 
                     <div class="d-flex justify-content-between mt-3">
                         <h5>Total:</h5>
-                        <h5 class="text-success">@Model.Total.ToString("C2")</h5>
+                        <h5 class="text-success">@Model.Total.ToString("N2") SAR</h5>
                     </div>
                 </div>
             </div>
@@ -121,9 +121,89 @@
     </div>
 </div>
 
+<!-- Toast Container for Service Hours Message -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="serviceHoursToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-danger text-white">
+            <i class="fas fa-store-slash me-2"></i>
+            <strong class="me-auto">Service Unavailable</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body bg-light">
+            <p class="mb-2">نحن حاليا خارج الخدمه بسبب اوقات الراحه</p>
+            <p class="mb-0">حاول عاود الطلب مره اخرى بعد الساعه التاسعه صباحا</p>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         $(document).ready(function() {
+            // دالة للتحقق من وقت الخدمة
+            function isWithinServiceHours() {
+                const now = new Date();
+                const currentHour = now.getHours();
+                const currentMinutes = now.getMinutes();
+
+                // تحويل الوقت إلى دقائق إجمالية للمقارنة
+                const currentTotalMinutes = currentHour * 60 + currentMinutes;
+                const startRestMinutes = 0; // 12:00 AM
+                const endRestMinutes = 9 * 60; // 9:00 AM
+
+                // إذا كان الوقت بين 12 AM و 9 AM
+                return currentTotalMinutes >= startRestMinutes && currentTotalMinutes < endRestMinutes;
+            }
+
+            // دالة لإظهار رسالة وقت الراحة
+            function showServiceHoursMessage() {
+                const toast = new bootstrap.Toast(document.getElementById('serviceHoursToast'));
+                toast.show();
+            }
+
+            // دالة لتحديث حالة زر الطلب بناءً على وقت الخدمة
+            function updateOrderButtonState() {
+                const placeOrderBtn = $('#placeOrderBtn');
+
+                if (isWithinServiceHours()) {
+                    // خارج أوقات الخدمة
+                    placeOrderBtn.prop('disabled', true);
+                    placeOrderBtn.html('<i class="fas fa-ban"></i> Service Unavailable');
+                    placeOrderBtn.removeClass('btn-success').addClass('btn-secondary');
+
+                    // إظهار رسالة توضيحية صغيرة تحت الزر
+                    if (!$('#serviceHoursNote').length) {
+                        placeOrderBtn.after(
+                            '<div id="serviceHoursNote" class="mt-2 small text-muted">' +
+                            '<i class="fas fa-info-circle"></i> Service available from 9:00 AM to 12:00 AM' +
+                            '</div>'
+                        );
+                    }
+                } else {
+                    // داخل أوقات الخدمة
+                    placeOrderBtn.prop('disabled', false);
+                    placeOrderBtn.html('<i class="fas fa-check-circle"></i> Place Order');
+                    placeOrderBtn.removeClass('btn-secondary').addClass('btn-success');
+
+                    // إزالة الرسالة التوضيحية إذا كانت موجودة
+                    $('#serviceHoursNote').remove();
+                }
+            }
+
+            // التحقق من وقت الخدمة عند تحميل الصفحة
+            updateOrderButtonState();
+
+            // التحقق من وقت الخدمة كل دقيقة
+            setInterval(updateOrderButtonState, 60000);
+
+            // منع إرسال النموذج إذا كان خارج أوقات الخدمة
+            $('#checkoutForm').on('submit', function(e) {
+                if (isWithinServiceHours()) {
+                    e.preventDefault();
+                    showServiceHoursMessage();
+                    return false;
+                }
+            });
+
             // دالة لحساب الوقت التقديري
             function updateEstimatedTime(orderType) {
                 if (orderType) {
@@ -171,4 +251,3 @@
         });
     </script>
 }
-

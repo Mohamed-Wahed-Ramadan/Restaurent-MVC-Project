@@ -64,7 +64,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h4>@Model.TodayRevenue.ToString("C2")</h4>
+                            <h4>@Model.TodayRevenue.ToString("N2") SAR</h4>
                             <p class="mb-0">Today's Revenue</p>
                         </div>
                         <div class="align-self-center">
@@ -138,7 +138,7 @@
                                         <tr>
                                             <td>@order.UniqueOrderId</td>
                                             <td>@order.CreatedAt.ToString("g")</td>
-                                            <td>@order.Total.ToString("C2")</td>
+                                            <td>@order.Total.ToString("N2") SAR</td>
                                             <td>
                                                 <span class="badge bg-@GetStatusBadgeClass(order.Status)">
                                                     @order.Status
