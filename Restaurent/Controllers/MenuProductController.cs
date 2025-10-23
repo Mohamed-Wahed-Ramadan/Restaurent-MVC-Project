@@ -256,7 +256,6 @@ namespace Restaurent.Controllers
             product.Quantity = viewModel.Quantity;
             product.CategoryId = viewModel.CategoryId;
 
-            // رفع الصورة الجديدة إذا تم اختيارها
             if (imageFile != null && imageFile.Length > 0)
             {
                 product.ImageUrl = await SaveProductImage(imageFile);
@@ -679,6 +678,46 @@ namespace Restaurent.Controllers
             return Json(new { exists = false });
         }
 
+        // ========== دالة جديدة لإرجاع عدد السلة ==========
+        [HttpGet]
+        public async Task<JsonResult> GetCartCount()
+        {
+            var userSessionJson = HttpContext.Session.GetString("CurrentUser");
+
+            if (string.IsNullOrEmpty(userSessionJson))
+            {
+                return Json(new { success = false, count = 0 });
+            }
+
+            try
+            {
+                var userSession = JsonSerializer.Deserialize<Dictionary<string, object>>(userSessionJson);
+                if (userSession == null || !userSession.ContainsKey("Id"))
+                {
+                    return Json(new { success = false, count = 0 });
+                }
+
+                var userId = userSession["Id"]?.ToString();
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Json(new { success = false, count = 0 });
+                }
+
+                var cartCount = await _context.Carts
+                    .Where(c => c.UserId == userId)
+                    .SumAsync(c => c.Quantity);
+
+                // تحديث السيشن أيضاً
+                HttpContext.Session.SetInt32("CartCount", cartCount);
+
+                return Json(new { success = true, count = cartCount });
+            }
+            catch
+            {
+                return Json(new { success = false, count = 0 });
+            }
+        }
+
         // ========== الدوال المساعدة ==========
 
         private async Task<string?> SaveProductImage(IFormFile? imageFile)
@@ -736,7 +775,6 @@ namespace Restaurent.Controllers
             }
         }
 
-        // دالة مساعدة لتعيين القيم الافتراضية لـ ViewBag
         private void SetDefaultViewBag()
         {
             ViewBag.Favorites = new List<int>();
@@ -753,7 +791,6 @@ namespace Restaurent.Controllers
                     .Include(p => p.Category)
                     .Where(p => !p.IsDeleted);
 
-                // تطبيق البحث إذا كان هناك مصطلح بحث
                 if (!string.IsNullOrEmpty(searchTerm))
                 {
                     searchTerm = searchTerm.ToLower();
@@ -764,7 +801,6 @@ namespace Restaurent.Controllers
                     );
                 }
 
-                // تطبيق فلتر الفئة إذا تم اختيارها
                 if (categoryId.HasValue && categoryId > 0)
                 {
                     query = query.Where(p => p.CategoryId == categoryId);
@@ -774,7 +810,6 @@ namespace Restaurent.Controllers
                     .OrderBy(p => p.Name)
                     .ToListAsync();
 
-                // جلب المفضلات إذا كان المستخدم مسجل الدخول
                 var userSessionJson = HttpContext.Session.GetString("CurrentUser");
                 var favorites = new List<int>();
 
@@ -801,7 +836,6 @@ namespace Restaurent.Controllers
                     }
                 }
 
-                // إرجاع النتائج كـ JSON
                 return Json(new
                 {
                     success = true,
@@ -818,7 +852,7 @@ namespace Restaurent.Controllers
                         maxTime = p.MaxTime,
                         dayStock = p.DayStock,
                         isFavorite = favorites.Contains(p.Id),
-                        hasDiscount = HasDiscount(p) // استخدام الدالة المساعدة الموجودة
+                        hasDiscount = HasDiscount(p)
                     }),
                     totalCount = results.Count,
                     hasResults = results.Any()
@@ -836,7 +870,6 @@ namespace Restaurent.Controllers
             }
         }
 
-        // دالة مساعدة للتحقق من وجود خصم (نفس الدالة الموجودة في الـ View)
         private bool HasDiscount(MenuProduct product)
         {
             var now = DateTime.UtcNow;

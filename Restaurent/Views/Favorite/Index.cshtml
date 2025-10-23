@@ -237,30 +237,58 @@
 </div>
 
 @section Scripts {
-    <script>
-        // إضافة إلى السلة من صفحة المفضلة
-        function addToCart(productId) {
-            $.post('@Url.Action("AddToCart", "Cart")', {
+
+<script>
+    $(document).ready(function() {
+        // تحميل عدد السلة عند تحميل الصفحة
+        updateCartCount();
+    });
+
+    // إضافة إلى السلة من صفحة المفضلة - محدثة
+    function addToCart(productId) {
+        $.ajax({
+            url: '@Url.Action("AddToCart", "Cart")',
+            type: 'POST',
+            data: {
                 productId: productId,
                 quantity: 1
-            }, function(data) {
+            },
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function(data) {
                 if (data.success) {
-                    updateCartCount();
                     showAlert('success', data.message);
+                    // تحديث عدد السلة فوراً
+                    updateCartCount();
                 } else {
                     showAlert('error', data.message);
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    }
                 }
-            });
-        }
+            },
+            error: function() {
+                showAlert('error', 'An error occurred. Please try again.');
+            }
+        });
+    }
 
-        // إزالة من المفضلة
-        function toggleFavorite(productId, button) {
-            $.post('@Url.Action("ToggleFavorite", "Favorite")', {
+    // إزالة من المفضلة
+    function toggleFavorite(productId, button) {
+        $.ajax({
+            url: '@Url.Action("ToggleFavorite", "Favorite")',
+            type: 'POST',
+            data: {
                 productId: productId
-            }, function(data) {
+            },
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function(data) {
                 if (data.success) {
                     if (!data.isFavorite) {
-                        // إزالة العنصر من الصفحة إذا تمت إزالته من المفضلة
+                        // إزالة العنصر من الصفحة
                         $(button).closest('.col-12').fadeOut(300, function() {
                             $(this).remove();
 
@@ -274,7 +302,63 @@
                 } else {
                     showAlert('error', data.message);
                 }
-            });
-        }
-    </script>
+            },
+            error: function() {
+                showAlert('error', 'An error occurred. Please try again.');
+            }
+        });
+    }
+
+    // Update cart count - دالة محدثة
+    function updateCartCount() {
+        $.ajax({
+            url: '@Url.Action("GetCartCount", "MenuProduct")',
+            type: 'GET',
+            success: function(data) {
+                if (data.success && data.count !== undefined) {
+                    const $cartBadge = $('.cart-badge');
+                    if (data.count > 0) {
+                        if ($cartBadge.length > 0) {
+                            $cartBadge.text(data.count).show();
+                        } else {
+                            $('.nav-cart-icon').append(`<span class="cart-badge">${data.count}</span>`);
+                        }
+                    } else {
+                        $cartBadge.hide();
+                    }
+                    
+                    // إضافة animation
+                    $cartBadge.addClass('animate__animated animate__pulse');
+                    setTimeout(function() {
+                        $cartBadge.removeClass('animate__animated animate__pulse');
+                    }, 1000);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log('Error updating cart count:', error);
+            }
+        });
+    }
+
+    // Show alert notification
+    function showAlert(type, message) {
+        const bgColor = type === 'success' ? '#28a745' : '#dc3545';
+        const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+
+        const alert = $(`
+            <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+                <div class="toast show" role="alert">
+                    <div class="toast-body" style="background-color: ${bgColor}; color: white; border-radius: 8px;">
+                        <i class="fas ${icon} me-2"></i>${message}
+                    </div>
+                </div>
+            </div>
+        `);
+
+        $('body').append(alert);
+        setTimeout(function() {
+            alert.fadeOut(function() { $(this).remove(); });
+        }, 3000);
+    }
+</script>
 }

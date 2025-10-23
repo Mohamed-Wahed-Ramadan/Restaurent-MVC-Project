@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Context.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -364,8 +364,8 @@ namespace Context.Migrations
                 columns: new[] { "Id", "AccessFailedCount", "Birthday", "ConcurrencyStamp", "CreatedAt", "Email", "EmailConfirmed", "ImageURL", "IsAdmin", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UpdatedAt", "UserName" },
                 values: new object[,]
                 {
-                    { "1", 0, new DateTime(1999, 11, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), "803717a9-4924-4252-adee-e9194ff3521d", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "medo03459@gmail.com", true, null, true, false, null, "MEDO03459@GMAIL.COM", "MEDO03459", "AQAAAAIAAYagAAAAEGujmCBFWVkseMSmwkHJzelfLQqoDKV+HJz237coxCt+D2110MiU+PozkkFpJ39rbA==", "+201123002663", false, "a25304c2-a47a-44b5-99f5-a8e0b0440f93", false, null, "medo03459" },
-                    { "2", 0, new DateTime(1999, 11, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), "8aed222c-908e-4219-a435-f6c6038b8298", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "4dm1n@gmail.com", true, null, true, false, null, "4DM1N@GMAIL.COM", "4DM1N", "AQAAAAIAAYagAAAAEOJRs4ccVxOzLJOvdBlxF2Ivs7dO0Tcxsmp3URw3mOwc25pH64//Zm8TgpwTRn6pSA==", "+201123002663", false, "f8170840-6975-4a6e-ab4f-49bf7d86bafb", false, null, "4dm1n" }
+                    { "1", 0, new DateTime(1999, 11, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), "b1afe3f9-9f56-428f-a9cc-94b50ab8b638", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "medo03459@gmail.com", true, null, true, false, null, "MEDO03459@GMAIL.COM", "MEDO03459", "AQAAAAIAAYagAAAAEGetBbRG0vQHk+eBHrXtt59IA95DsVRTnHaTx0xyE90XxOAM46MlSm+MTfk31hjlpg==", "+201123002663", false, "267beb5f-d60f-468a-b340-30e8c5f5ce23", false, null, "medo03459" },
+                    { "2", 0, new DateTime(1999, 11, 19, 0, 0, 0, 0, DateTimeKind.Unspecified), "1f8d18b6-ddfb-4766-a614-559921505104", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "4dm1n@gmail.com", true, null, true, false, null, "4DM1N@GMAIL.COM", "4DM1N", "AQAAAAIAAYagAAAAEN+ijcbdvlHgDt9KisMu4l7E6Np3MCexIjIZ788nuNkl6AZN3kZ3A0qYhRLRA0LHWQ==", "+201123002663", false, "12dad585-b092-476e-aabf-cf4757d09929", false, null, "4dm1n" }
                 });
 
             migrationBuilder.InsertData(
@@ -373,15 +373,9 @@ namespace Context.Migrations
                 columns: new[] { "Id", "CreatedAt", "IsDeleted", "IsDeletedBy", "IsUpdateBy", "Name", "UpdateAt" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "Salads", null },
-                    { 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "Soups", null },
-                    { 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "Burgers", null },
-                    { 4, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "Cakes & Desserts", null },
-                    { 5, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "Beverages", null },
-                    { 6, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "Seafood", null },
-                    { 7, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "Grilled & BBQ", null },
-                    { 8, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "Pizza", null },
-                    { 9, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "Pies & Pastries", null }
+                    { 1, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "الكل", null },
+                    { 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "الحلويات", null },
+                    { 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, "المشروبات", null }
                 });
 
             migrationBuilder.InsertData(
@@ -389,81 +383,25 @@ namespace Context.Migrations
                 columns: new[] { "Id", "CategoryId", "CreatedAt", "DayStock", "Description", "ImageUrl", "IsDeleted", "IsDeletedBy", "IsUpdateBy", "MaxTime", "MinTime", "Name", "Price", "Quantity", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { 1, 1, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 50, "Fresh mixed greens with cherry tomatoes, cucumbers, and house dressing", "/images/a1.png", false, null, null, 10, 5, "Fresh Garden Salad", 45m, 50, null },
-                    { 2, 1, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 40, "Colorful assorted fresh fruits with honey drizzle", "/images/a2.png", false, null, null, 8, 5, "Fruit Paradise Bowl", 55m, 40, null },
-                    { 3, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 60, "Rich and creamy sweet corn soup", "/images/a3.png", false, null, null, 12, 8, "Creamy Corn Soup", 35m, 60, null },
-                    { 4, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 55, "Traditional tomato soup with fresh basil", "/images/a4.png", false, null, null, 12, 8, "Classic Tomato Soup", 30m, 55, null },
-                    { 5, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 50, "Velvety mushroom soup with herbs", "/images/a5.png", false, null, null, 15, 10, "Creamy Mushroom Soup", 40m, 50, null },
-                    { 6, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 35, "Rich seafood soup with prawns and fish", "/images/a6.png", false, null, null, 18, 12, "Seafood Chowder", 65m, 35, null },
-                    { 7, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 60, "Light and fluffy egg drop soup", "/images/a7.png", false, null, null, 10, 8, "Golden Egg Drop Soup", 28m, 60, null },
-                    { 8, 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 100, "Crispy golden French fries", "/images/a8.png", false, null, null, 12, 8, "Golden French Fries", 25m, 100, null },
-                    { 9, 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 200, "Classic tomato ketchup", "/images/a9.png", false, null, null, 2, 1, "Ketchup Dip", 8m, 200, null },
-                    { 10, 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 80, "Juicy beef patty with cheese and fresh vegetables", "/images/b1.png", false, null, null, 20, 15, "Classic Beef Burger", 55m, 80, null },
-                    { 11, 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 60, "Two beef patties with double cheese", "/images/b2.png", false, null, null, 25, 18, "Double Decker Burger", 75m, 60, null },
-                    { 12, 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 45, "Three layers of beef patties with special sauce", "/images/b3.png", false, null, null, 28, 20, "Triple Stack Burger", 95m, 45, null },
-                    { 13, 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 30, "Huge burger with multiple patties and toppings", "/images/b4.png", false, null, null, 30, 25, "Mega Monster Burger", 110m, 30, null },
-                    { 14, 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 70, "Burger combo with fries", "/images/b5.png", false, null, null, 22, 18, "Deluxe Combo Burger", 65m, 70, null },
-                    { 15, 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 75, "Crispy fried chicken with fresh lettuce", "/images/b6.png", false, null, null, 20, 15, "Crispy Chicken Burger", 50m, 75, null },
-                    { 16, 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 55, "Beef burger with crispy bacon and BBQ sauce", "/images/b7.png", false, null, null, 23, 18, "BBQ Bacon Burger", 70m, 55, null },
-                    { 17, 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 40, "Premium beef with caramelized onions and special sauce", "/images/b8.png", false, null, null, 25, 20, "Premium Gourmet Burger", 85m, 40, null },
-                    { 18, 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 65, "Spicy burger with jalapeños and pepper jack cheese", "/images/b9.png", false, null, null, 22, 16, "Spicy Jalapeño Burger", 60m, 65, null },
-                    { 19, 4, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 100, "Soft vanilla cupcake with cream frosting", "/images/c1.png", false, null, null, 8, 5, "Vanilla Cupcake", 20m, 100, null },
-                    { 20, 4, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 95, "Rich chocolate cupcake with chocolate frosting", "/images/c2.png", false, null, null, 8, 5, "Chocolate Cupcake", 22m, 95, null },
-                    { 21, 4, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 50, "Tangy passion fruit tart with fresh cream", "/images/c3.png", false, null, null, 10, 8, "Passion Fruit Tart", 35m, 50, null },
-                    { 22, 4, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 20, "Classic Black Forest cake with cherries and whipped cream", "/images/c4.png", false, null, null, 15, 10, "Black Forest Cake", 120m, 20, null },
-                    { 23, 4, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 40, "Creamy cheesecake topped with fresh strawberries", "/images/c5.png", false, null, null, 12, 8, "Strawberry Cheesecake", 65m, 40, null },
-                    { 24, 4, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 45, "Chocolate cake with Oreo cream filling", "/images/c6.png", false, null, null, 12, 8, "Cookies & Cream Cake", 55m, 45, null },
-                    { 25, 4, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 60, "Classic red velvet cake with cream cheese frosting", "/images/c7.png", false, null, null, 10, 6, "Red Velvet Cake Slice", 45m, 60, null },
-                    { 26, 4, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 35, "Tangy lemon filling with fluffy meringue topping", "/images/c8.png", false, null, null, 10, 8, "Lemon Meringue Pie", 40m, 35, null },
-                    { 27, 4, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 80, "Chocolate and vanilla ice cream with toppings", "/images/c9.png", false, null, null, 8, 5, "Ice Cream Sundae", 38m, 80, null },
-                    { 28, 5, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 60, "Healthy green smoothie with spinach and fruits", "/images/d2.png", false, null, null, 8, 5, "Green Detox Smoothie", 32m, 60, null },
-                    { 29, 5, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 70, "Refreshing mint mojito with lime", "/images/d3.png", false, null, null, 8, 5, "Mint Mojito", 28m, 70, null },
-                    { 30, 5, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 80, "Freshly squeezed orange juice", "/images/d4.png", false, null, null, 7, 5, "Fresh Orange Juice", 25m, 80, null },
-                    { 31, 5, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 65, "Creamy strawberry milkshake", "/images/d5.png", false, null, null, 10, 6, "Strawberry Milkshake", 35m, 65, null },
-                    { 32, 5, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 75, "Fresh watermelon juice", "/images/d6.png", false, null, null, 8, 5, "Watermelon Juice", 22m, 75, null },
-                    { 33, 5, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 90, "Classic fresh lemonade", "/images/d7.png", false, null, null, 7, 5, "Lemonade", 20m, 90, null },
-                    { 34, 5, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 70, "Thick strawberry smoothie", "/images/d8.png", false, null, null, 9, 6, "Strawberry Smoothie", 30m, 70, null },
-                    { 35, 5, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 65, "Tropical mango smoothie", "/images/d9.png", false, null, null, 9, 6, "Mango Smoothie", 32m, 65, null },
-                    { 36, 5, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 100, "Traditional hot tea", "/images/d10.png", false, null, null, 8, 5, "Hot Tea", 15m, 100, null },
-                    { 37, 5, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 85, "Rich Italian cappuccino", "/images/d11.png", false, null, null, 10, 6, "Cappuccino", 28m, 85, null },
-                    { 38, 5, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 75, "Artistic latte with milk foam", "/images/d12.png", false, null, null, 12, 7, "Latte Art Coffee", 30m, 75, null },
-                    { 39, 5, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 90, "Strong Italian espresso", "/images/d13.png", false, null, null, 8, 5, "Espresso", 25m, 90, null },
-                    { 40, 6, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 40, "Fresh shrimp with cocktail sauce", "/images/f1.png", false, null, null, 20, 15, "Shrimp Platter", 95m, 40, null },
-                    { 41, 6, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 35, "Assorted fresh sushi rolls", "/images/f2.png", false, null, null, 25, 20, "Sushi Platter", 120m, 35, null },
-                    { 42, 6, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 45, "Perfectly grilled fish with lemon", "/images/f3.png", false, null, null, 25, 18, "Grilled Fish Fillet", 85m, 45, null },
-                    { 43, 6, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 30, "Premium grilled salmon steak", "/images/f4.png", false, null, null, 28, 20, "Grilled Salmon", 110m, 30, null },
-                    { 44, 6, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 55, "Crispy fried calamari rings", "/images/f5.png", false, null, null, 18, 12, "Calamari Rings", 65m, 55, null },
-                    { 45, 6, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 50, "Classic British fish and chips", "/images/f6.png", false, null, null, 22, 15, "Fish & Chips", 70m, 50, null },
-                    { 46, 6, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 48, "Crispy breaded jumbo shrimp", "/images/f7.png", false, null, null, 20, 15, "Breaded Shrimp", 75m, 48, null },
-                    { 47, 6, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 25, "Spanish seafood rice with mixed seafood", "/images/f8.png", false, null, null, 35, 25, "Seafood Paella", 130m, 25, null },
-                    { 48, 6, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 15, "Grilled whole lobster with butter sauce", "/images/f9.png", false, null, null, 40, 30, "Lobster Special", 180m, 15, null },
-                    { 49, 7, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 70, "Hot and spicy chicken wings", "/images/g1.png", false, null, null, 20, 15, "Spicy Wings", 55m, 70, null },
-                    { 50, 7, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 65, "Chicken wings with BBQ glaze", "/images/g2.png", false, null, null, 22, 15, "BBQ Chicken Wings", 58m, 65, null },
-                    { 51, 7, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 35, "Assorted grilled meats with vegetables", "/images/g3.png", false, null, null, 35, 25, "Mixed Grill Platter", 140m, 35, null },
-                    { 52, 7, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 30, "Premium beef steak grilled to perfection", "/images/g4.png", false, null, null, 30, 22, "Grilled Steak", 150m, 30, null },
-                    { 53, 7, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 55, "Grilled chicken kebabs with spices", "/images/g5.png", false, null, null, 25, 18, "Chicken Kebab Skewers", 75m, 55, null },
-                    { 54, 7, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 40, "Tender BBQ pork ribs", "/images/g6.png", false, null, null, 35, 25, "BBQ Ribs", 95m, 40, null },
-                    { 55, 7, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 28, "Juicy grilled lamb chops with herbs", "/images/g7.png", false, null, null, 30, 22, "Grilled Lamb Chops", 135m, 28, null },
-                    { 56, 7, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 32, "Assorted meat kebabs with grilled vegetables", "/images/g8.png", false, null, null, 28, 22, "Mixed Kebab Platter", 120m, 32, null },
-                    { 57, 7, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 60, "Grilled chicken drumsticks with spices", "/images/g9.png", false, null, null, 25, 18, "Chicken Drumsticks", 65m, 60, null },
-                    { 58, 7, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 45, "Sticky BBQ chicken wings with sauce", "/images/g111.png", false, null, null, 25, 20, "BBQ Wings Special", 85m, 45, null },
-                    { 59, 8, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 50, "Classic pizza with tomato, mozzarella, and basil", "/images/p1.png", false, null, null, 22, 15, "Margherita Pizza", 65m, 50, null },
-                    { 60, 8, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 55, "Classic pepperoni with mozzarella cheese", "/images/p2.png", false, null, null, 22, 15, "Pepperoni Pizza", 75m, 55, null },
-                    { 61, 8, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 45, "Loaded with pepperoni, sausage, peppers, and more", "/images/p3.png", false, null, null, 25, 18, "Supreme Pizza", 95m, 45, null },
-                    { 62, 8, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 48, "Fresh vegetables with mozzarella and tomato sauce", "/images/p4.png", false, null, null, 22, 15, "Vegetarian Pizza", 70m, 48, null },
-                    { 63, 8, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 42, "Four cheese blend pizza", "/images/p5.png", false, null, null, 23, 16, "Cheese Lovers Pizza", 80m, 42, null },
-                    { 64, 8, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 40, "Grilled chicken with BBQ sauce and onions", "/images/p6.png", false, null, null, 25, 18, "BBQ Chicken Pizza", 85m, 40, null },
-                    { 65, 8, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 46, "Ham and pineapple with mozzarella", "/images/p7.png", false, null, null, 22, 15, "Hawaiian Pizza", 75m, 46, null },
-                    { 66, 8, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 38, "Loaded with various meats and cheese", "/images/p8.png", false, null, null, 26, 18, "Meat Feast Pizza", 98m, 38, null },
-                    { 67, 9, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 45, "Classic American apple pie with cinnamon", "/images/s1.png", false, null, null, 15, 10, "Apple Pie", 55m, 45, null },
-                    { 68, 9, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 40, "Sweet cherry pie with lattice crust", "/images/s2.png", false, null, null, 15, 10, "Cherry Pie", 58m, 40, null },
-                    { 69, 9, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 60, "French crepes with sweet filling", "/images/s3.png", false, null, null, 12, 8, "Crepes", 42m, 60, null },
-                    { 70, 9, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 55, "Belgian waffle topped with fresh strawberries", "/images/s4.png", false, null, null, 15, 10, "Strawberry Waffle", 48m, 55, null },
-                    { 71, 9, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 80, "Flaky French butter croissants", "/images/s5.png", false, null, null, 8, 5, "Butter Croissants", 25m, 80, null },
-                    { 72, 9, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 70, "Sweet cinnamon roll with cream cheese frosting", "/images/s6.png", false, null, null, 12, 8, "Cinnamon Roll", 32m, 70, null },
-                    { 73, 9, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 35, "Assorted sweet pastries and cookies", "/images/s7.png", false, null, null, 12, 10, "Mixed Pastry Box", 65m, 35, null },
-                    { 74, 9, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 65, "Assorted Danish pastries with fruit filling", "/images/s8.png", false, null, null, 10, 8, "Danish Pastries", 38m, 65, null },
-                    { 75, 9, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 60, "Fresh breakfast sandwich with egg and cheese", "/images/s9.png", false, null, null, 15, 10, "Breakfast Sandwich", 45m, 60, null }
+                    { 1, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 50, "Sushi crepe Cal 678", "/images/9.jpg", false, null, null, 15, 10, "سوشي كريب", 24.00m, 50, null },
+                    { 2, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 45, "Molten chocolate Cal 420", "/images/12.jpg", false, null, null, 18, 12, "مولتن شوكلاتة", 23.00m, 45, null },
+                    { 3, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 55, "Waffle zatar Cal 620", "/images/5.jpg", false, null, null, 12, 8, "وافل بالزعتر", 23.00m, 55, null },
+                    { 4, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 60, "Big waffle Cal 620", "/images/4.jpg", false, null, null, 12, 8, "وافل كبير", 21.00m, 60, null },
+                    { 5, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 65, "Waffle fingers Cal 620", "/images/6.jpg", false, null, null, 15, 10, "اصابع الوافل", 21.00m, 65, null },
+                    { 6, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 70, "Pancake Cal 569", "/images/2.jpg", false, null, null, 12, 8, "بانكيك", 16.00m, 70, null },
+                    { 7, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 75, "Small waffle Cal 569", "/images/1.jpg", false, null, null, 10, 6, "وافل صغير", 16.00m, 75, null },
+                    { 8, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 40, "Mix box Cal 853", "/images/7.jpg", false, null, null, 18, 12, "مكس بوكس", 21.00m, 40, null },
+                    { 9, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 55, "Stik strawberry Cal 248", "/images/20.jpg", false, null, null, 15, 10, "ستيك فراولة", 19.00m, 55, null },
+                    { 10, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 35, "Keek tamer Cal 450", "/images/19.jpg", false, null, null, 20, 15, "كيك تمر", 23.00m, 35, null },
+                    { 11, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 40, "Molten White Cal 420", "/images/13.jpg", false, null, null, 18, 12, "مولتن وايت شوكلاتة", 24.00m, 40, null },
+                    { 12, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 25, "Box pancake Cal 1950", "/images/8.jpg", false, null, null, 25, 18, "بوكس بانكيك", 52.00m, 25, null },
+                    { 13, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 60, "Crepe Cal 620", "/images/10.jpg", false, null, null, 12, 8, "كريب", 20.00m, 60, null },
+                    { 14, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 45, "Strawberry crepe Cal 640", "/images/11.jpg", false, null, null, 15, 10, "كريب فراولة", 25.00m, 45, null },
+                    { 15, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 80, "Chocolate needle Cal 41", "/images/17.jpg", false, null, null, 8, 5, "حقنة الشوكلاتة", 12.00m, 80, null },
+                    { 16, 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 35, "Canderella crepe Cal 720", "/images/18.jpg", false, null, null, 18, 12, "كاندريلا كريب", 24.00m, 35, null },
+                    { 17, 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 100, "Cal 8", "/images/15.jpg", false, null, null, 5, 3, "قهوة اليوم بارده", 9.00m, 100, null },
+                    { 18, 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 120, "Cal 4", "/images/16.jpg", false, null, null, 5, 3, "قهوة اليوم حارة", 8.00m, 120, null },
+                    { 19, 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), 200, "Water", "/images/21.jpg", false, null, null, 2, 1, "ماء", 1.00m, 200, null }
                 });
 
             migrationBuilder.CreateIndex(

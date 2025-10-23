@@ -46,30 +46,30 @@
         .ToListAsync();
 }
 
-<div class="container-fluid px-3 px-md-5 mt-4">
+<div class="container-fluid px-3 px-md-5 " >
     <!-- Carousel Section -->
     <div id="carouselExample" class="carousel slide carousel-fade mb-4" data-bs-ride="carousel">
         <div class="carousel-inner">
             <div class="carousel-item active">
-                <img src="/images/res1.jpg" class="d-block w-100" style="height:500px; object-fit: cover;" alt="Restaurant Image 1" loading="lazy">
+                <img src="/images/res1.jpg" class="d-block w-100" style="height:500px; border-radius:50px;" alt="Restaurant Image 1" loading="lazy">
             </div>
             <div class="carousel-item">
-                <img src="/images/res7.jpg" class="d-block w-100" style="height:500px; object-fit: cover;" alt="Restaurant Image 2" loading="lazy">
+                <img src="/images/res7.jpg" class="d-block w-100" style="height:500px; border-radius:50px;" alt="Restaurant Image 2" loading="lazy">
             </div>
             <div class="carousel-item">
-                <img src="/images/res2.jpg" class="d-block w-100" style="height:500px; object-fit: cover;" alt="Restaurant Image 3" loading="lazy">
+                <img src="/images/res2.jpg" class="d-block w-100" style="height:500px; border-radius:50px;" alt="Restaurant Image 3" loading="lazy">
             </div>
             <div class="carousel-item">
-                <img src="/images/res3.jpg" class="d-block w-100" style="height:500px; object-fit: cover;" alt="Restaurant Image 4" loading="lazy">
+                <img src="/images/res3.jpg" class="d-block w-100" style="height:500px; border-radius:50px;" alt="Restaurant Image 4" loading="lazy">
             </div>
             <div class="carousel-item">
-                <img src="/images/res4.jpg" class="d-block w-100" style="height:500px; object-fit: cover;" alt="Restaurant Image 5" loading="lazy">
+                <img src="/images/res4.jpg" class="d-block w-100" style="height:500px; border-radius:50px;" alt="Restaurant Image 5" loading="lazy">
             </div>
             <div class="carousel-item">
-                <img src="/images/res5.jpg" class="d-block w-100" style="height:500px; object-fit: cover;" alt="Restaurant Image 6" loading="lazy">
+                <img src="/images/res5.jpg" class="d-block w-100" style="height:500px; border-radius:50px;" alt="Restaurant Image 6" loading="lazy">
             </div>
             <div class="carousel-item">
-                <img src="/images/res6.jpg" class="d-block w-100" style="height:500px; object-fit: cover;" alt="Restaurant Image 7" loading="lazy">
+                <img src="/images/res6.jpg" class="d-block w-100" style="height:500px; border-radius:50px;" alt="Restaurant Image 7" loading="lazy">
             </div>
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
@@ -250,13 +250,15 @@
                     <!-- Category Header -->
                     <div class="category-header p-3 mb-3 border-bottom">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h3 class="mb-0 fw-bold" style="color: #8B4513;">
-                                <i class="fas fa-utensils me-2" style="color: #8B4513;"></i>
-                                @categoryGroup.Key
-                            </h3>
-                            <span class="badge bg-primary fs-6 category-count">
-                                @categoryGroup.Count() Items
+
+                            <span class="badge bg-primary fs-6 category-count" style="direction:rtl;">
+                                 @categoryGroup.Count() نوع
                             </span>
+                            <h3 class="mb-0 fw-bold" style="color: #8B4513;">
+                                
+                                @categoryGroup.Key
+                                <i class="fas fa-utensils me-2" style="color: #8B4513;"></i>
+                            </h3>
                         </div>
                     </div>
 
@@ -304,7 +306,7 @@
                                                 <i class="fas fa-eye me-1"></i> View Details
                                             </a>
                                             <!-- الوصف باللون الذهبي -->
-                                            <p class="gold-description text-center mb-0">
+                                            <p class="gold-description text-center mb-0 ">
                                                 @(item.Description?.Length > 80 ? item.Description.Substring(0, 80) + "..." : item.Description)
                                             </p>
                                         </div>
@@ -338,7 +340,10 @@
                                     </div>
 
                                     <div class="card-body d-flex flex-column p-3">
-                                        <h5 class="card-title text-dark mb-1">@item.Name</h5>
+                                        <h5 class="card-title text-dark mb-1" style="direction:rtl">@item.Name</h5>
+                                        <p class=" text-center mb-0">
+                                            @(item.Description?.Length > 80 ? item.Description.Substring(0, 80) + "..." : item.Description)
+                                        </p>
 
                                         <!-- Stock Information -->
                                         <div class="stock-info mb-3">
@@ -465,7 +470,9 @@
             --text-light: #7f8c8d;
             --bg-light: #f8f9fa;
         }
-
+        .main-content{
+            padding-top:17px
+        }
         body {
             background-color: var(--bg-light);
             color: var(--text-dark);
@@ -744,417 +751,433 @@
         }
     </style>
 
-    <script>
-        // Global variables
-        let searchTimeout;
 
-        $(document).ready(function() {
-            // Initialize carousels
-            initializeCarousels();
+<script>
+    // Global variables
+    let searchTimeout;
 
-            // Set up interactive search event listeners
-            $('#interactiveSearch').on('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(performInteractiveSearch, 300);
-            });
+    $(document).ready(function() {
+        // Initialize carousels
+        initializeCarousels();
 
-            $('#categoryFilter').on('change', function() {
-                performInteractiveSearch();
-            });
-
-            // Create floating icons
-            createFloatingIcons();
+        // Set up interactive search event listeners
+        $('#interactiveSearch').on('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(performInteractiveSearch, 300);
         });
 
-        // Interactive search function
-        function performInteractiveSearch() {
-            const searchTerm = $('#interactiveSearch').val().trim();
-            const categoryId = $('#categoryFilter').val();
+        $('#categoryFilter').on('change', function() {
+            performInteractiveSearch();
+        });
 
-            // Show loading spinner
-            $('#searchLoading').removeClass('d-none');
-            $('#productsContainer').addClass('opacity-50');
+        // Create floating icons
+        createFloatingIcons();
+        
+        // تحميل عدد السلة عند تحميل الصفحة
+        updateCartCount();
+    });
 
-            $.ajax({
-                url: '@Url.Action("InteractiveSearch", "MenuProduct")',
-                type: 'GET',
-                data: {
-                    searchTerm: searchTerm,
-                    categoryId: categoryId || ''
-                },
-                success: function(response) {
-                    if (response.success) {
-                        updateProductsDisplay(response.products, response.totalCount, response.hasResults);
-                    } else {
-                        showToast('Search failed: ' + response.message, 'error');
-                        resetToOriginalView();
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Search error:', error);
-                    showToast('An error occurred during search', 'error');
+    // Interactive search function
+    function performInteractiveSearch() {
+        const searchTerm = $('#interactiveSearch').val().trim();
+        const categoryId = $('#categoryFilter').val();
+
+        $('#searchLoading').removeClass('d-none');
+        $('#productsContainer').addClass('opacity-50');
+
+        $.ajax({
+            url: '@Url.Action("InteractiveSearch", "MenuProduct")',
+            type: 'GET',
+            data: {
+                searchTerm: searchTerm,
+                categoryId: categoryId || ''
+            },
+            success: function(response) {
+                if (response.success) {
+                    updateProductsDisplay(response.products, response.totalCount, response.hasResults);
+                } else {
+                    showToast('Search failed: ' + response.message, 'error');
                     resetToOriginalView();
-                },
-                complete: function() {
-                    $('#searchLoading').addClass('d-none');
-                    $('#productsContainer').removeClass('opacity-50');
                 }
-            });
-        }
-
-        // Update products display based on search results
-        function updateProductsDisplay(products, totalCount, hasResults) {
-            const $container = $('#productsContainer');
-            const $noResults = $('#noResults');
-            const $searchStatus = $('#searchStatus');
-            const $resultsCount = $('#resultsCount');
-
-            if (!hasResults || products.length === 0) {
-                // Show no results message
-                $container.html('');
-                $noResults.removeClass('d-none');
-                $searchStatus.removeClass('d-none');
-                $resultsCount.text('0 products found');
-                return;
+            },
+            error: function(xhr, status, error) {
+                console.error('Search error:', error);
+                showToast('An error occurred during search', 'error');
+                resetToOriginalView();
+            },
+            complete: function() {
+                $('#searchLoading').addClass('d-none');
+                $('#productsContainer').removeClass('opacity-50');
             }
+        });
+    }
 
-            // Hide no results message
-            $noResults.addClass('d-none');
+    // Update products display based on search results
+    function updateProductsDisplay(products, totalCount, hasResults) {
+        const $container = $('#productsContainer');
+        const $noResults = $('#noResults');
+        const $searchStatus = $('#searchStatus');
+        const $resultsCount = $('#resultsCount');
+
+        if (!hasResults || products.length === 0) {
+            $container.html('');
+            $noResults.removeClass('d-none');
             $searchStatus.removeClass('d-none');
-            $resultsCount.text(totalCount + ' product(s) found');
+            $resultsCount.text('0 products found');
+            return;
+        }
 
-            // Group products by category
-            const productsByCategory = groupProductsByCategory(products);
+        $noResults.addClass('d-none');
+        $searchStatus.removeClass('d-none');
+        $resultsCount.text(totalCount + ' product(s) found');
 
-            // Generate HTML for products
-            let html = '';
-            for (const [categoryName, categoryProducts] of Object.entries(productsByCategory)) {
-                html += generateCategorySection(categoryName, categoryProducts);
+        const productsByCategory = groupProductsByCategory(products);
+
+        let html = '';
+        for (const [categoryName, categoryProducts] of Object.entries(productsByCategory)) {
+            html += generateCategorySection(categoryName, categoryProducts);
+        }
+
+        $container.html(html);
+        initializeProductInteractions();
+    }
+
+    // Group products by category
+    function groupProductsByCategory(products) {
+        const groups = {};
+        products.forEach(product => {
+            const category = product.category || 'Uncategorized';
+            if (!groups[category]) {
+                groups[category] = [];
             }
+            groups[category].push(product);
+        });
+        return groups;
+    }
 
-            $container.html(html);
-
-            // Re-initialize favorite buttons and other interactive elements
-            initializeProductInteractions();
-        }
-
-        // Group products by category
-        function groupProductsByCategory(products) {
-            const groups = {};
-            products.forEach(product => {
-                const category = product.category || 'Uncategorized';
-                if (!groups[category]) {
-                    groups[category] = [];
-                }
-                groups[category].push(product);
-            });
-            return groups;
-        }
-
-        // Generate category section HTML
-        function generateCategorySection(categoryName, products) {
-            return `
-                <div class="category-section mb-5">
-                    <div class="category-header p-3 mb-3 border-bottom">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h3 class="mb-0 fw-bold" style="color: #8B4513;">
-                                <i class="fas fa-utensils me-2" style="color: #8B4513;"></i>
-                                ${categoryName}
-                            </h3>
-                            <span class="badge bg-primary fs-6 category-count">
-                                ${products.length} Items
-                            </span>
-                        </div>
-                    </div>
-                    <div class="row g-4 rounded-bottom">
-                        ${products.map(product => generateProductCard(product)).join('')}
+    // Generate category section HTML
+    function generateCategorySection(categoryName, products) {
+        return `
+            <div class="category-section mb-5">
+                <div class="category-header p-3 mb-3 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0 fw-bold" style="color: #8B4513;">
+                            <i class="fas fa-utensils me-2" style="color: #8B4513;"></i>
+                            ${categoryName}
+                        </h3>
+                        <span class="badge bg-primary fs-6 category-count">
+                            ${products.length} Items
+                        </span>
                     </div>
                 </div>
-            `;
-        }
+                <div class="row g-4 rounded-bottom">
+                    ${products.map(product => generateProductCard(product)).join('')}
+                </div>
+            </div>
+        `;
+    }
 
-        // Generate product card HTML
-        function generateProductCard(product) {
-            const isOutOfStock = product.quantity <= 0;
-            const isLowStock = product.quantity < 10 && product.quantity > 0;
-            const favoriteClass = product.isFavorite ? 'favorite-active' : 'favorite-inactive';
-            const favoriteTitle = product.isFavorite ? 'Remove from favorites' : 'Add to favorites';
+    // Generate product card HTML
+    function generateProductCard(product) {
+        const isOutOfStock = product.quantity <= 0;
+        const isLowStock = product.quantity < 10 && product.quantity > 0;
+        const favoriteClass = product.isFavorite ? 'favorite-active' : 'favorite-inactive';
+        const favoriteTitle = product.isFavorite ? 'Remove from favorites' : 'Add to favorites';
 
-            return `
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3 product-item"
-                     data-product-id="${product.id}">
-                    <div class="card product-card h-100 shadow-sm position-relative border-0 bg-transparent">
-                        ${product.hasDiscount ? `
-                            <div class="position-absolute top-0 start-0 m-2" style="z-index: 10;">
-                                <div class="discount-badge bg-success text-white px-2 py-1 rounded">
-                                    <i class="fas fa-tag me-1"></i> OFFER
-                                </div>
+        return `
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 product-item"
+                 data-product-id="${product.id}">
+                <div class="card product-card h-100 shadow-sm position-relative border-0 bg-transparent">
+                    ${product.hasDiscount ? `
+                        <div class="position-absolute top-0 start-0 m-2" style="z-index: 10;">
+                            <div class="discount-badge bg-success text-white px-2 py-1 rounded">
+                                <i class="fas fa-tag me-1"></i> OFFER
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="position-relative product-image-container">
+                        <div style="height: 220px; width: 100%; ">
+                            <img src="${product.imageUrl}" alt="${product.name}"
+                             class="card-img-top product-image"
+                             style="height: 100%; width: 100%; "
+                             onerror="this.src='/images/placeholder.png'" loading="lazy">
+                        </div>
+
+                        <div class="position-absolute bottom-0 end-0 m-2 price-on-image">
+                            <div class="price-badge">
+                                <span class="fw-bold">${product.price} SAR</span>
+                            </div>
+                        </div>
+
+                        <div class="product-overlay d-flex flex-column align-items-center justify-content-center">
+                            <a href="/MenuProduct/Showprd/${product.id}"
+                               class="btn btn-primary btn-details mb-3">
+                                <i class="fas fa-eye me-1"></i> View Details
+                            </a>
+                            <p class="gold-description text-center mb-0">
+                                ${product.description && product.description.length > 80 ?
+                                  product.description.substring(0, 80) + '...' :
+                                  product.description || ''}
+                            </p>
+                        </div>
+
+                        ${@isLoggedIn.ToString().ToLower() ? `
+                            <div class="position-absolute top-0 end-0 m-2" style="z-index: 20;">
+                                <button class="favorite-btn ${favoriteClass}"
+                                        onclick="toggleFavorite('${product.id}', this)"
+                                        title="${favoriteTitle}">
+                                    <i class="fas fa-heart"></i>
+                                </button>
                             </div>
                         ` : ''}
 
-                        <div class="position-relative product-image-container">
-                            <div style="height: 220px; width: 100%; ">
-                                <img src="${product.imageUrl}" alt="${product.name}"
-                                 class="card-img-top product-image"
-                                 style="height: 100%; width: 100%; "
-                                 onerror="this.src='/images/placeholder.png'" loading="lazy">
+                        ${isLowStock ? `
+                            <div class="position-absolute top-0 start-0 m-2">
+                                <span class="badge bg-warning text-dark">Low Stock</span>
                             </div>
+                        ` : ''}
 
-                            <div class="position-absolute bottom-0 end-0 m-2 price-on-image">
-                                <div class="price-badge">
-                                    <span class="fw-bold">${product.price} SAR</span>
+                        ${isOutOfStock ? `
+                            <div class="position-absolute top-0 start-0 m-2">
+                                <span class="badge bg-danger">Out of Stock</span>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="card-body d-flex flex-column p-3">
+                        <h5 class="card-title text-dark mb-1">${product.name}</h5>
+
+                        <div class="stock-info mb-3">
+                            <div class="row text-center small text-muted">
+                                <div class="col-4">
+                                    <i class="fas fa-clock"></i><br>
+                                    ${product.minTime}-${product.maxTime} min
+                                </div>
+                                <div class="col-4">
+                                    <i class="fas fa-box"></i><br>
+                                    ${product.quantity} left
+                                </div>
+                                <div class="col-4">
+                                    <i class="fas fa-fire"></i><br>
+                                    ${product.dayStock}/day
                                 </div>
                             </div>
-
-                            <div class="product-overlay d-flex flex-column align-items-center justify-content-center">
-                                <a href="/MenuProduct/Showprd/${product.id}"
-                                   class="btn btn-primary btn-details mb-3">
-                                    <i class="fas fa-eye me-1"></i> View Details
-                                </a>
-                                <p class="gold-description text-center mb-0">
-                                    ${product.description && product.description.length > 80 ?
-                                      product.description.substring(0, 80) + '...' :
-                                      product.description || ''}
-                                </p>
-                            </div>
-
-                            ${@isLoggedIn.ToString().ToLower() ? `
-                                <div class="position-absolute top-0 end-0 m-2" style="z-index: 20;">
-                                    <button class="favorite-btn ${favoriteClass}"
-                                            onclick="toggleFavorite('${product.id}', this)"
-                                            title="${favoriteTitle}">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                </div>
-                            ` : ''}
-
-                            ${isLowStock ? `
-                                <div class="position-absolute top-0 start-0 m-2">
-                                    <span class="badge bg-warning text-dark">Low Stock</span>
-                                </div>
-                            ` : ''}
-
-                            ${isOutOfStock ? `
-                                <div class="position-absolute top-0 start-0 m-2">
-                                    <span class="badge bg-danger">Out of Stock</span>
-                                </div>
-                            ` : ''}
                         </div>
 
-                        <div class="card-body d-flex flex-column p-3">
-                            <h5 class="card-title text-dark mb-1">${product.name}</h5>
+                        <div class="d-grid gap-2 mt-auto">
+                            ${!isOutOfStock ? `
+                                <button class="btn btn-brown btn-sm"
+                                        onclick="addToCart('${product.id}')">
+                                    <i class="fas fa-cart-plus me-1"></i> Add to Cart
+                                </button>
+                            ` : `
+                                <button class="btn btn-secondary btn-sm" disabled>
+                                    <i class="fas fa-times me-1"></i> Out of Stock
+                                </button>
+                            `}
 
-                            <div class="stock-info mb-3">
-                                <div class="row text-center small text-muted">
-                                    <div class="col-4">
-                                        <i class="fas fa-clock"></i><br>
-                                        ${product.minTime}-${product.maxTime} min
-                                    </div>
-                                    <div class="col-4">
-                                        <i class="fas fa-box"></i><br>
-                                        ${product.quantity} left
-                                    </div>
-                                    <div class="col-4">
-                                        <i class="fas fa-fire"></i><br>
-                                        ${product.dayStock}/day
+                            ${@isAdmin.ToString().ToLower() ? `
+                                <div class="admin-actions mt-2 pt-2 border-top">
+                                    <div class="btn-group w-100" role="group">
+                                        <a href="/MenuProduct/Edit/${product.id}"
+                                           class="btn btn-warning btn-sm">
+                                            <i class="fas fa-edit me-1"></i>Edit
+                                        </a>
+                                        <a href="/MenuProduct/Delete/${product.id}"
+                                           class="btn btn-danger btn-sm">
+                                            <i class="fas fa-trash me-1"></i>Delete
+                                        </a>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div class="d-grid gap-2 mt-auto">
-                                ${!isOutOfStock ? `
-                                    <button class="btn btn-brown btn-sm"
-                                            onclick="addToCart('${product.id}')">
-                                        <i class="fas fa-cart-plus me-1"></i> Add to Cart
-                                    </button>
-                                ` : `
-                                    <button class="btn btn-secondary btn-sm" disabled>
-                                        <i class="fas fa-times me-1"></i> Out of Stock
-                                    </button>
-                                `}
-
-                                ${@isAdmin.ToString().ToLower() ? `
-                                    <div class="admin-actions mt-2 pt-2 border-top">
-                                        <div class="btn-group w-100" role="group">
-                                            <a href="/MenuProduct/Edit/${product.id}"
-                                               class="btn btn-warning btn-sm">
-                                                <i class="fas fa-edit me-1"></i>Edit
-                                            </a>
-                                            <a href="/MenuProduct/Delete/${product.id}"
-                                               class="btn btn-danger btn-sm">
-                                                <i class="fas fa-trash me-1"></i>Delete
-                                            </a>
-                                        </div>
-                                    </div>
-                                ` : ''}
-                            </div>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
-            `;
-        }
+            </div>
+        `;
+    }
 
-        // Initialize product interactions after dynamic loading
-        function initializeProductInteractions() {
-            // Re-initialize favorite buttons
-            $('.favorite-btn').each(function() {
-                const productId = $(this).closest('.product-item').data('product-id');
-                // يمكن إضافة أي تفاعلات إضافية هنا
+    // Initialize product interactions after dynamic loading
+    function initializeProductInteractions() {
+        // Re-initialize any needed interactions
+    }
+
+    // Clear interactive search
+    function clearInteractiveSearch() {
+        $('#interactiveSearch').val('');
+        performInteractiveSearch();
+    }
+
+    // Reset interactive search
+    function resetInteractiveSearch() {
+        $('#interactiveSearch').val('');
+        $('#categoryFilter').val('');
+        performInteractiveSearch();
+    }
+
+    // Reset to original view
+    function resetToOriginalView() {
+        $('#searchStatus').addClass('d-none');
+        $('#noResults').addClass('d-none');
+        location.reload();
+    }
+
+    // Initialize carousels
+    function initializeCarousels() {
+        if ($('#carouselExample').length) {
+            new bootstrap.Carousel(document.getElementById('carouselExample'), {
+                interval: 4000,
+                wrap: true,
+                pause: 'hover'
             });
         }
 
-        // Clear interactive search
-        function clearInteractiveSearch() {
-            $('#interactiveSearch').val('');
-            performInteractiveSearch();
+        if ($('#discountsCarousel').length) {
+            new bootstrap.Carousel(document.getElementById('discountsCarousel'), {
+                interval: 5000,
+                wrap: true,
+                pause: 'hover'
+            });
         }
+    }
 
-        // Reset interactive search
-        function resetInteractiveSearch() {
-            $('#interactiveSearch').val('');
-            $('#categoryFilter').val('');
-            performInteractiveSearch();
+    // Create floating food icons
+    function createFloatingIcons() {
+        const icons = ['🥘', '🍕', '🍔', '🍟', '🌭', '🍿', '🧁', '🍩'];
+        const container = $('#floatingIcons');
+
+        for (let i = 0; i < 15; i++) {
+            const icon = $('<div class="floating-icon">' + icons[Math.floor(Math.random() * icons.length)] + '</div>');
+
+            const left = Math.random() * 100;
+            const delay = Math.random() * 15;
+            const duration = 15 + Math.random() * 10;
+
+            icon.css({
+                left: left + '%',
+                animationDelay: delay + 's',
+                animationDuration: duration + 's'
+            });
+
+            container.append(icon);
         }
+    }
 
-        // Reset to original view
-        function resetToOriginalView() {
-            $('#searchStatus').addClass('d-none');
-            $('#noResults').addClass('d-none');
-            // إعادة تحميل الصفحة لعرض جميع المنتجات
-            location.reload();
-        }
-
-        // Initialize carousels
-        function initializeCarousels() {
-            if ($('#carouselExample').length) {
-                new bootstrap.Carousel(document.getElementById('carouselExample'), {
-                    interval: 4000,
-                    wrap: true,
-                    pause: 'hover'
-                });
+    // Toggle favorite
+    function toggleFavorite(productId, button) {
+        $.ajax({
+            url: '@Url.Action("ToggleFavorite", "Favorite")',
+            type: 'POST',
+            data: { productId: productId },
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    if (response.isFavorite) {
+                        $(button).removeClass('favorite-inactive').addClass('favorite-active');
+                        $(button).attr('title', 'Remove from favorites');
+                    } else {
+                        $(button).removeClass('favorite-active').addClass('favorite-inactive');
+                        $(button).attr('title', 'Add to favorites');
+                    }
+                    showToast(response.message, 'success');
+                } else {
+                    showToast(response.message, 'error');
+                    if (response.redirect) {
+                        window.location.href = response.redirect;
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                console.log('Error:', error);
+                showToast('An error occurred. Please try again.', 'error');
             }
+        });
+    }
 
-            if ($('#discountsCarousel').length) {
-                new bootstrap.Carousel(document.getElementById('discountsCarousel'), {
-                    interval: 5000,
-                    wrap: true,
-                    pause: 'hover'
-                });
+    // Add to cart - دالة محدثة
+    function addToCart(productId) {
+        $.ajax({
+            url: '@Url.Action("AddToCart", "Cart")',
+            type: 'POST',
+            data: { productId: productId, quantity: 1 },
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    // تحديث عدد السلة فوراً
+                    updateCartCount();
+                } else {
+                    showToast(response.message, 'error');
+                    if (response.redirect) {
+                        window.location.href = response.redirect;
+                    }
+                }
+            },
+            error: function() {
+                showToast('An error occurred. Please try again.', 'error');
             }
-        }
+        });
+    }
 
-        // Create floating food icons
-        function createFloatingIcons() {
-            const icons = ['🥘', '🍕', '🍔', '🍟', '🌭', '🍿', '🧁', '🍩', '🍪', '🥨', '🥐', '🍇', '🍈', '🍉', '🍊', '🍋', '🍌', '🍍', '🥭', '🍎', '🍏', '🍐', '🍑', '🍒', '🍓', '🥝', '🍅', '🥥', '🥑', '🍆', '🥔', '🥕', '🌽', '🌶️', '🥒', '🥬', '🥦', '🧄', '🧅', '🍄', '🥜', '🌰', '🍞', '🥐', '🥖', '🥨', '🥯', '🥞', '🧇', '🍗', '🍖', '🥩', '🥓', '🍔', '🍟', '🍕', '🌭', '🥪', '🌮', '🌯', '🥙', '🧆', '🥚', '🍳', '🥘', '🍲', '🥣', '🥗', '🍿', '🧈', '🧂', '🥫', '🍱', '🍘', '🍙', '🍚', '🍛', '🍜', '🍝', '🍠', '🍢', '🍣', '🍤', '🍥', '🥮', '🍡', '🥟', '🥠', '🥡', '🍦', '🍧', '🍨', '🍩', '🍪', '🎂', '🍰', '🧁', '🥧', '🍫', '🍬', '🍭', '🍮', '🍯', '🍼', '🥛', '☕', '🍵', '🍶', '🍾', '🍷', '🍸', '🍹', '🍺', '🍻', '🥂', '🥃', '🥤', '🧃', '🧉', '🧊'];
-            const container = $('#floatingIcons');
-
-            for (let i = 0; i < 15; i++) {
-                const icon = $('<div class="floating-icon">' + icons[Math.floor(Math.random() * icons.length)] + '</div>');
-
-                // Random position and animation
-                const left = Math.random() * 100;
-                const delay = Math.random() * 15;
-                const duration = 15 + Math.random() * 10;
-
-                icon.css({
-                    left: left + '%',
-                    animationDelay: delay + 's',
-                    animationDuration: duration + 's'
-                });
-
-                container.append(icon);
-            }
-        }
-
-        // Toggle favorite
-        function toggleFavorite(productId, button) {
-            $.ajax({
-                url: '@Url.Action("ToggleFavorite", "Favorite")',
-                type: 'POST',
-                data: { productId: productId },
-                headers: {
-                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function(response) {
-                    if (response.success) {
-                        if (response.isFavorite) {
-                            $(button).removeClass('favorite-inactive').addClass('favorite-active');
-                            $(button).attr('title', 'Remove from favorites');
+    // Update cart count - دالة محدثة ومحسنة
+    function updateCartCount() {
+        $.ajax({
+            url: '@Url.Action("GetCartCount", "MenuProduct")',
+            type: 'GET',
+            success: function(data) {
+                if (data.success && data.count !== undefined) {
+                    // تحديث الرقم في الـ badge
+                    const $cartBadge = $('.cart-badge');
+                    if (data.count > 0) {
+                        if ($cartBadge.length > 0) {
+                            $cartBadge.text(data.count).show();
                         } else {
-                            $(button).removeClass('favorite-active').addClass('favorite-inactive');
-                            $(button).attr('title', 'Add to favorites');
+                            // إنشاء badge جديد إذا لم يكن موجود
+                            $('.nav-cart-icon').append(`<span class="cart-badge">${data.count}</span>`);
                         }
-                        showToast(response.message, 'success');
                     } else {
-                        showToast(response.message, 'error');
-                        if (response.redirect) {
-                            window.location.href = response.redirect;
-                        }
+                        $cartBadge.hide();
                     }
-                },
-                error: function(xhr, status, error) {
-                    console.log('Error:', error);
-                    showToast('An error occurred. Please try again.', 'error');
+                    
+                    // إضافة animation بسيط
+                    $cartBadge.addClass('animate__animated animate__pulse');
+                    setTimeout(function() {
+                        $cartBadge.removeClass('animate__animated animate__pulse');
+                    }, 1000);
                 }
-            });
-        }
+            },
+            error: function(xhr, status, error) {
+                console.log('Error updating cart count:', error);
+            }
+        });
+    }
 
-        // Add to cart
-        function addToCart(productId) {
-            $.ajax({
-                url: '@Url.Action("AddToCart", "Cart")',
-                type: 'POST',
-                data: { productId: productId, quantity: 1 },
-                headers: {
-                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function(response) {
-                    if (response.success) {
-                        showToast(response.message, 'success');
-                        updateCartCount();
-                    } else {
-                        showToast(response.message, 'error');
-                        if (response.redirect) {
-                            window.location.href = response.redirect;
-                        }
-                    }
-                },
-                error: function() {
-                    showToast('An error occurred. Please try again.', 'error');
-                }
-            });
-        }
+    // Show toast notification
+    function showToast(message, type) {
+        const bgColor = type === 'success' ? '#28a745' : '#dc3545';
+        const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
 
-        // Update cart count
-        function updateCartCount() {
-            $.get('@Url.Action("GetCartCount", "Cart")', function(data) {
-                if (data.count !== undefined) {
-                    $('#cartCount').text(data.count);
-                }
-            });
-        }
-
-        // Show toast notification
-        function showToast(message, type) {
-            const bgColor = type === 'success' ? '#28a745' : '#dc3545';
-            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-
-            const toast = $(`
-                <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999;">
-                    <div class="toast show" role="alert">
-                        <div class="toast-body" style="background-color: ${bgColor}; color: white; border-radius: 8px;">
-                            <i class="fas ${icon} me-2"></i>${message}
-                        </div>
+        const toast = $(`
+            <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+                <div class="toast show" role="alert">
+                    <div class="toast-body" style="background-color: ${bgColor}; color: white; border-radius: 8px;">
+                        <i class="fas ${icon} me-2"></i>${message}
                     </div>
                 </div>
-            `);
+            </div>
+        `);
 
-            $('body').append(toast);
-            setTimeout(function() {
-                toast.fadeOut(function() { $(this).remove(); });
-            }, 3000);
-        }
-    </script>
+        $('body').append(toast);
+        setTimeout(function() {
+            toast.fadeOut(function() { $(this).remove(); });
+        }, 3000);
+    }
+</script>
 }
 
 @functions {

@@ -215,7 +215,6 @@ namespace Restaurent.Controllers
                 {
                     await SetUserSession(user);
 
-                    // حفظ تفضيل RememberMe في الـ Session للمستخدمين العاديين فقط
                     if (!isAdmin && vm.RememberMe)
                     {
                         HttpContext.Session.SetString("UseRememberMe", "true");

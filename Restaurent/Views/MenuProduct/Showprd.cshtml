@@ -250,73 +250,100 @@
         }
     </style>
 
-    <script>
-        // Add to cart function
-        function addToCart(productId) {
-            $.ajax({
-                url: '@Url.Action("AddToCart", "Cart")',
-                type: 'POST',
-                data: { productId: productId, quantity: 1 },
-                headers: {
-                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function(response) {
-                    if (response.success) {
-                        showToast(response.message, 'success');
-                        updateCartCount();
-                    } else {
-                        showToast(response.message, 'error');
-                        if (response.redirect) {
-                            window.location.href = response.redirect;
-                        }
+
+<script>
+    // Add to cart function - محدثة
+    function addToCart(productId) {
+        $.ajax({
+            url: '@Url.Action("AddToCart", "Cart")',
+            type: 'POST',
+            data: { productId: productId, quantity: 1 },
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    // تحديث عدد السلة فوراً
+                    updateCartCount();
+                } else {
+                    showToast(response.message, 'error');
+                    if (response.redirect) {
+                        window.location.href = response.redirect;
                     }
-                },
-                error: function(xhr, status, error) {
-                    console.log('Error:', error);
-                    showToast('An error occurred. Please try again.', 'error');
                 }
-            });
-        }
+            },
+            error: function(xhr, status, error) {
+                console.log('Error:', error);
+                showToast('An error occurred. Please try again.', 'error');
+            }
+        });
+    }
 
-        // Update cart count
-        function updateCartCount() {
-            $.get('@Url.Action("GetCartCount", "Cart")', function(data) {
-                if (data.count !== undefined) {
-                    $('#cartCount').text(data.count);
+    // Update cart count - دالة محدثة
+    function updateCartCount() {
+        $.ajax({
+            url: '@Url.Action("GetCartCount", "MenuProduct")',
+            type: 'GET',
+            success: function(data) {
+                if (data.success && data.count !== undefined) {
+                    const $cartBadge = $('.cart-badge');
+                    if (data.count > 0) {
+                        if ($cartBadge.length > 0) {
+                            $cartBadge.text(data.count).show();
+                        } else {
+                            $('.nav-cart-icon').append(`<span class="cart-badge">${data.count}</span>`);
+                        }
+                    } else {
+                        $cartBadge.hide();
+                    }
+                    
+                    // إضافة animation
+                    $cartBadge.addClass('animate__animated animate__pulse');
+                    setTimeout(function() {
+                        $cartBadge.removeClass('animate__animated animate__pulse');
+                    }, 1000);
                 }
-            });
-        }
+            },
+            error: function(xhr, status, error) {
+                console.log('Error updating cart count:', error);
+            }
+        });
+    }
 
-        // Show toast notification
-        function showToast(message, type) {
-            const bgColor = type === 'success' ? '#28a745' : '#dc3545';
-            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    // Show toast notification
+    function showToast(message, type) {
+        const bgColor = type === 'success' ? '#28a745' : '#dc3545';
+        const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
 
-            const toast = `
-                <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999;">
-                    <div class="toast show" role="alert">
-                        <div class="toast-body" style="background-color: ${bgColor}; color: white;">
-                            <i class="fas ${icon} me-2"></i>${message}
-                        </div>
+        const toast = `
+            <div class="position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+                <div class="toast show" role="alert">
+                    <div class="toast-body" style="background-color: ${bgColor}; color: white; border-radius: 8px;">
+                        <i class="fas ${icon} me-2"></i>${message}
                     </div>
                 </div>
-            `;
+            </div>
+        `;
 
-            $('body').append(toast);
-            setTimeout(function() {
-                $('.toast').fadeOut(function() { $(this).parent().remove(); });
-            }, 3000);
-        }
+        $('body').append(toast);
+        setTimeout(function() {
+            $('.toast').fadeOut(function() { $(this).parent().remove(); });
+        }, 3000);
+    }
 
-        // Handle Enter key press for add to cart
-        $(document).ready(function() {
-            $(document).keypress(function(e) {
-                if (e.which === 13) { // Enter key
-                    if ($('.btn-success:not(:disabled)').is(':focus')) {
-                        addToCart(@Model.Id);
-                    }
+    // Handle Enter key press for add to cart
+    $(document).ready(function() {
+        // تحميل عدد السلة عند تحميل الصفحة
+        updateCartCount();
+        
+        $(document).keypress(function(e) {
+            if (e.which === 13) { // Enter key
+                if ($('.btn-success:not(:disabled)').is(':focus')) {
+                    addToCart(@Model.Id);
                 }
-            });
+            }
         });
-    </script>
+    });
+</script>
 }
