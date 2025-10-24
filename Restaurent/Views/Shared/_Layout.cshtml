@@ -180,6 +180,18 @@
                 padding: 1rem;
             }
         }
+
+        @@media (max-width: 500px) {
+            .brand-name {
+                font-size:16px;
+            }
+        }
+
+        @@media (max-width: 370px) {
+            .brand-name {
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -189,7 +201,7 @@
 
                 <!-- يسار: اسم المطعم و Home -->
                 <div class="d-flex align-items-center">
-                    <a class="navbar-brand me-3" asp-controller="MenuProduct" asp-action="GetAll">
+                    <a class="navbar-brand me-3 brand-name" asp-controller="MenuProduct" asp-action="GetAll">
                        <img src="~/images/logo.png" alt="logo Dukkan Waffle" style="width:40px; height:40px;"/> Dukkan Waffle <i class="fas fa-utensils"></i>
                     </a>
                     <a class="nav-link" asp-controller="MenuProduct" asp-action="GetAll">
@@ -306,16 +318,18 @@
                         }
                         else
                         {
-                            <li class="nav-item">
+                            <li class="nav-item mb-2">
                                 <a class="nav-link" asp-controller="User" asp-action="Login">
                                     <i class="fas fa-sign-in-alt"></i> Login
                                 </a>
                             </li>
-                            <li class="nav-item ms-2">
+                            
+                            <li class="nav-item ms-2 mb-2">
                                 <a class="nav-link btn btn-primary text-white" asp-controller="User" asp-action="Register">
                                     <i class="fas fa-user-plus"></i> Register
                                 </a>
                             </li>
+                            
                         }
 
                         <li class="nav-item ms-2">
@@ -388,7 +402,7 @@
             <div class="text-center mt-3">
                 <p class="footer-text mb-0">
                     &copy; @DateTime.Now.Year - <strong>Dukkan Waffle</strong> | Crafted with
-                    <i class="fas fa-heart text-danger"></i> by Mohamed Wahed
+                    <i class="fas fa-heart text-danger"></i> by <a class="text-warning" href="https://mohamed-wahed-portfolio.netlify.app/" style="text-decoration:none;">Mohamed Wahed</a>
                 </p>
             </div>
         </div>
