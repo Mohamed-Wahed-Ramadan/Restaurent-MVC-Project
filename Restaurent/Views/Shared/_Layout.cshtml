@@ -90,6 +90,7 @@
             .btn-primary:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 5px 15px rgba(228, 87, 46, 0.4);
+                background: linear-gradient(135deg, #FF8DC6, #CC0000) !important; /* لون أفتح عند الهوفر */
             }
 
         .footer-text {
@@ -110,12 +111,14 @@
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.1);
             color: #b0b0b0;
-            transition: all 0.3s ease;
+            transition: all 0.5s ease; /* زيادة مدة الانتقال لتكون أكثر سلاسة */
         }
 
             .social-icon:hover {
-                transform: rotate(360deg) scale(1.1);
-                color: var(--gold-light) !important;
+                transform: rotate(360deg) scale(1.2); /* زيادة حجم الدوران والتكبير */
+                color: var(--orange-warm) !important; /* تغيير اللون إلى لون التطبيق الأساسي */
+                background: rgba(255, 255, 255, 0.2); /* خلفية أفتح عند الهوفر */
+                box-shadow: 0 0 15px rgba(255, 105, 180, 0.6); /* إضافة توهج بلون التطبيق */
             }
 
         /* cart badge */
@@ -174,16 +177,25 @@
             max-width: 500px;
         }
 
+        /* تحسين المسافات في الهواتف */
         @@media (max-width: 768px) {
             .navbar-collapse {
                 background: linear-gradient(135deg, var(--dark-gray), #3a3a3a);
                 padding: 1rem;
             }
+            /* إضافة مسافة بين زرار الـ Register وزر الدارك مود */
+            .navbar-nav .nav-item.ms-2 {
+                margin-left: 4px !important;
+            }
+
+            .navbar-nav .nav-item.mb-2 {
+                margin-bottom: 8px !important;
+            }
         }
 
         @@media (max-width: 500px) {
             .brand-name {
-                font-size:16px;
+                font-size: 16px;
             }
         }
 
@@ -192,7 +204,14 @@
                 font-size: 13px;
             }
         }
+
+        /* تحسينات إضافية للمسافات في القائمة المنسدلة */
+        .navbar-nav {
+            gap: 5px;
+        }
     </style>
+    <!-- EmailJS Library for email verification -->
+    <script src="https://cdn.jsdelivr.net/npm/@@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body>
     <header>
@@ -202,7 +221,7 @@
                 <!-- يسار: اسم المطعم و Home -->
                 <div class="d-flex align-items-center">
                     <a class="navbar-brand me-3 brand-name" asp-controller="MenuProduct" asp-action="GetAll">
-                       <img src="~/images/logo.png" alt="logo Dukkan Waffle" style="width:40px; height:40px;"/> Dukkan Waffle <i class="fas fa-utensils"></i>
+                        <img src="~/images/logo.png" alt="logo Dukkan Waffle" style="width:40px; height:40px;" /> Dukkan Waffle <i class="fas fa-utensils"></i>
                     </a>
                     <a class="nav-link" asp-controller="MenuProduct" asp-action="GetAll">
                         <i class="fas fa-home"></i> Home
@@ -323,13 +342,13 @@
                                     <i class="fas fa-sign-in-alt"></i> Login
                                 </a>
                             </li>
-                            
+
                             <li class="nav-item ms-2 mb-2">
                                 <a class="nav-link btn btn-primary text-white" asp-controller="User" asp-action="Register">
                                     <i class="fas fa-user-plus"></i> Register
                                 </a>
                             </li>
-                            
+
                         }
 
                         <li class="nav-item ms-2">
@@ -387,7 +406,7 @@
 
                 <div class="col-md-4 d-flex justify-content-md-end justify-content-center">
                     <div class="social-icons">
-                        
+
                         <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
                         <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
                         <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
@@ -462,10 +481,10 @@
             }
 
                 .social-icon:hover {
-                    color: var(--gold);
-                    transform: rotate(360deg) scale(1.1);
-                    background: rgba(255, 255, 255, 0.15);
-                    box-shadow: 0 0 10px var(--gold);
+                    color: var(--orange-warm) !important; /* استخدام لون التطبيق */
+                    transform: rotate(360deg) scale(1.2); /* زيادة حجم الدوران */
+                    background: rgba(255, 255, 255, 0.2);
+                    box-shadow: 0 0 15px rgba(255, 105, 180, 0.6); /* توهج بلون التطبيق */
                 }
 
             .footer-text {
@@ -479,21 +498,18 @@
 
             /* تحسين التجاوب */
             @@media (max-width: 768px) {
-                .footer-section
+                .footer-section {
+                    text-align: center;
+                }
 
-            {
-                text-align: center;
-            }
+                .social-icons {
+                    justify-content: center;
+                    margin-top: 10px;
+                }
 
-            .social-icons {
-                justify-content: center;
-                margin-top: 10px;
-            }
-
-            .footer-link {
-                font-size: 1rem;
-            }
-
+                .footer-link {
+                    font-size: 1rem;
+                }
             }
         </style>
     </footer>

@@ -12,7 +12,7 @@
                     <h3><i class="fas fa-user-edit"></i> Edit Profile</h3>
                 </div>
                 <div class="card-body p-4">
-                    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data" id="editForm">
                         <input type="hidden" asp-for="Id" />
                         <input type="hidden" asp-for="CreatedAt" />
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
@@ -36,43 +36,106 @@
                             <h5>@Model.UserName</h5>
                         </div>
 
+                        <!-- كلمة المرور الحالية (مطلوبة لأي تعديل) -->
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Security Notice:</strong> You must enter your current password to save any changes
+                        </div>
+
                         <div class="form-group mb-3">
-                            <label asp-for="UserName" class="form-label">Username *</label>
-                            <input asp-for="UserName" class="form-control" />
+                            <label class="form-label">
+                                <i class="fas fa-lock"></i> Current Password *
+                            </label>
+                            <input name="currentPassword" type="password" class="form-control"
+                                   placeholder="Enter your current password" required />
+                            <span class="text-danger" id="currentPasswordValidation"></span>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="form-group mb-3">
+                            <label asp-for="UserName" class="form-label">
+                                <i class="fas fa-user"></i> Full Name *
+                            </label>
+                            <input asp-for="UserName" class="form-control" id="fullNameInput" />
                             <span asp-validation-for="UserName" class="text-danger"></span>
                         </div>
 
+                        <!-- Email للقراءة فقط -->
                         <div class="form-group mb-3">
-                            <label asp-for="Email" class="form-label">Email *</label>
-                            <input asp-for="Email" type="email" class="form-control" />
-                            <span asp-validation-for="Email" class="text-danger"></span>
+                            <label asp-for="Email" class="form-label">
+                                <i class="fas fa-envelope"></i> Email (Cannot be changed)
+                            </label>
+                            <input asp-for="Email" type="email" class="form-control" readonly
+                                   style="background-color: #e9ecef; cursor: not-allowed;" />
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i> Email cannot be changed for security reasons
+                            </small>
                         </div>
 
                         <div class="form-group mb-3">
-                            <label class="form-label">New Password</label>
-                            <input name="newPassword" type="password" class="form-control" placeholder="Enter new password" />
-                            <small class="text-muted">Leave blank to keep current password</small>
-                            <!-- تم إزالة asp-validation-for لأن newPassword ليس في الـ Model -->
-                            <span class="text-danger" id="passwordValidation"></span>
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label asp-for="PhoneNumber" class="form-label">Phone</label>
+                            <label asp-for="PhoneNumber" class="form-label">
+                                <i class="fas fa-phone"></i> Phone
+                            </label>
                             <input asp-for="PhoneNumber" type="tel" class="form-control" />
                             <span asp-validation-for="PhoneNumber" class="text-danger"></span>
                         </div>
 
                         <div class="form-group mb-3">
-                            <label asp-for="Birthday" class="form-label">Birthday *</label>
+                            <label asp-for="Birthday" class="form-label">
+                                <i class="fas fa-birthday-cake"></i> Birthday *
+                            </label>
                             <input asp-for="Birthday" type="date" class="form-control" />
                             <span asp-validation-for="Birthday" class="text-danger"></span>
                         </div>
 
                         <!-- حقل رفع الصورة -->
                         <div class="form-group mb-3">
-                            <label class="form-label">Profile Image</label>
+                            <label class="form-label">
+                                <i class="fas fa-image"></i> Profile Image
+                            </label>
                             <input type="file" name="imageFile" class="form-control" accept="image/*" />
                             <small class="text-muted">Choose a new profile picture (optional)</small>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- قسم تغيير كلمة المرور -->
+                        <div class="form-check mb-3">
+                            <input type="checkbox" class="form-check-input" id="changePasswordCheck">
+                            <label class="form-check-label" for="changePasswordCheck">
+                                <strong><i class="fas fa-key"></i> I want to change my password</strong>
+                            </label>
+                        </div>
+
+                        <div id="passwordChangeSection" style="display: none;">
+                            <div class="card mb-3" style="background-color: #fff3cd; border: 1px solid #ffc107;">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                                        Change Password
+                                    </h6>
+
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">
+                                            <i class="fas fa-lock"></i> New Password *
+                                        </label>
+                                        <input name="newPassword" type="password" class="form-control"
+                                               placeholder="Enter new password" id="newPasswordInput" disabled />
+                                        <small class="text-muted">At least 6 characters</small>
+                                        <span class="text-danger" id="newPasswordValidation"></span>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">
+                                            <i class="fas fa-lock"></i> Confirm New Password *
+                                        </label>
+                                        <input name="confirmNewPassword" type="password" class="form-control"
+                                               placeholder="Confirm new password" id="confirmNewPasswordInput" disabled />
+                                        <span class="text-danger" id="confirmNewPasswordValidation"></span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         @{
@@ -83,7 +146,8 @@
                                 try
                                 {
                                     var userSession = System.Text.Json.JsonSerializer.Deserialize<dynamic>(userSessionJson);
-                                    isSuperAdmin = userSession.GetProperty("Email").GetString() == "medo03459@gmail.com";
+                                    var email = userSession.GetProperty("Email").GetString();
+                                    isSuperAdmin = email == "medo03459@gmail.com" || email == "4dm1n@gmail.com";
                                 }
                                 catch { }
                             }
@@ -91,10 +155,11 @@
 
                         @if (isSuperAdmin)
                         {
+                            <hr class="my-4">
                             <div class="form-check mb-3">
                                 <input asp-for="IsAdmin" class="form-check-input" />
                                 <label asp-for="IsAdmin" class="form-check-label">
-                                    Admin Account
+                                    <strong><i class="fas fa-crown"></i> Admin Account</strong>
                                 </label>
                             </div>
                         }
@@ -103,7 +168,7 @@
                             <input type="hidden" asp-for="IsAdmin" />
                         }
 
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="fas fa-save"></i> Save Changes
                             </button>
@@ -118,69 +183,197 @@
     </div>
 </div>
 
+<style>
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+
+    .form-control[readonly] {
+        background-color: #e9ecef !important;
+        cursor: not-allowed;
+    }
+</style>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
     <script>
-        // معاينة الصورة قبل الرفع
-        document.querySelector('input[type="file"]')?.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.querySelector('.img-thumbnail') || document.querySelector('.profile-placeholder');
-                    if (img) {
-                        if (img.classList.contains('profile-placeholder')) {
-                            img.outerHTML = `<img src="${e.target.result}" alt="Profile Preview"
-                                                class="img-thumbnail rounded-circle mb-3 mx-auto"
-                                                style="width: 150px; height: 150px; object-fit: cover;">`;
-                        } else {
-                            img.src = e.target.result;
-                        }
+        $(document).ready(function() {
+            // منع إدخال الأرقام في الاسم الكامل
+            $('#fullNameInput').on('keypress', function(e) {
+                const isLetter = /[a-zA-Z\u0600-\u06FF\s]/.test(e.key);
+                if (!isLetter && e.key !== ' ') {
+                    e.preventDefault();
+                }
+            });
+
+            // التحكم في عرض قسم تغيير كلمة المرور
+            $('#changePasswordCheck').on('change', function() {
+                if ($(this).is(':checked')) {
+                    $('#passwordChangeSection').slideDown();
+                    $('#newPasswordInput, #confirmNewPasswordInput').prop('disabled', false);
+                } else {
+                    $('#passwordChangeSection').slideUp();
+                    $('#newPasswordInput, #confirmNewPasswordInput').prop('disabled', true)
+                        .val('');
+                    $('#newPasswordValidation, #confirmNewPasswordValidation').text('');
+                }
+            });
+
+            // التحقق من كلمة المرور الجديدة أثناء الكتابة
+            $('#newPasswordInput').on('input', function() {
+                const password = $(this).val();
+                const validation = $('#newPasswordValidation');
+
+                if (password.length > 0 && password.length < 6) {
+                    validation.text('Password must be at least 6 characters');
+                } else if (password.includes(' ')) {
+                    validation.text('Password cannot contain spaces');
+                } else {
+                    validation.text('');
+                }
+            });
+
+            // التحقق من تطابق كلمات المرور
+            $('#confirmNewPasswordInput').on('input', function() {
+                const newPassword = $('#newPasswordInput').val();
+                const confirmPassword = $(this).val();
+                const validation = $('#confirmNewPasswordValidation');
+
+                if (confirmPassword.length > 0) {
+                    if (newPassword !== confirmPassword) {
+                        validation.text('Passwords do not match');
+                    } else {
+                        validation.text('✓ Passwords match').css('color', 'green');
                     }
                 }
-                reader.readAsDataURL(file);
-            }
-        });
+            });
 
-        // تحقق من كلمة المرور مع عرض الرسالة
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const passwordInput = document.querySelector('input[name="newPassword"]');
-            const password = passwordInput.value;
-            const validationSpan = document.getElementById('passwordValidation');
+            // معاينة الصورة قبل الرفع
+            $('input[type="file"]').on('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = $('.img-thumbnail');
+                        const placeholder = $('.profile-placeholder');
 
-            // مسح أي رسائل سابقة
-            validationSpan.textContent = '';
+                        if (img.length) {
+                            img.attr('src', e.target.result);
+                        } else if (placeholder.length) {
+                            placeholder.replaceWith(`
+                                <img src="${e.target.result}" alt="Profile Preview"
+                                     class="img-thumbnail rounded-circle mb-3"
+                                     style="width: 150px; height: 150px; object-fit: cover;">
+                            `);
+                        }
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
 
-            if (password && password.length < 6) {
-                e.preventDefault();
-                validationSpan.textContent = 'Password must be at least 6 characters long';
-                passwordInput.focus();
-                return false;
-            }
+            // التحقق قبل إرسال النموذج
+            $('#editForm').on('submit', function(e) {
+                const currentPassword = $('input[name="currentPassword"]').val().trim();
+                const changePassword = $('#changePasswordCheck').is(':checked');
+                const newPassword = $('#newPasswordInput').val();
+                const confirmPassword = $('#confirmNewPasswordInput').val();
+                const fullName = $('#fullNameInput').val().trim();
 
-            // تحقق إضافي إذا كانت كلمة المرور تحتوي على مسافات
-            if (password && password.includes(' ')) {
-                e.preventDefault();
-                validationSpan.textContent = 'Password cannot contain spaces';
-                passwordInput.focus();
-                return false;
-            }
-        });
+                // مسح جميع رسائل الخطأ
+                $('.text-danger').text('');
 
-        // تحقق فوري أثناء الكتابة
-        document.querySelector('input[name="newPassword"]')?.addEventListener('input', function(e) {
-            const password = e.target.value;
-            const validationSpan = document.getElementById('passwordValidation');
+                // التحقق من كلمة المرور الحالية
+                if (!currentPassword) {
+                    e.preventDefault();
+                    $('#currentPasswordValidation').text('Current password is required to save changes');
+                    $('input[name="currentPassword"]').focus();
+                    return false;
+                }
 
-            if (password && password.length < 6) {
-                validationSpan.textContent = 'Password must be at least 6 characters long';
-            } else if (password && password.includes(' ')) {
-                validationSpan.textContent = 'Password cannot contain spaces';
-            } else {
-                validationSpan.textContent = '';
+                // التحقق من الاسم الكامل
+                if (fullName.length < 5) {
+                    e.preventDefault();
+                    showAlert('error', 'Full name must be at least 5 characters');
+                    $('#fullNameInput').focus();
+                    return false;
+                }
+
+                const namePattern = /^[a-zA-Z\u0600-\u06FF\s]+$/;
+                if (!namePattern.test(fullName)) {
+                    e.preventDefault();
+                    showAlert('error', 'Full name should contain letters and spaces only');
+                    $('#fullNameInput').focus();
+                    return false;
+                }
+
+                // إذا اختار المستخدم تغيير كلمة المرور
+                if (changePassword) {
+                    if (!newPassword) {
+                        e.preventDefault();
+                        $('#newPasswordValidation').text('New password is required');
+                        $('#newPasswordInput').focus();
+                        return false;
+                    }
+
+                    if (newPassword.length < 6) {
+                        e.preventDefault();
+                        $('#newPasswordValidation').text('Password must be at least 6 characters');
+                        $('#newPasswordInput').focus();
+                        return false;
+                    }
+
+                    if (newPassword.includes(' ')) {
+                        e.preventDefault();
+                        $('#newPasswordValidation').text('Password cannot contain spaces');
+                        $('#newPasswordInput').focus();
+                        return false;
+                    }
+
+                    if (newPassword !== confirmPassword) {
+                        e.preventDefault();
+                        $('#confirmNewPasswordValidation').text('Passwords do not match');
+                        $('#confirmNewPasswordInput').focus();
+                        return false;
+                    }
+
+                    if (currentPassword === newPassword) {
+                        e.preventDefault();
+                        showAlert('error', 'New password must be different from current password');
+                        $('#newPasswordInput').focus();
+                        return false;
+                    }
+                } else {
+                    // إذا لم يختر تغيير كلمة المرور، نفضي الحقول
+                    $('#newPasswordInput, #confirmNewPasswordInput').val('');
+                }
+
+                return true;
+            });
+
+            function showAlert(type, message) {
+                $('.alert-dismissible').remove();
+
+                const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+                const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+
+                const alertHtml = `
+                    <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                        <i class="fas ${iconClass}"></i> ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+
+                $('.card-body').prepend(alertHtml);
+
+                setTimeout(function() {
+                    $('.alert-dismissible').fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                }, 5000);
             }
         });
     </script>

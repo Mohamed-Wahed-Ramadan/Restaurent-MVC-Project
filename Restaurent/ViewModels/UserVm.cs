@@ -6,7 +6,8 @@ namespace Restaurent.ViewModels
     {
         [Required(ErrorMessage = "Full name is required")]
         [Display(Name = "Full Name")]
-        [StringLength(100, ErrorMessage = "Name cannot be longer than 100 characters")]
+        [StringLength(100, MinimumLength = 5, ErrorMessage = "Full name must be between 5 and 100 characters")]
+        [RegularExpression(@"^[a-zA-Z\u0600-\u06FF\s]+$", ErrorMessage = "Full name should contain letters and spaces only")]
         public string FullName { get; set; } = null!;
 
         [Required(ErrorMessage = "Email is required")]

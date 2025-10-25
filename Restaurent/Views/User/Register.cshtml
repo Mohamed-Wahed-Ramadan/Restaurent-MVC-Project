@@ -8,7 +8,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow-lg">
-                <div class="card-header btn btn-primary text-white " style="border-radius:10px 10px 0 0; !important" ">
+                <div class="card-header btn btn-primary text-white" style="border-radius:10px 10px 0 0;">
                     <h3><i class="fas fa-user-plus"></i> Create Account</h3>
                 </div>
                 <div class="card-body p-4">
@@ -29,8 +29,22 @@
                                     <label asp-for="Email" class="form-label">
                                         <i class="fas fa-envelope"></i> Email *
                                     </label>
-                                    <input asp-for="Email" type="email" class="form-control" placeholder="Enter your email" />
+                                    <div class="verify-container d-flex gap-2">
+                                        <input asp-for="Email" type="email" class="form-control" placeholder="Enter your email" id="Email" />
+                                        <button type="button" class="btn btn-secondary" id="verifyBtn" style="white-space: nowrap;">
+                                            <i class="fas fa-check-circle"></i> Verify
+                                        </button>
+                                    </div>
                                     <span asp-validation-for="Email" class="text-danger"></span>
+                                    <div id="verifyStatus" class="mt-2"></div>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-shield-alt"></i> Verification Code *
+                                    </label>
+                                    <input type="text" class="form-control" placeholder="Enter verification code" id="verificationCode" />
+                                    <small class="form-text text-muted">Enter the code sent to your email</small>
                                 </div>
 
                                 <div class="form-group mb-3">
@@ -66,20 +80,22 @@
                                     <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="••••••••" />
                                     <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                                 </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="ImageFile" class="form-label">
+                                        <i class="fas fa-image"></i> Profile Image
+                                    </label>
+                                    <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
+                                    <span asp-validation-for="ImageFile" class="text-danger"></span>
+                                    <small class="form-text text-muted">Optional: Upload your profile picture (JPG, PNG, GIF)</small>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="form-group mb-3">
-                            <label asp-for="ImageFile" class="form-label">
-                                <i class="fas fa-image"></i> Profile Image
-                            </label>
-                            <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
-                            <span asp-validation-for="ImageFile" class="text-danger"></span>
-                            <small class="form-text text-muted">Optional: Upload your profile picture (JPG, PNG, GIF)</small>
-                        </div>
+                        <input type="hidden" id="isEmailVerified" name="isEmailVerified" value="false" />
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
                                 <i class="fas fa-user-plus"></i> Register
                             </button>
                         </div>
@@ -97,66 +113,56 @@
     </div>
 </div>
 
+<style>
+    .verified-badge {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        display: inline-block;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .error-badge {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        display: inline-block;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .verify-container {
+        position: relative;
+    }
+
+    #verifyBtn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+</style>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
-    <script>
-        $(document).ready(function() {
-            // التحقق من العمر عند التسجيل
-            $('#Birthday').on('change', function() {
-                var birthDate = new Date($(this).val());
-                var today = new Date();
-                var age = today.getFullYear() - birthDate.getFullYear();
-                var monthDiff = today.getMonth() - birthDate.getMonth();
+    <!-- EmailJS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@@emailjs/browser@3/dist/email.min.js"></script>
 
-                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                    age--;
-                }
-
-                if (age < 18) {
-                    showAlert('error', 'You must be at least 18 years old to register.');
-                }
-            });
-
-            $('#registerForm').on('submit', function(e) {
-                var password = $('#Password').val();
-                var confirmPassword = $('#ConfirmPassword').val();
-
-                if (password && password.length < 6) {
-                    e.preventDefault();
-                    showAlert('error', 'Password must be at least 6 characters long');
-                    return false;
-                }
-
-                if (password !== confirmPassword) {
-                    e.preventDefault();
-                    showAlert('error', 'Passwords do not match');
-                    return false;
-                }
-            });
-
-            function showAlert(type, message) {
-                $('.alert-dismissible').remove();
-
-                var alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-                var iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
-
-                var alertHtml = '<div class="alert ' + alertClass + ' alert-dismissible fade show mt-3" role="alert">' +
-                    '<i class="fas ' + iconClass + '"></i> ' +
-                    message +
-                    '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
-                    '</div>';
-
-                $('.card-body').prepend(alertHtml);
-
-                setTimeout(function() {
-                    $('.alert-dismissible').fadeOut(300, function() {
-                        $(this).remove();
-                    });
-                }, 5000);
-            }
-        });
-    </script>
+    <script src="~/js/register-validation.js"></script>
 }

@@ -11,9 +11,8 @@ namespace Context.Configuration
         {
             var categories = new[]
             {
-                new Category { Id = 1, Name = "الكل", CreatedAt = new DateTime(2024, 1, 1) },
-                new Category { Id = 2, Name = "الحلويات", CreatedAt = new DateTime(2024, 1, 1) },
-                new Category { Id = 3, Name = "المشروبات", CreatedAt = new DateTime(2024, 1, 1) }
+                new Category { Id = 1, Name = "الحلويات", CreatedAt = new DateTime(2024, 1, 1) },
+                new Category { Id = 2, Name = "المشروبات", CreatedAt = new DateTime(2024, 1, 1) }
             };
 
             builder.HasData(categories);

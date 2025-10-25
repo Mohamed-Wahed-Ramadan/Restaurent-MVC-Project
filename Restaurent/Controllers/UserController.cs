@@ -76,7 +76,7 @@ namespace Restaurent.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(User model, IFormFile? imageFile, string? newPassword)
+        public async Task<IActionResult> Edit(User model, IFormFile? imageFile, string currentPassword, string? newPassword, string? confirmNewPassword)
         {
             ModelState.Remove("PasswordHash");
             ModelState.Remove("SecurityStamp");
@@ -84,11 +84,13 @@ namespace Restaurent.Controllers
             ModelState.Remove("NormalizedEmail");
             ModelState.Remove("NormalizedUserName");
             ModelState.Remove("imageFile");
+            ModelState.Remove("currentPassword");
             ModelState.Remove("newPassword");
-
+            ModelState.Remove("confirmNewPassword");
             ModelState.Remove("Orders");
             ModelState.Remove("CartItems");
             ModelState.Remove("Favorites");
+            ModelState.Remove("Email"); // Email لا يمكن تعديله
 
             if (!ModelState.IsValid)
             {
@@ -98,6 +100,7 @@ namespace Restaurent.Controllers
             var currentUserId = GetUserIdFromSession();
             if (string.IsNullOrEmpty(currentUserId))
             {
+                TempData["ErrorMessage"] = "Please login to continue";
                 return RedirectToAction("Login");
             }
 
@@ -116,11 +119,53 @@ namespace Restaurent.Controllers
                     return RedirectToAction("Details");
                 }
 
-                existingUser.UserName = model.UserName;
-                existingUser.Email = model.Email;
+                // ✅ التحقق من كلمة المرور الحالية (إلزامي)
+                if (string.IsNullOrEmpty(currentPassword))
+                {
+                    ModelState.AddModelError("", "Current password is required to save any changes");
+                    TempData["ErrorMessage"] = "Current password is required";
+                    return View(model);
+                }
+
+                // التحقق من صحة كلمة المرور الحالية
+                var passwordCheck = await _userManager.CheckPasswordAsync(existingUser, currentPassword);
+                if (!passwordCheck)
+                {
+                    ModelState.AddModelError("", "Current password is incorrect");
+                    TempData["ErrorMessage"] = "Current password is incorrect";
+                    return View(model);
+                }
+
+                // التحقق من الاسم الكامل
+                if (string.IsNullOrWhiteSpace(model.UserName) || model.UserName.Length < 5)
+                {
+                    ModelState.AddModelError("UserName", "Full name must be at least 5 characters");
+                    TempData["ErrorMessage"] = "Full name must be at least 5 characters";
+                    return View(model);
+                }
+
+                // التحقق من أن الاسم يحتوي على حروف فقط
+                var namePattern = new System.Text.RegularExpressions.Regex(@"^[a-zA-Z\u0600-\u06FF\s]+$");
+                if (!namePattern.IsMatch(model.UserName))
+                {
+                    ModelState.AddModelError("UserName", "Full name should contain letters and spaces only");
+                    TempData["ErrorMessage"] = "Full name should contain letters and spaces only";
+                    return View(model);
+                }
+
+                // تحديث البيانات الأساسية
+                existingUser.UserName = model.UserName.Trim();
+                // Email لا يتم تحديثه - يبقى كما هو
                 existingUser.PhoneNumber = model.PhoneNumber;
                 existingUser.Birthday = model.Birthday;
                 existingUser.UpdatedAt = DateTime.UtcNow;
+
+                // تحديث حالة الأدمن (للسوبر أدمن فقط)
+                var currentUserEmail = GetEmailFromSession();
+                if (currentUserEmail == SUPER_ADMIN_EMAIL || currentUserEmail == SECOND_SUPER_ADMIN_EMAIL)
+                {
+                    existingUser.IsAdmin = model.IsAdmin;
+                }
 
                 // تحديث الصورة إذا تم رفع واحدة
                 if (imageFile != null && imageFile.Length > 0)
@@ -128,31 +173,69 @@ namespace Restaurent.Controllers
                     existingUser.ImageURL = await SaveImage(imageFile);
                 }
 
+                // ✅ تغيير كلمة المرور (اختياري)
                 if (!string.IsNullOrEmpty(newPassword))
                 {
+                    // التحقق من طول كلمة المرور الجديدة
                     if (newPassword.Length < 6)
                     {
-                        ModelState.AddModelError("", "Password must be at least 6 characters");
+                        ModelState.AddModelError("", "New password must be at least 6 characters");
+                        TempData["ErrorMessage"] = "New password must be at least 6 characters";
                         return View(model);
                     }
 
-                    var token = await _userManager.GeneratePasswordResetTokenAsync(existingUser);
-                    var result = await _userManager.ResetPasswordAsync(existingUser, token, newPassword);
-                    if (!result.Succeeded)
+                    // التحقق من عدم وجود مسافات
+                    if (newPassword.Contains(" "))
                     {
-                        foreach (var error in result.Errors)
+                        ModelState.AddModelError("", "Password cannot contain spaces");
+                        TempData["ErrorMessage"] = "Password cannot contain spaces";
+                        return View(model);
+                    }
+
+                    // التحقق من تطابق كلمات المرور
+                    if (newPassword != confirmNewPassword)
+                    {
+                        ModelState.AddModelError("", "New passwords do not match");
+                        TempData["ErrorMessage"] = "New passwords do not match";
+                        return View(model);
+                    }
+
+                    // التحقق من أن كلمة المرور الجديدة مختلفة عن القديمة
+                    if (currentPassword == newPassword)
+                    {
+                        ModelState.AddModelError("", "New password must be different from current password");
+                        TempData["ErrorMessage"] = "New password must be different from current password";
+                        return View(model);
+                    }
+
+                    // تغيير كلمة المرور
+                    var changePasswordResult = await _userManager.ChangePasswordAsync(existingUser, currentPassword, newPassword);
+                    if (!changePasswordResult.Succeeded)
+                    {
+                        foreach (var error in changePasswordResult.Errors)
                         {
                             ModelState.AddModelError("", error.Description);
                         }
+                        TempData["ErrorMessage"] = "Failed to change password";
                         return View(model);
                     }
                 }
 
+                // حفظ التغييرات
                 var updateResult = await _userManager.UpdateAsync(existingUser);
                 if (updateResult.Succeeded)
                 {
                     await SetUserSession(existingUser);
-                    TempData["SuccessMessage"] = "Profile updated successfully!";
+
+                    if (!string.IsNullOrEmpty(newPassword))
+                    {
+                        TempData["SuccessMessage"] = "Profile and password updated successfully!";
+                    }
+                    else
+                    {
+                        TempData["SuccessMessage"] = "Profile updated successfully!";
+                    }
+
                     return RedirectToAction("Details", new { id = existingUser.Id });
                 }
                 else
@@ -161,11 +244,13 @@ namespace Restaurent.Controllers
                     {
                         ModelState.AddModelError("", error.Description);
                     }
+                    TempData["ErrorMessage"] = "Failed to update profile";
                 }
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError("", "An error occurred while updating the profile: " + ex.Message);
+                TempData["ErrorMessage"] = "An unexpected error occurred";
             }
 
             return View(model);
@@ -248,19 +333,36 @@ namespace Restaurent.Controllers
             return View(vm);
         }
 
+        // ============================================
+        // التعديل الرئيسي: إضافة التحقق من البريد الإلكتروني
+        // ============================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(UserVm vm)
+        public async Task<IActionResult> Register(UserVm vm, string isEmailVerified)
         {
+            // إزالة validation للحقول غير المطلوبة
+            ModelState.Remove("isEmailVerified");
+
+            // التحقق من أن البريد الإلكتروني تم التحقق منه من خلال JavaScript
+            if (string.IsNullOrEmpty(isEmailVerified) || isEmailVerified != "true")
+            {
+                ModelState.AddModelError("Email", "Please verify your email address first by clicking the Verify button");
+                TempData["ErrorMessage"] = "Email verification required. Please verify your email before registering.";
+                return View(vm);
+            }
+
             if (ModelState.IsValid)
             {
+                // التحقق من وجود المستخدم مسبقاً
                 var existingUser = await _userManager.FindByEmailAsync(vm.Email);
                 if (existingUser != null)
                 {
                     ModelState.AddModelError("Email", "Email already exists");
+                    TempData["ErrorMessage"] = "This email is already registered. Please use a different email or login.";
                     return View(vm);
                 }
 
+                // إنشاء مستخدم جديد
                 var user = new User()
                 {
                     UserName = vm.FullName,
@@ -270,21 +372,24 @@ namespace Restaurent.Controllers
                     CreatedAt = DateTime.UtcNow
                 };
 
+                // حفظ الصورة إذا تم رفعها
                 if (vm.ImageFile != null && vm.ImageFile.Length > 0)
                 {
                     user.ImageURL = await SaveImage(vm.ImageFile);
                 }
 
+                // إنشاء المستخدم في قاعدة البيانات
                 IdentityResult res = await _userManager.CreateAsync(user, vm.Password);
 
                 if (res.Succeeded)
                 {
-                    // المستخدم الجديد دائماً isPersistent = false عند التسجيل
+                    // تسجيل دخول المستخدم تلقائياً بعد التسجيل
                     await _signinManager.SignInAsync(user, isPersistent: false);
                     await SetUserSession(user);
 
-                    TempData["SuccessMessage"] = "Registration successful! Welcome to our restaurant.";
+                    TempData["SuccessMessage"] = "Registration successful! Welcome to Dukkan Waffle Restaurant.";
 
+                    // التوجيه بناءً على نوع المستخدم
                     if (user.IsAdmin)
                     {
                         return RedirectToAction("Dashboard", "Admin");
@@ -295,10 +400,12 @@ namespace Restaurent.Controllers
                     }
                 }
 
+                // في حالة فشل إنشاء المستخدم
                 foreach (var er in res.Errors)
                 {
                     ModelState.AddModelError("", er.Description);
                 }
+                TempData["ErrorMessage"] = "Registration failed. Please check the errors and try again.";
             }
 
             return View(vm);
